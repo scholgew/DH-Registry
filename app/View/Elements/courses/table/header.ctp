@@ -20,6 +20,8 @@ echo '<tr>';
 	
 	if(!empty($edit)) echo '<th>Actions</th>';
 	
+	echo '<th>Condition</th>';
+	
 	foreach($fieldlist as $key => $fieldDef) {
 		$expl = explode('.', $key);
 		$fieldModelName = $modelName;
