@@ -1,6 +1,7 @@
 #Licence
 
-Copyright 2014 Hendrik Schmeer on behalf of DARIAH-EU, VCC2 and DARIAH-DE, Credits to Erasmus University Rotterdam, University of Cologne, PIREH / University Paris 1
+Copyright 2014 Hendrik Schmeer on behalf of DARIAH-EU, VCC2 and DARIAH-DE. 
+Credits to Erasmus University Rotterdam, Erasmus Studio, the eHumanities Group (KNAW), HKI University of Cologne and Karl Franzens University Graz.
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
 
