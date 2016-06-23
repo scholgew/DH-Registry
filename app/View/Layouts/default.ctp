@@ -18,6 +18,9 @@
 
 $this->extend('/Layouts/base');
 
+$DODH = false;
+if(stristr($_SERVER['HTTP_HOST'], 'dh-projectregistry.org') !== false) $DODH = true;
+
 $this->start('header');
 ?>
 <div id="header">
@@ -29,14 +32,14 @@ $this->start('header');
 		'width' => 202,
 		'height' => 61
 	);
-	//if($this->request->params['controller'] == 'projects') 
-	$logo = array(
-		'file' => 'eHumanities_small.png',
-		'alt' => 'The eHumanities Group',
-		'url' => 'https://www.knaw.nl/en/institutes/e-humanities-group',
-		'width' => 236,
-		'height' => 46
-	);	
+	if($this->request->params['controller'] == 'projects' OR $DODH) 
+		$logo = array(
+			'file' => 'eHumanities_small.png',
+			'alt' => 'The eHumanities Group',
+			'url' => 'https://www.knaw.nl/en/institutes/e-humanities-group',
+			'width' => 236,
+			'height' => 46
+		);	
 	echo $this->Html->image('/img/logos/' . $logo['file'], array(
 		'alt' => $logo['alt'],
 		'class' => 'left',
@@ -48,16 +51,36 @@ $this->start('header');
 	<div>
 		<h1>
 			<?php
-			echo $this->Html->link('DH Registry', '/');
+			echo $this->Html->link('Digital Humanities Registry', '/');
 			$title = $this->fetch('title');
 			if(!empty($title)) echo ' - ' . $title;
 			?>
 		</h1>
-		<?php //<p>Research and teaching within the Digital Humanities community</p>?>
-		<p>
-			Project-Registry <strong>BETA</strong> |
-			<?php echo $this->Html->link('About', '/pages/projectregistry'); ?>
-		</p>
+		<?php
+		if($this->request->params['controller'] != 'projects') {
+			?>
+			<p>
+				Courseregistry <strong>BETA</strong> |
+				<?php echo $this->Html->link('About', '/pages/about'); ?>
+			</p>
+			<?php
+		}else{
+			?>
+			<p>
+				Projectregistry <strong>BETA</strong> |
+				<?php echo $this->Html->link('About', '/pages/projectregistry'); ?>
+			</p>
+			<?php
+			if(!$DODH) {
+				?>
+				<p>
+					<strong>This Project-Registry is a copy of</strong>
+					<?php echo $this->Html->link('DODH', 'http://dh-projectregistry.org'); ?> (Dutch Overview Digital Humanities)
+				</p>
+				<?php
+			}
+		}
+		?>
 	</div>
 </div>
 <?php

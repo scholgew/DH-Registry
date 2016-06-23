@@ -10,16 +10,15 @@ $background_color: #ccc;
 $background_color_2: #f4f4f4;	/* for any kind of accentuation, eg. table rows */
 
 $link_color: #00265a;
-//$link_hover_color: #005AD6;
-$link_hover_color: $ehumPurple;
+$link_hover_color: #005AD6;
+//$link_hover_color: $ehumPurple;
 $menu_main_link_color: $link_color;
 $menu_main_link_hover_color: $link_hover_color;
 
 $border_color: #ccc;
 
 $header_font_color: #555;
-//$header_background_color: #003564;	/* DARIAH style */
-$header_background_color: #fff;
+$header_background_color: #203a6b;	/* DARIAH style */
 
 $content_background_color: #fff;
 $menu_background_color: #fff;
@@ -71,7 +70,7 @@ $menu_width: 236px;
 	}
 	
 	div {
-		background-color: $header_background_color;
+		background-color: $content_background_color;
 		min-height: 61px;
 		margin: 0;
 		margin-left: $menu_width + 24px;

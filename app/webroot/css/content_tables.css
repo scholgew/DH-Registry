@@ -7,7 +7,7 @@ Syntax error: Undefined variable: "$border_color".
 3: $table_header_font_color: #fff;
 4: $table_border_color: $border_color;
 5: $table_header_border_color: $border_color;
-6: $table_header_background_color: $ehumGreen;
+6: $table_header_background_color: $header_background_color;
 7: $table_nth_row_background_color: $background_color_2;
 8: 
 9: 
@@ -48,4 +48,4 @@ C:/Ruby193/lib/ruby/gems/1.9.1/gems/sass-3.2.13/vendor/listen/lib/listen/adapter
 body:before {
   white-space: pre;
   font-family: monospace;
-  content: "Syntax error: Undefined variable: \"$border_color\".\A         on line 4 of css/scss/content_tables.scss\A \A 1: /** Tables **/\A 2: \A 3: $table_header_font_color: #fff;\A 4: $table_border_color: $border_color;\A 5: $table_header_border_color: $border_color;\A 6: $table_header_background_color: $ehumGreen;\A 7: $table_nth_row_background_color: $background_color_2;\A 8: \A 9: "; }
+  content: "Syntax error: Undefined variable: \"$border_color\".\A         on line 4 of css/scss/content_tables.scss\A \A 1: /** Tables **/\A 2: \A 3: $table_header_font_color: #fff;\A 4: $table_border_color: $border_color;\A 5: $table_header_border_color: $border_color;\A 6: $table_header_background_color: $header_background_color;\A 7: $table_nth_row_background_color: $background_color_2;\A 8: \A 9: "; }
