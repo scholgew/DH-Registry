@@ -20,23 +20,15 @@ $toggle = ($showDetails) ? ''
 
 $outdated = null;
 if($record['Course']['updated'] < date('Y-m-d H:i:s', time() - Configure::read('App.CourseYellow'))) {
-	$outdated = 'yellow';
+	$outdated = ' yellow';
 }
 if(	$record['Course']['updated'] < date('Y-m-d H:i:s', time() - Configure::read('App.CourseRed'))
 OR	(!empty($edit) AND $record['Course']['updated'] < date('Y-m-d H:i:s', time() - Configure::read('App.CourseWarnPeriod')))
 ) {
-	$outdated = 'red';
-}
-
-$title = '';
-if($outdated) {
-	if(empty($classname)) $classname = 'outdated '.$outdated;
-	else $classname .= ' outdated '.$outdated;
-	$title = 'This record has not been revised  for a year or longer.';
-	if(!empty($edit)) $title = ' title="Please update this record to avoid it being dropped from the Course Registry."';
+	$outdated = ' red';
 }
 ?>
-<tr <?php echo $toggle; echo $title; ?>
+<tr <?php echo $toggle; ?>
 	class="<?php echo $classname; ?>"
 	>
 	<?php
@@ -50,11 +42,11 @@ if($outdated) {
 		echo '</td>';
 	}
 	?>
-	<td class="state">
+	<td class="state<?php echo $outdated; ?>">
 		<div class="ribbon">
 			<div class="inset"></div>
 			<div class="container">
-				<div class="base">outdated</div>
+				<div class="base"></div>
 				<div class="left_corner"></div>
 				<div class="right_corner"></div>
 			</div>

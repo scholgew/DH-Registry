@@ -16,10 +16,15 @@ Configure::write('App.fullBaseUrl', 'https://example.com');
 Configure::write('App.EmailSubjectPrefix', '[DH Registry]');
 Configure::write('App.defaultEmail', 'noreply@example.com');
 
-// send an update reminder after this period, show red in the user dashboard
+// send an update reminder after this period, make traffic-light display relative to this setting
 Configure::write('App.CourseWarnPeriod', (60*60*24*300));
-// show red in the public listing
-Configure::write('App.CoursePublicWarnPeriod', (Configure::read('App.CourseWarnPeriod') + 60*60*24*7*4));
+
+// show yellow on public listing some weeks after reminder email
+Configure::write('App.CourseYellow', Configure::read('App.CourseWarnPeriod') + 60*60*24*7*4);
+// show red
+Configure::write('App.CourseRed', Configure::read('App.CourseWarnPeriod') + 60*60*24*7*26);
+
+
 // stop displaying course on homepage
 Configure::write('App.CourseExpirationPeriod', (60*60*24*365*2));
 // courses not updated for this period will be hidden at all, for archival purposes

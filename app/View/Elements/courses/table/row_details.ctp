@@ -18,21 +18,24 @@
 $toggle = ($showDetails) ? ''
 	: 'style="display:none" onclick="toggleRow(event, \'record-details-' . $k . '\');" onmouseover="siblingHover(this, \'prev\');" onmouseout="siblingHover(this, \'prev\')"';
 
-$outdated = false;
-if(	$record['Course']['updated'] < date('Y-m-d H:i:s', time() - Configure::read('App.CoursePublicWarnPeriod'))
-OR	(!empty($edit) AND $record['Course']['updated'] < date('Y-m-d H:i:s', time() - Configure::read('App.CourseWarnPeriod')))
-) $outdated = true;
-
-$title = '';
-if($outdated) {
-	if(empty($classname)) $classname = 'outdated';
-	else $classname .= ' outdated';
-	$title = 'This record has not been revised  for a year or longer.';
-	if(!empty($edit)) $title = ' title="Please update this record to avoid it being dropped from the Course Registry."';
+$outdated = 'Green';
+$title = 'entry actively maintained';
+if($record['Course']['updated'] < date('Y-m-d H:i:s', time() - Configure::read('App.CourseYellow'))) {
+	$outdated = 'Yellow';
+	$title = 'entry not revised since one year';
 }
+if(	$record['Course']['updated'] < date('Y-m-d H:i:s', time() - Configure::read('App.CourseRed'))
+OR	(!empty($edit) AND $record['Course']['updated'] < date('Y-m-d H:i:s', time() - Configure::read('App.CourseWarnPeriod')))
+) {
+	$outdated = 'Red';
+	$title = 'entry not revised since > 1,5 year';
+}
+
+if($outdated !== 'Green' AND !empty($edit))
+	$title = '<span style="color:red">Entry will disappear after 2 years.<br>Please update!</span>';
 ?>
 
-<tr <?php echo $toggle; echo $title; ?>
+<tr <?php echo $toggle; ?>
 	id="record-details-<?php echo $k; ?>" 
 	class="<?php echo $classname; ?>"
 	>
@@ -41,6 +44,8 @@ if($outdated) {
 		<div class="record_details">
 			<div class="left narrow">
 				<dl>
+					<dt>State <?php echo $outdated; ?></dt>
+					<dd><?php echo $title; ?></dd>
 					<dt>Language</dt>
 					<dd><?php echo (!empty($record['Language']['name'])) ? $record['Language']['name'] : ' - '; ?></dd>
 					<dt>Start Date</dt>

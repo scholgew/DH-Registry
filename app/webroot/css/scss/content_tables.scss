@@ -87,13 +87,14 @@ table {
 			vertical-align: top;
 			color: #fff;
 			font-size: 9px;
+			cursor: pointer;
+			text-decoration: underline;
 			.ribbon {
 				width: 70px;
 				height: 50px;
 				margin: -1px 0 0;
 				position: relative;
 				overflow: hidden;
-				
 				// top shadow
 				.inset {
 					width: 70px;
@@ -116,48 +117,23 @@ table {
 					height: 45px;
 					overflow: hidden;
 					margin: 0 auto;
-					border-left: 1px solid #631a15;
-					border-right: 1px solid #631a15;
+					border-left: 1px solid #376315;
+					border-right: 1px solid #376315;
 					text-align: center;
 					vertical-align: middle;
-				
 					.base {
 						height: 15px;
 						width: 50px;
 						padding-top: 5px;
-						background: rgb(199,59,60);
-						background: -moz-linear-gradient(top,  rgba(199,59,60,1) 0%, rgba(184,32,31,1) 100%);
-						background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(199,59,60,1)), color-stop(100%,rgba(184,32,31,1)));
-						background: -webkit-linear-gradient(top,  rgba(199,59,60,1) 0%,rgba(184,32,31,1) 100%);
-						background: -o-linear-gradient(top,  rgba(199,59,60,1) 0%,rgba(184,32,31,1) 100%);
-						background: -ms-linear-gradient(top,  rgba(199,59,60,1) 0%,rgba(184,32,31,1) 100%);
-						background: linear-gradient(top,  rgba(199,59,60,1) 0%,rgba(184,32,31,1) 100%);
-						filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#c73b3c', endColorstr='#b8201f',GradientType=0 );
+						background: #6AB81F;
 						position: relative;
 						z-index: 2;
-						// the rivets
-						/*
-						&:after, &:before {
-							content: '';
-							position: absolute;
-							top: 0;
-							height: 242px;
-							width: 86px;
-							left: 6px;
-							border-left: 1px dashed #631a15;
-							border-right: 1px dashed #631a15;
-						}
-						&:before {
-							left: 7px;
-							border-left: 1px dashed #da5050;
-							border-right: 1px dashed #da5050;
-						}
-						*/
+						&:after {content: 'active';}
 					}
 					.left_corner, .right_corner {
 						width: 50px;
 						height: 50px;
-						background: #b8201f;
+						background: #6AB81F;
 						position: absolute;
 						bottom: 4px;
 						left: -25px;
@@ -179,41 +155,33 @@ table {
 					}
 				}
 			}
-
-
-
-
-#ribbon .left_corner {
-	width: 100px;
-	height: 100px;
-	background: #b8201f;
-	position: absolute;
-	bottom: 20px;
-	left: -50px;
-	z-index: 1;
-	
-	-webkit-transform: rotate(45deg);
-	-moz-transform: rotate(45deg);
-	-ms-transform: rotate(45deg);
-	-o-transform: rotate(45deg);
-	transform: rotate(45deg);
-}
-
-#ribbon .right_corner {
-	width: 100px;
-	height: 100px;
-	background: #b8201f;
-	position: absolute;
-	bottom: 20px;
-	right: -50px;
-	z-index: 1;
-	
-	-webkit-transform: rotate(45deg);
-	-moz-transform: rotate(45deg);
-	-ms-transform: rotate(45deg);
-	-o-transform: rotate(45deg);
-	transform: rotate(45deg);
-}
+			&.yellow {
+				.container {
+					border-left: 1px solid #D6BD2D;
+					border-right: 1px solid #D6BD2D;
+					.base {
+						color: #666;
+						&:after{content: 'aged';}
+						background: #FFDF2B;
+					}
+					.left_corner, .right_corner {
+						background: #FFDF2B;
+					}
+				}
+			}
+			&.red {
+				.container {
+					border-left: 1px solid #631a15;
+					border-right: 1px solid #631a15;
+					.base {
+						&:after{content: 'age-old';}
+						background: #b8201f;
+					}
+					.left_corner, .right_corner {
+						background: #b8201f;
+					}
+				}
+			}
 		}
 	}
 	

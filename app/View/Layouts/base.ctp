@@ -72,7 +72,7 @@
 				<ul>
 				<?php
 				echo '<li>' . $this->Html->link('Courses', array('controller' => 'courses', 'action' => 'index', 'plugin' => null)) . '</li>';
-				echo '<li>' . $this->Html->link('Projects', array('controller' => 'projects', 'action' => 'index', 'plugin' => null)) . '</li>';
+				//echo '<li>' . $this->Html->link('Projects', array('controller' => 'projects', 'action' => 'index', 'plugin' => null)) . '</li>';
 				
 				echo $this->fetch('menu');
 				?><li><hr></li><?php
