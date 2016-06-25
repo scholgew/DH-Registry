@@ -60,7 +60,7 @@ $this->start('header');
 		if($this->request->params['controller'] != 'projects') {
 			?>
 			<p>
-				Courseregistry <strong>BETA</strong> |
+				Courseregistry <strong>ALPHA</strong> |
 				<?php echo $this->Html->link('About', '/pages/about'); ?>
 			</p>
 			<?php

@@ -127,11 +127,13 @@ if($this->action === 'add' AND !empty($auth_user) AND !empty($auth_user['institu
 echo $this->Form->input('institution_id', $opts);
 echo $this->Form->input('department');
 
-echo $this->element('taxonomy/selector', array('habtmModel' => 'TadirahActivity'));
+echo $this->element('taxonomy/selector', array('habtmModel' => 'NwoDiscipline', 'dropdown' => true, 'label' => 'Disciplines'));
 
-echo $this->element('taxonomy/selector', array('habtmModel' => 'TadirahTechnique'));
+echo $this->element('taxonomy/selector', array('habtmModel' => 'TadirahActivity', 'dropdown' => true));
 
-echo $this->element('taxonomy/selector', array('habtmModel' => 'TadirahObject'));
+echo $this->element('taxonomy/selector', array('habtmModel' => 'TadirahTechnique', 'dropdown' => true));
+
+echo $this->element('taxonomy/selector', array('habtmModel' => 'TadirahObject', 'dropdown' => true));
 
 echo $this->Form->end('submit');
 ?>

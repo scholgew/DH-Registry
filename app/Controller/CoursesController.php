@@ -495,24 +495,23 @@ class CoursesController extends AppController {
 	
 	protected function _setTaxonomy() {
 		$tadirahObjects = $this->Course->TadirahObject->find('all', array('contain' => array()));
-		$tadirahObjectsList = Hash::combine($tadirahObjects, '{n}.TadirahObject.id', '{n}.TadirahObject.name');
 		$tadirahTechniques = $this->Course->TadirahTechnique->find('all', array('contain' => array()));
-		$tadirahTechniquesList = Hash::combine($tadirahTechniques, '{n}.TadirahTechnique.id', '{n}.TadirahTechnique.name');
 		$tadirahActivities = $this->Course->TadirahActivity->find('threaded', array(
 			'contain' => array(
 				'ParentTadirahActivity',
 				'TadirahTechnique'		// both needed for filter extension
 			)
 		));
-		$tadirahActivitiesList = $this->Course->TadirahActivity->find('list');
+		$nwoDisciplines = $this->Course->NwoDiscipline->find('all', array(
+			'contain' => array(),
+			'order' => 'NwoDiscipline.name ASC'
+		));
 		
 		$this->set(compact(
 			'tadirahObjects',
 			'tadirahTechniques',
 			'tadirahActivities',
-			'tadirahActivitiesList',
-			'tadirahObjectsList',
-			'tadirahTechniquesList'
+			'nwoDisciplines'
 		));
 	}
 	

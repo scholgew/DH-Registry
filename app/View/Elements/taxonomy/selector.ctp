@@ -21,6 +21,9 @@ if(!function_exists('getOpts')) {
 		if(!empty($level)) $level = ' ' . $level;
 		$crossModel = Inflector::pluralize($modelName).$habtmModel;
 		$opts = array(
+			'empty' => false,
+			'required' => false,
+			'onchange' => false,
 			'type' => 'checkbox',
 			'value' => $record[$habtmModel]['id'],
 			'label' => array('text' => $record[$habtmModel]['name'], 'title' => $record[$habtmModel]['description']),
@@ -120,12 +123,12 @@ $classes .= (!empty($dropdown)) ? ' dropdown_checklist' : '';
 </div>
 
 <?php
-if(!empty($dropdown)) {
+if(!empty($dropdown) AND empty($dropdownScript)) {
+	$this->set('dropdownScript', true);
+	$this->append('script_bottom');
 	?>
-	<script>window.jQuery || document.write('<script src="\/\/code.jquery.com\/jquery-1.11.3.min.js"><\/script>')</script>
-	<script>
-	if(!dropdownChecklist) {
-		var dropdownChecklist = 1;
+	if(!dropdownScript) {
+		var dropdownScript = 1;
 		jQuery(document).ready(function() {
 			var toggle = $('.checklist_toggle');
 			var checklist = $('.checklist');
@@ -166,9 +169,8 @@ if(!empty($dropdown)) {
 			$(id).toggle();
 		}
 	}
-	</script>
-
 	<?php
+	$this->end();
 }
 ?>
 

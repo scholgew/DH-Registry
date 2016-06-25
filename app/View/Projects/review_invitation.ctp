@@ -62,9 +62,6 @@ echo $this->Form->end('Go!');
 </fieldset>
 
 <script>
-window.jQuery || document.write('<script src="\/\/code.jquery.com\/jquery-1.11.3.min.js"><\/script>')
-</script>
-<script>
 var persons = <?php echo $_serialize['persons']; ?>;
 jQuery(document).ready(function() {
 	

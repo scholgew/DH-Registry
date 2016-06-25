@@ -281,9 +281,6 @@ Eg. consider people involved or institutions and their respective roles and iden
 </fieldset>
 
 
-<script>
-window.jQuery || document.write('<script src="\/\/code.jquery.com\/jquery-1.11.3.min.js"><\/script>')
-</script>
 <?php echo $this->Html->script('HasManyForm.js'); ?>
 
 <script>

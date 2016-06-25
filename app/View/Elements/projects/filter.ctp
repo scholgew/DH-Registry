@@ -38,18 +38,12 @@ $filter = $this->Session->read('filter');
 			<p class="note">Enable Javascript to make use of the taxonomy filter. </p>
 		</noscript>
 		<?php
-		$this->Form->inputDefaults(array(
-			'empty' => false,
-			'required' => false,
-			'onchange' => false
-		));
-		
 		echo $this->element('taxonomy/selector', array(
 			'habtmModel' => 'NwoDiscipline',
 			'label' => 'Disciplines',
 			'dropdown' => true,
-			'buttons' => true)
-		);
+			'buttons' => true
+		));
 		
 		echo $this->Form->end(array(
 			'label' => 'Show Results',

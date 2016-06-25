@@ -301,6 +301,13 @@ class Course extends AppModel {
 			'foreignKey' => 'course_id',
 			'associationForeignKey' => 'tadirah_object_id',
 			'unique' => 'keepExisting'
+		),
+		'NwoDiscipline' => array(
+			'className' => 'NwoDiscipline',
+			'joinTable' => 'courses_nwo_disciplines',
+			'foreignKey' => 'course_id',
+			'associationForeignKey' => 'nwo_discipline_id',
+			'unique' => 'keepExisting'
 		)
 	);
 	

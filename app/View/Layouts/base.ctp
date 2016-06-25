@@ -48,14 +48,9 @@
 	
 	echo $this->fetch('meta');
 	echo $this->fetch('css');
-	echo $this->fetch('script');
 	?>
 	
-	<script type="text/javascript">
-		window.onload = function() {
-			<?php echo $this->fetch('onload'); ?>
-		}
-	</script>
+	
 </head>
 
 
@@ -72,12 +67,12 @@
 				<ul>
 				<?php
 				echo '<li>' . $this->Html->link('Courses', array('controller' => 'courses', 'action' => 'index', 'plugin' => null)) . '</li>';
-				//echo '<li>' . $this->Html->link('Projects', array('controller' => 'projects', 'action' => 'index', 'plugin' => null)) . '</li>';
+				if(stristr($_SERVER['HTTP_HOST'], 'dh-projectregistry.org') !== false)
+					echo '<li>' . $this->Html->link('Projects', array('controller' => 'projects', 'action' => 'index', 'plugin' => null)) . '</li>';
 				
 				echo $this->fetch('menu');
 				?><li><hr></li><?php
-				
-				//echo '<li>' . $this->Html->link('Manual', array('controller' => 'pages', 'action' => 'manual', 'plugin' => null)) . '</li>';
+//echo '<li>' . $this->Html->link('Manual', array('controller' => 'pages', 'action' => 'manual', 'plugin' => null)) . '</li>';
 				echo '<li>' . $this->Html->link('Contact us', array('controller' => 'contacts', 'action' => 'send', 'plugin' => null)) . '</li>';
 				?>
 				</ul>
@@ -97,6 +92,27 @@
 	</div>
 	
 	
+	<script src="https://code.jquery.com/jquery-1.12.4.min.js"
+		integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="
+		crossorigin="anonymous">
+	</script>
+	<script type="text/javascript">
+		window.jQuery || document.write('<script type="text/javascript" src="<?php echo $this->Html->url('/js/jquery-1.12.4.min.js', true); ?>"><\/script>')
+	</script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" 
+		integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" 
+		crossorigin="anonymous">
+	</script>
+	<script type="text/javascript">
+		(typeof $().modal == 'function') || document.write('<script type="text/javascript" src="<?php echo $this->Html->url('/js/bootstrap.min.js', true); ?>"><\/script>')
+	</script>
 	
+	<?php echo $this->fetch('script'); ?>
+	<script type="text/javascript"><?php echo $this->fetch('script_bottom'); ?></script>
+	<script type="text/javascript">
+		window.onload = function() {
+			<?php echo $this->fetch('onload'); ?>
+		}
+	</script>
 </body>
 </html>

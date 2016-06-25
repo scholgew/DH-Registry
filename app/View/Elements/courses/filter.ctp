@@ -23,7 +23,7 @@ if(stristr($_SERVER['HTTP_HOST'], 'dh-projectregistry.org') !== false) $DODH = t
 if($DODH) {
 	?>
 	<li class="notification">
-		Courses not in sync with the Course-Registry (state ~2014).<br>
+		Courses not in sync with the Course-Registry (state ~2016).<br>
 		Visit the <?php echo $this->Html->link('DARIAH Course-Registry.', 'https://dh-registry.de.dariah.eu/', array('target' => 'blank')); ?>
 	</li>
 	<?php
@@ -55,23 +55,13 @@ if(!empty($filter['Course.id']) AND !is_array($filter['Course.id'])) $location_f
 		echo $this->Form->input('institution_id');
 	}
 	echo $this->Form->input('course_parent_type_id', array(
-		'label' => '1. Coursetype'
+		'label' => '1. Type'
 	));
 	echo $this->Form->input('course_type_id', array(
-		'label' => '2. Coursetype'
+		'label' => '2. Type'
 	));
-	?>
-	<p>TaDiRAH keywords</p>
-	<noscript>
-		<p class="note">Enable Javascript to make use of the taxonomy filter. </p>
-	</noscript>
-	<?php
-	$this->Form->inputDefaults(array(
-		'empty' => false,
-		'required' => false,
-		'onchange' => false
-	));
-	echo $this->element('taxonomy/taxonomy_filter', array('dropdownChecklist' => false));
+	
+	echo $this->element('taxonomy/taxonomy_filter', array('dropdownChecklist' => true));
 	
 	echo $this->Form->end(array(
 		'label' => 'Show Results',

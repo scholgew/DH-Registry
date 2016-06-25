@@ -38,9 +38,9 @@
 	Copyright 2014 Hendrik Schmeer on behalf of DARIAH-EU, <br>
 	VCC2 and DARIAH-DE,  <br><br>
 	Credits to:  <br>
-	Royal Netherlands Academy of Arts and Sciences, <br>
+	Royal Netherlands Academy of Arts and Sciences KNAW, <br>
 	the eHumanities Group, <br>
-	Data Archiving and Networked Services, <br>
+	Data Archiving and Networked Services DANS, <br>
 	Erasmus University Rotterdam,  <br>
 	University of Cologne,  <br>
 	PIREH / University Paris 1. 
@@ -54,7 +54,7 @@
 
 
 
-<h2>Impressum</h2>
+<h2 id="impressum">Impressum</h2>
 <h3>Verantwortlich für den Inhalt</h3>
 <h4>Anbieter</h4>
 <p>

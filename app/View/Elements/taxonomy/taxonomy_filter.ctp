@@ -17,118 +17,37 @@
  */
 
  
- 
 if(empty($dropdownChecklist)) $dropdownChecklist = false;
 ?>
-<p class="taxonomy selection" id="activities_selection" onclick="toggleActivities();">
-	<?php
-	$selected = array('- all -');
-	if(!empty($this->request->data['TadirahActivity']['TadirahActivity'])) {
-		$selected = array();
-		foreach($this->request->data['TadirahActivity']['TadirahActivity'] as $id) {
-			$selected[] = $tadirahActivitiesList[$id];
-		}
-	}
-	?>
-	Activities: <span><?php echo implode(', ', $selected); ?></span>
-</p>
-<div class="taxonomy keywords" id="activities_keywords" style="display:none;">
-	<?php
-	echo $this->element('ie_apologies');
-	
-	echo $this->element('taxonomy/selector', array('habtmModel' => 'TadirahActivity', 'dropdown' => $dropdownChecklist));
-	
-	echo $this->Form->button('Ok', array(
-		'type' => 'submit'
-	));
-	echo $this->Form->button('Cancel', array(
-		'onclick' => "toggleActivities();",
-		'type' => 'button'
-	));
-	?>
-</div>
+<noscript>
+	<p class="note">Enable Javascript to make use of the taxonomy filter. </p>
+</noscript>
+<?php 
+echo $this->element('taxonomy/selector', array(
+	'habtmModel' => 'NwoDiscipline',
+	'label' => 'Disciplines',
+	'dropdown' => $dropdownChecklist,
+	'buttons' => true
+));
 
+echo '<p>TaDiRAH keywords</p>';
 
-
-<p class="taxonomy selection" id="techniques_selection" onclick="toggleTechniques();">
-	<?php
-	$selected = array('- all -');
-	if(!empty($this->request->data['TadirahTechnique']['TadirahTechnique'])) {
-		$selected = array();
-		foreach($this->request->data['TadirahTechnique']['TadirahTechnique'] as $id) {
-			$selected[] = $tadirahTechniquesList[$id];
-		}
-	}
-	?>
-	Techniques: <span><?php echo implode(', ', $selected); ?></span>
-</p>
-<div class="taxonomy keywords" id="techniques_keywords" style="display:none;">
-	<?php
-	echo $this->element('ie_apologies');
-	
-	echo $this->element('taxonomy/selector', array('habtmModel' => 'TadirahTechnique', 'dropdown' => $dropdownChecklist));
-	
-	echo $this->Form->button('Ok', array(
-		'onclick' => 'this.form.submit();'
-	));
-	echo $this->Form->button('Cancel', array(
-		'onclick' => "toggleTechniques();",
-		'type' => 'button'
-	));
-	?>
-</div>
-
-
-
-<p class="taxonomy selection" id="objects_selection" onclick="toggleObjects();">
-	<?php
-	$selected = array('- all -');
-	if(!empty($this->request->data['TadirahObject']['TadirahObject'])) {
-		$selected = array();
-		foreach($this->request->data['TadirahObject']['TadirahObject'] as $id) {
-			$selected[] = $tadirahObjectsList[$id];
-		}
-	}
-	?>
-	Objects: <span><?php echo implode(', ', $selected); ?></span>
-</p>
-<div class="taxonomy keywords" id="objects_keywords" style="display:none;">
-	<?php
-	echo $this->element('ie_apologies');
-	
-	echo $this->element('taxonomy/selector', array('habtmModel' => 'TadirahObject', 'dropdown' => $dropdownChecklist));
-	
-	echo $this->Form->button('Ok', array(
-		'onclick' => 'this.form.submit();'
-	));
-	echo $this->Form->button('Cancel', array(
-		'onclick' => "toggleObjects();",
-		'type' => 'button'
-	));
-	?>
-</div>
-
-
-<?php $this->Html->scriptStart(array('inline' => false)); ?>
-function toggle(id) {
-	var element = document.getElementById(id);
-	if(element.style.display == 'block') element.style.display = 'none';
-	else element.style.display = 'block';
-}
-function hide(id1, id2) {
-	document.getElementById(id1).style.display = 'none';
-	document.getElementById(id2).style.display = 'none';
-}
-function toggleObjects() {
-	hide('activities_keywords', 'techniques_keywords');
-	toggle('objects_keywords');
-}
-function toggleTechniques() {
-	hide('activities_keywords', 'objects_keywords');
-	toggle('techniques_keywords');
-}
-function toggleActivities() {
-	hide('techniques_keywords', 'objects_keywords');
-	toggle('activities_keywords');
-}
-<?php $this->Html->scriptEnd(); ?>
+echo $this->element('taxonomy/selector', array(
+	'habtmModel' => 'TadirahActivity',
+	'label' => 'Activities',
+	'dropdown' => $dropdownChecklist,
+	'buttons' => true
+));
+echo $this->element('taxonomy/selector', array(
+	'habtmModel' => 'TadirahTechnique',
+	'label' => 'Techniques',
+	'dropdown' => $dropdownChecklist,
+	'buttons' => true
+));
+echo $this->element('taxonomy/selector', array(
+	'habtmModel' => 'TadirahObject',
+	'label' => 'Objects',
+	'dropdown' => $dropdownChecklist,
+	'buttons' => true
+));
+?>
