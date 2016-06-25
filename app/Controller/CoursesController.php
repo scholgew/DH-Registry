@@ -426,6 +426,25 @@ class CoursesController extends AppController {
 			$this->filter['Course.id'] = Set::extract('/CoursesTadirahActivity/ids_filtered', $subquery);
 			unset($this->filter['CoursesTadirahActivity.tadirah_activity_id']);
 		}
+		if(!empty($this->filter['CoursesNwoDiscipline.nwo_discipline_id'])) {
+			$subquery = $this->Course->find('all', array(
+				'joins' => array(
+					array(
+						'alias' => 'CoursesNwoDiscipline',
+						'table' => 'courses_nwo_disciplines',
+						'type' => 'INNER',
+						'conditions' => 'CoursesNwoDiscipline.course_id = Course.id'
+					)
+				),
+				'conditions' => array(
+					'CoursesNwoDiscipline.nwo_discipline_id' => $this->filter['CoursesNwoDiscipline.nwo_discipline_id']
+				),
+				'fields' => array('DISTINCT (CoursesNwoDiscipline.course_id) AS ids_filtered'),
+				'contain' => array('CoursesNwoDiscipline')
+			));
+			$this->filter['Course.id'] = Set::extract('/CoursesNwoDiscipline/ids_filtered', $subquery);
+			unset($this->filter['CoursesNwoDiscipline.nwo_discipline_id']);
+		}
 	}
 	
 	protected function _getFilterOptions_validateFilters() {
@@ -482,7 +501,6 @@ class CoursesController extends AppController {
 		}
 		
 		$this->_setTaxonomy();
-		
 		// set all option lists to view
 		$this->set(compact(
 			'countries',
