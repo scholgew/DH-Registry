@@ -25,7 +25,7 @@
 		$page = $this->fetch('title');
 		$title = 'DH Registry';
 		if($page == 'Courses') $title = 'DH Course Registry';
-		elseif($page == 'Projects') $title = 'DH Project Registry - Beta';
+		elseif($page == 'Projects') $title = 'DH Project Registry';
 		echo $title;
 		?>
 	</title>

@@ -22,7 +22,7 @@ class CcConfigConfiguration extends CakeclientAppModel {
 	
 	
 	
-	public function afterSave($created, $options) {
+	public function afterSave($created, $options = array()) {
 		Cache::delete('App.config', 'default');
 	}
 	

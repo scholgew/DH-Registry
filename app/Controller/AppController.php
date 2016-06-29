@@ -69,6 +69,10 @@ class AppController extends Controller {
 		$this->set('modelName', $this->modelClass);
 		
 		if($this->request->params['action'] != 'edit') $this->Session->delete('edit');
+		
+		if(strpos(APP, 'xampp') !== false AND Configure::read('debug') > 0) {
+			$this->Auth->allow();
+		}
 	}
 	
 	

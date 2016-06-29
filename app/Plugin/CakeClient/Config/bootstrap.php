@@ -1,9 +1,9 @@
 <?php
 	// set some defaults
-	// layout: [bool]false (don't override app-layout), CakeClient.default, any other
-	Configure::write('CakeClient.layout', 'CakeClient.default');
+	// layout: [bool]false (don't override app-layout), any other
+	Configure::write('Cakeclient.layout', 'Cakeclient.cakeclient');	// Cakeclient default layout (naming conflict with 'default')
 	// may contain either string or array('element' => 'path/to/element','text' => 'footer string')
-	Configure::write('CakeClient.footer', '&copy; 2016 <a href="http://hendrikschmeer.de" target="_blank">Hendrik Schmeer</a>');
+	Configure::write('Cakeclient.footer', '&copy; 2016 <a href="http://hendrikschmeer.de" target="_blank">Hendrik Schmeer</a>');
 	
 	
 	// make the plugin controllers & models available to the application
