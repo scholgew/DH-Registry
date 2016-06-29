@@ -38,7 +38,7 @@ class CrudComponent extends Component {
 		$this->virtualController = $this->controller->name;
 		// to make Crud views available outside the plugin, it requires setting an absolute path - also mention the file extension ".ctp"!
 		$this->viewPath = APP . 'Plugin' . DS . 'CakeClient' . DS . 'View' . DS . 'Crud' . DS;
-		$this->controller->layout = 'CakeClient.default';
+		if(Configure::read('CakeClient.layout')) $this->controller->layout = Configure::read('CakeClient.layout');
 		
 		// map the special crud parameter to the action key - requests without the crud key won't arrive in here! (routes)
 		if(!empty($this->controller->request->params['crud'])) {

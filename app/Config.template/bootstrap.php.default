@@ -106,6 +106,8 @@ Cache::config('default', array('engine' => 'File'));
  
  CakePlugin::load('Users', array('routes' => true, 'bootstrap' => true));
  
+ CakePlugin::load('Cakeclient', array('routes' => true, 'bootstrap' => true));
+ 
  
 
 /**

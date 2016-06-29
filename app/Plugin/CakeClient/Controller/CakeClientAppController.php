@@ -33,6 +33,7 @@ class CakeClientAppController extends AppController {
 		parent::beforeFilter();
 		
 		// we're on a CRUD route - set all the CRUD relevant variables (actions, menu, view, fieldlist, relations)
+		// except for those actions that don't have a view:
 		if(!in_array(strtolower($this->request->params['action']), array('delete','fix_order'))) $this->Crud->setCRUDenv();
 		
 		// maintain pagination settings
@@ -86,7 +87,7 @@ class CakeClientAppController extends AppController {
 	* overridden in the application's AppController. 
 	*/
 	function _normalizePath($action = array()) {
-		if($this->_appControllerOverride('normalizePath', $return, $action)) return $return;
+		if($this->_appControllerOverride('normalizePath', $return = null, $action)) return $return;
 		
 		$normalizedPath = '';
 		if(!empty($action['plugin'])) {

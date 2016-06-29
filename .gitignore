@@ -10,3 +10,4 @@ tests
 tmp
 .sass-cache
 .svn
+/app/webroot/maintenance.php

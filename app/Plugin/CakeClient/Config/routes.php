@@ -7,6 +7,11 @@
 	
 	// exceptions from the CRUD schema - have to be defined before the CRUD routes are defined
 	
+	// read in app-specific configuration and override of the previous defaults
+	$filename = APP . 'Config' . DS . 'CakeClient' . DS . 'routes.php';
+	if(file_exists($filename)) {
+		include($filename);
+	}
 	
 	/**	CRUD ROUTES
 	*	Create a set of routes for each routing prefix. 
