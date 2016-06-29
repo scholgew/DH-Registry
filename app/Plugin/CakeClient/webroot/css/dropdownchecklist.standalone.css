@@ -1,0 +1,60 @@
+/** Minimal stand-alone css for dropdownchecklist support
+    We highly recommend using JQuery ThemeRoller instead  
+*/
+@media -sass-debug-info{filename{font-family:file\:\/\/D\:\/xampp\/htdocs\/AP\/app\/Plugin\/CakeClient\/webroot\/css\/scss\/dropdownchecklist\.standalone\.scss}line{font-family:\000034}}
+.ui-dropdownchecklist {
+  font-size: medium;
+  color: black; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/D\:\/xampp\/htdocs\/AP\/app\/Plugin\/CakeClient\/webroot\/css\/scss\/dropdownchecklist\.standalone\.scss}line{font-family:\000038}}
+.ui-dropdownchecklist-selector {
+  height: 20px;
+  border: 1px solid #ddd;
+  background: #fff; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/D\:\/xampp\/htdocs\/AP\/app\/Plugin\/CakeClient\/webroot\/css\/scss\/dropdownchecklist\.standalone\.scss}line{font-family:\0000313}}
+.ui-state-hover, .ui-state-active {
+  border-color: #5794bf; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/D\:\/xampp\/htdocs\/AP\/app\/Plugin\/CakeClient\/webroot\/css\/scss\/dropdownchecklist\.standalone\.scss}line{font-family:\0000316}}
+.ui-dropdownchecklist-dropcontainer {
+  background-color: #fff;
+  border: 1px solid #999; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/D\:\/xampp\/htdocs\/AP\/app\/Plugin\/CakeClient\/webroot\/css\/scss\/dropdownchecklist\.standalone\.scss}line{font-family:\0000322}}
+.ui-state-hover {
+  background-color: #39f; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/D\:\/xampp\/htdocs\/AP\/app\/Plugin\/CakeClient\/webroot\/css\/scss\/dropdownchecklist\.standalone\.scss}line{font-family:\0000325}}
+.ui-state-disabled label {
+  color: #ccc; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/D\:\/xampp\/htdocs\/AP\/app\/Plugin\/CakeClient\/webroot\/css\/scss\/dropdownchecklist\.standalone\.scss}line{font-family:\0000328}}
+.ui-dropdownchecklist-group {
+  font-weight: bold;
+  font-style: italic; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/D\:\/xampp\/htdocs\/AP\/app\/Plugin\/CakeClient\/webroot\/css\/scss\/dropdownchecklist\.standalone\.scss}line{font-family:\0000332}}
+.ui-dropdownchecklist-indent {
+  padding-left: 7px; }
+
+/* Font size of 0 on the -selector and an explicit medium on -text required to eliminate 
+   descender problems within the containers and still have a valid size for the text */
+@media -sass-debug-info{filename{font-family:file\:\/\/D\:\/xampp\/htdocs\/AP\/app\/Plugin\/CakeClient\/webroot\/css\/scss\/dropdownchecklist\.standalone\.scss}line{font-family:\0000337}}
+.ui-dropdownchecklist-selector-wrapper {
+  vertical-align: middle;
+  font-size: 0px; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/D\:\/xampp\/htdocs\/AP\/app\/Plugin\/CakeClient\/webroot\/css\/scss\/dropdownchecklist\.standalone\.scss}line{font-family:\0000341}}
+.ui-dropdownchecklist-selector {
+  padding: 1px 2px 2px 2px;
+  font-size: 0px; }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/D\:\/xampp\/htdocs\/AP\/app\/Plugin\/CakeClient\/webroot\/css\/scss\/dropdownchecklist\.standalone\.scss}line{font-family:\0000345}}
+.ui-dropdownchecklist-text {
+  font-size: medium;
+  /* line-height: 20px; */ }
+
+@media -sass-debug-info{filename{font-family:file\:\/\/D\:\/xampp\/htdocs\/AP\/app\/Plugin\/CakeClient\/webroot\/css\/scss\/dropdownchecklist\.standalone\.scss}line{font-family:\0000349}}
+.ui-dropdownchecklist-group {
+  padding: 1px 2px 2px 2px; }

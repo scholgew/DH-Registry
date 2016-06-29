@@ -9,3 +9,4 @@ tests
 /app/webroot/info.php
 tmp
 .sass-cache
+.svn
