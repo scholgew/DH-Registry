@@ -24,7 +24,7 @@
  * its action called 'display', and we pass a param to select the view file
  * to use (in this case, /app/View/Pages/home.ctp)...
  */
- 
+	
 	
 	Router::parseExtensions('json', 'xml');
 	
@@ -38,7 +38,7 @@
 			'persist' => array('layout')
 		)
 	);
-	Router::connect('/', array('controller' => 'projects', 'action' => 'index'));
+	Router::connect('/', array('controller' => 'courses', 'action' => 'index'));
 /**
  * ...and connect the rest of 'Pages' controller's URLs.
  */
@@ -62,13 +62,6 @@
 		'action' => 'display',
 		'about'
 	));
-	
-	
-	
-	
-	
-	
-	
 	
 	Router::connect('/:layout/users/:action', array(
 			'controller' => 'app_users'
@@ -95,6 +88,9 @@
 	
 	
 	
+	// define the Cakeclient exceptions, before the plugin's routes load
+	Router::connect('/courses/*', array('controller' => 'courses'));
+	Router::connect('/projects/*', array('controller' => 'projects'));
 
 /**
  * Load all plugin routes. See the CakePlugin documentation on
