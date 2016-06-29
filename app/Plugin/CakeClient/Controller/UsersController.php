@@ -1,5 +1,5 @@
 <?php
-class UsersController extends CakeClientAppController {
+class UsersController extends CakeclientAppController {
 
 	function beforeFilter() {
 		parent::beforeFilter();

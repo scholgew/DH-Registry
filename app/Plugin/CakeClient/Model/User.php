@@ -5,7 +5,7 @@ if(file_exists(APP . 'Model' . DS . pathinfo(__FILE__, PATHINFO_BASENAME))) {
 	return;
 }
 
-class User extends CakeClientAppModel {
+class User extends CakeclientAppModel {
 	
 	var $belongsTo = array(
 		'UserRole' => array(

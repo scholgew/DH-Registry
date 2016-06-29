@@ -31,12 +31,12 @@
 						$label = $this->Html->link($label, array(
 							'action' => 'index',
 							'controller' => Inflector::tableize($fieldModelName),
-							'plugin' => Configure::read('CakeClient.prefix')
+							'plugin' => Configure::read('Cakeclient.prefix')
 						));
 						$value = $this->Html->link($value, array(
 							'action' => 'view',
 							'controller' => Inflector::tableize($fieldModelName),
-							'plugin' => Configure::read('CakeClient.prefix'),
+							'plugin' => Configure::read('Cakeclient.prefix'),
 							$foreignKeyValue
 						));
 						unset($foreignKeyValue);

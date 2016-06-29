@@ -2,34 +2,33 @@
 	// Provide route prefixes for the plugin as an array. It may also contain the empty string ''.
 	// this cannot be defined in the database, as it's required to have it declared before everything else
 	// this can be overridden in the application
-	Configure::write('CakeClient.prefixes', array('admin'));
+	Configure::write('Cakeclient.prefixes', array('admin'));
 	
-	
-	// exceptions from the CRUD schema - have to be defined before the CRUD routes are defined
 	
 	// read in app-specific configuration and override of the previous defaults
-	$filename = APP . 'Config' . DS . 'CakeClient' . DS . 'routes.php';
+	$filename = APP . 'Config' . DS . 'Cakeclient' . DS . 'routes.php';
 	if(file_exists($filename)) {
 		include($filename);
 	}
+	
 	
 	/**	CRUD ROUTES
 	*	Create a set of routes for each routing prefix. 
 	*	This allows for differenciated levels of access for different kind of users (eg. admin, editor, author).
 	*	Also check for Cake's routing prefixes, which eg. enable "admin_routing". 
 	*	These prefixed function calls have to be routed to the CRUD actions instead, 
-	*	if the corresponding CakeClient route is set. 
+	*	if the corresponding Cakeclient route is set. 
 	*/
 	$RoutingPrefixes = Configure::read('Routing.prefixes');
-	$CakeClientPrefix = Configure::read('CakeClient.prefixes');
-	if(is_array($CakeClientPrefix)) {
-		foreach($CakeClientPrefix as $prefix) {
+	$CakeclientPrefix = Configure::read('Cakeclient.prefixes');
+	if(is_array($CakeclientPrefix)) {
+		foreach($CakeclientPrefix as $prefix) {
 			setRoutes($prefix, $RoutingPrefixes);
 		}
 	}
-	elseif(is_string($CakeClientPrefix)) {
+	elseif(is_string($CakeclientPrefix)) {
 		// string & empty values...
-		setRoutes($CakeClientPrefix, $RoutingPrefixes);
+		setRoutes($CakeclientPrefix, $RoutingPrefixes);
 	}
 	
 	
@@ -65,7 +64,7 @@
 		'cakeclient.route' => 'cakeclient'
 	));
 	
-	// CakeClient exceptions
+	// Cakeclient exceptions
 	Router::connect('/cakeclient/cc_config_configurations/add/*', array(
 		'plugin' => 'cakeclient',
 		'controller' => 'cc_config_configurations',
@@ -104,7 +103,7 @@
 			'cakeclient.route' => $prefix
 			// one would expect the parameter 'crud' here as well, but this is set by the router itself!
 		);
-		// CakeClient exceptions
+		// Cakeclient exceptions
 		$cc_config_configurations_add = array(
 			'plugin' => 'cakeclient',
 			'controller' => 'cc_config_configurations',
@@ -142,7 +141,8 @@
 			unset($cc_config_actions_edit[$prefix]);
 		}
 		
-		// CakeClient exceptions from the CRUD schema - have to be defined before the CRUD routes are defined
+		// Cakeclient exceptions from the CRUD schema have to be defined before the CRUD routes are defined,
+		// so do the internal exceptions
 		Router::connect(
 			$url_prefix . '/cc_config_configurations/add/*', 
 			$cc_config_configurations_add
@@ -152,6 +152,7 @@
 			$cc_config_actions_edit
 		);
 		
+		// finally the "real" CRUD routes :)
 		// short index URLs
 		Router::connect(
 			$url_prefix . '/:table',
@@ -169,7 +170,7 @@
 		if(!$prefix_empty) {
 			// Route everything that's not CRUD to controllers outside the plugin - but stay within the prefix route to have a unified backend. 
 			// Do not make a prefix routing like "prefix_action()", to have the same method available in several routes. Allow access based on prefix and user accesslevel. 
-			$authPlugin = Configure::read('CakeClient.auth_plugin');
+			$authPlugin = Configure::read('Cakeclient.auth_plugin');
 			Router::connect('/' . $prefix . '/users/login', array(
 				'controller' => 'users',
 				'action' => 'login',

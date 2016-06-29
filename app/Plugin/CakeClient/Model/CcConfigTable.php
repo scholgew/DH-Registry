@@ -5,16 +5,17 @@ if(file_exists(APP . 'Model' . DS . pathinfo(__FILE__, PATHINFO_BASENAME))) {
 	return;
 }
 
-class CcConfigTable extends CakeClientAppModel {
+class CcConfigTable extends CakeclientAppModel {
 	
 	
 	
-	
+	/*
 	var $actsAs = array(
 		'Utils.Sortable' => array(
 			'parentId' => 'cc_config_configuration_id'
 		)
 	);
+	*/
 	
 	var $belongsTo = array(
 		'CcConfigMenu' => array(
@@ -59,14 +60,14 @@ class CcConfigTable extends CakeClientAppModel {
 			$table = $stored['CcConfigTable']['name'];
 			
 		}elseif(!empty($table) AND is_string($table)) {
-			$tableDef = Configure::read('CakeClient.tables.' . $table);
+			$tableDef = Configure::read('Cakeclient.tables.' . $table);
 			if($tableDef) {
 				$table_id = $tableDef['id'];
 			}else{
 				$stored = $this->find('first', array(
 					'conditions' => array(
 						'name' => $table,
-						'cc_config_configuration_id' => Configure::read('CakeClient.config_id')
+						// #ToDo 'cc_config_menu_id' => Configure::read('Cakeclient.config_id')
 					),
 					'recursive' => -1
 				));
@@ -89,7 +90,7 @@ class CcConfigTable extends CakeClientAppModel {
 	function store($config_id = null) {
 		if(empty($config_id)) {
 			// use the current config id
-			$config_id = Configure::read('CakeClient.config_id');
+			$config_id = Configure::read('Cakeclient.config_id');
 		}
 		
 		if(!isset($this->tables) OR empty($this->tables)) {
@@ -145,7 +146,7 @@ class CcConfigTable extends CakeClientAppModel {
 	function tidy($config_id = null) {
 		if(empty($config_id)) {
 			// use the current config id
-			$config_id = Configure::read('CakeClient.config_id');
+			$config_id = Configure::read('Cakeclient.config_id');
 		}
 		if(!isset($this->tables) OR empty($this->tables)) {
 			$this->__getDbTables();

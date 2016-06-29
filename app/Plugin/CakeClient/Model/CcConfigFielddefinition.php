@@ -5,7 +5,7 @@ if(file_exists(APP . 'Model' . DS . pathinfo(__FILE__, PATHINFO_BASENAME))) {
 	return;
 }
 
-class CcConfigFielddefinition extends CakeClientAppModel {
+class CcConfigFielddefinition extends CakeclientAppModel {
 	
 	var $actsAs = array(
 		'Utils.Sortable' => array(

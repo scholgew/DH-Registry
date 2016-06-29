@@ -10,7 +10,7 @@ if(isset($crudRelations) AND !empty($crudRelations['belongsTo'])) {
 			$link_url = array(
 				'action' => 'view',
 				'controller' => $assoc['tablename'],
-				'plugin' => Configure::read('CakeClient.prefix')
+				'plugin' => Configure::read('Cakeclient.prefix')
 			);
 			$link_url[0] = $record[$modelName][$assoc['foreign_key']];
 			

@@ -19,12 +19,12 @@
 		?>
 	</title>
 	<?php
-	if(!Configure::read('CakeClient.robots') OR Configure::read('debug') > 0) {
+	if(!Configure::read('Cakeclient.robots') OR Configure::read('debug') > 0) {
 		echo $this->Html->meta(array('name' => 'robots', 'content' => 'noindex'));
 	}
 	
-	$meta_description = Configure::read('CakeClient.description');
-	$meta_keywords = Configure::read('CakeClient.keywords');
+	$meta_description = Configure::read('Cakeclient.description');
+	$meta_keywords = Configure::read('Cakeclient.keywords');
 	if($meta_keywords) {
 		echo $this->Html->meta('keywords', $meta_keywords);
 	}
@@ -34,16 +34,16 @@
 	
 	echo $this->Html->meta('icon');
 	
-	echo $this->Html->css('CakeClient.styles.css');
+	echo $this->Html->css('Cakeclient.styles.css');
 	if(Configure::read('debug') > 0) {
-		echo $this->Html->css('CakeClient.cake_debugging.css');
+		echo $this->Html->css('Cakeclient.cake_debugging.css');
 	}
 	
 	echo $this->fetch('meta');
 	echo $this->fetch('css');
 	echo $this->fetch('script');
 	
-	echo $this->element('layout/onload', array(), array('plugin' => 'CakeClient'));
+	echo $this->element('layout/onload', array(), array('plugin' => 'Cakeclient'));
 	?>
 	
 </head>
@@ -60,7 +60,7 @@
 			<div id="content">
 				<h2><?php echo $title_for_layout; ?></h2>
 				<?php
-				echo $this->element('layout/actions', array(), array('plugin' => 'CakeClient'));
+				echo $this->element('layout/actions', array(), array('plugin' => 'Cakeclient'));
 				echo $this->Session->flash();
 				echo $this->fetch('content');
 				?>

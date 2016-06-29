@@ -5,7 +5,7 @@ if(file_exists(APP . 'Model' . DS . pathinfo(__FILE__, PATHINFO_BASENAME))) {
 	return;
 }
 
-class CcConfigActionsView extends CakeClientAppModel {
+class CcConfigActionsView extends CakeclientAppModel {
 	
 	var $actsAs = array(
 		'Utils.Sortable' => array(
@@ -27,7 +27,7 @@ class CcConfigActionsView extends CakeClientAppModel {
 	
 	
 	function afterFind($results = array(), $primary = false) {
-		// classVar $crud is set to false by default in CakeClientAppModel
+		// classVar $crud is set to false by default in CakeclientAppModel
 		// and manipulated by the CRUD methods for differentiation. 
 		if($primary AND in_array($this->crud, array('index', 'view'))) {
 			// we're enhancing the actions' names with the corresponding table name for better readability

@@ -1,11 +1,11 @@
 <div id="header">
 	<?php
-	if($logo = Configure::read('CakeClient.logo_image')) {
+	if($logo = Configure::read('Cakeclient.logo_image')) {
 		$options = array(
 			'alt' => 'Logo',
 			'class' => 'left'
 		);
-		if($url = Configure::read('CakeClient.logo_url')) $options['url'] = $url;
+		if($url = Configure::read('Cakeclient.logo_url')) $options['url'] = $url;
 		else $options['url'] = '/';
 		echo $this->Html->image($logo_left, $options);
 	}
@@ -26,12 +26,12 @@
 	?>
 	
 	<?php
-	if($logo_2 = Configure::read('CakeClient.logo_right_image')) {
+	if($logo_2 = Configure::read('Cakeclient.logo_right_image')) {
 		$options = array(
 			'alt' => 'Logo',
 			'class' => 'right'
 		);
-		if($url = Configure::read('CakeClient.logo_right_url')) $options['url'] = $url;
+		if($url = Configure::read('Cakeclient.logo_right_url')) $options['url'] = $url;
 		else $options['url'] = '/';
 		echo $this->Html->image($logo_2, $options);
 	}

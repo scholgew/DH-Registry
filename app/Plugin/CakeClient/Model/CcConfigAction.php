@@ -5,7 +5,7 @@ if(file_exists(APP . 'Model' . DS . pathinfo(__FILE__, PATHINFO_BASENAME))) {
 	return;
 }
 
-class CcConfigAction extends CakeClientAppModel {
+class CcConfigAction extends CakeclientAppModel {
 	
 	var $displayField = 'label';
 	

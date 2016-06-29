@@ -1,5 +1,5 @@
 <?php
-class CcConfigConfigurationsController extends CakeClientAppController {
+class CcConfigConfigurationsController extends CakeclientAppController {
 	
 	
 	// see the special route in routes.php!

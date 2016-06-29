@@ -5,7 +5,7 @@ if(file_exists(APP . 'Model' . DS . pathinfo(__FILE__, PATHINFO_BASENAME))) {
 	return;
 }
 
-class CcConfigMenu extends CakeClientAppModel {
+class CcConfigMenu extends CakeclientAppModel {
 	
 	var $belongsTo = array(
 		'UserRole' => array(
@@ -23,23 +23,23 @@ class CcConfigMenu extends CakeClientAppModel {
 	/* Copied over from the former configuration model
 	*  
 	function add($clone = null, $data = array()) {
-		if(!Configure::read('CakeClient.config_id') OR $clone == 'new') {
+		if(!Configure::read('Cakeclient.config_id') OR $clone == 'new') {
 			$configuration = array(
 				'default' => 1,
 				'disable_cache_checking' => 1,
 				'robots' => 'noindex,nofollow'
 			);
-			if(Configure::read('CakeClient.config_id')) {
+			if(Configure::read('Cakeclient.config_id')) {
 				$configuration['default'] = 0;
 			}
 			$this->create();
 			if($configuration = $this->save($configuration, false)) {
-				Configure::write('CakeClient', $configuration['CcConfigConfiguration']);
+				Configure::write('Cakeclient', $configuration['CcConfigConfiguration']);
 			}
 			
 		}else{
 			// $clone possible values: empty, 'current', [ID]
-			$clone_id = Configure::read('CakeClient.config_id');
+			$clone_id = Configure::read('Cakeclient.config_id');
 			if(!empty($clone) AND ctype_digit($clone)) {
 				$clone_id = $clone;
 			}

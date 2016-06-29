@@ -14,7 +14,7 @@ if(isset($crudRelations) AND !empty($crudRelations['hasAndBelongsToMany'])) {
 		$link_url = array(
 			'action' => 'index',
 			'controller' => $assoc['tablename'],
-			'plugin' => Configure::read('CakeClient.prefix'),
+			'plugin' => Configure::read('Cakeclient.prefix'),
 			$modelName . '.' . $assoc['primary_key'] => $parent_id
 		);
 		if(!$parent_id) unset($link_url[$assoc['primary_key']]);

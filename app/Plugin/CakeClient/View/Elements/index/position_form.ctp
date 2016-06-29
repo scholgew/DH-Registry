@@ -42,7 +42,7 @@
 		'id' => 'PositionEditForm_' . $id,
 		'url' => array(
 			'action' => 'edit',
-			'plugin' => Configure::read('CakeClient.prefix'),
+			'plugin' => Configure::read('Cakeclient.prefix'),
 			$id
 		)
 	));

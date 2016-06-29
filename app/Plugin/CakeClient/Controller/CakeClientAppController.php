@@ -1,14 +1,14 @@
 <?php
-class CakeClientAppController extends AppController {
+class CakeclientAppController extends AppController {
 	
 	var $components = array(
-		'CakeClient.Crud',
+		'Cakeclient.Crud',
 		'Session',
 		'Paginator'
 	);
 	
 	var $helpers = array(
-		'CakeClient.Display'
+		'Cakeclient.Display'
 	);
 	
 	var $overrideController = null;
@@ -29,11 +29,10 @@ class CakeClientAppController extends AppController {
 	* The resulting viewVars are merged into the actual request's viewVars. 
 	*/
 	function beforeFilter() {
-		// ckeck with main application AppController, if we got permission to proceed
+		// check with main application AppController, if we got permission to proceed
 		parent::beforeFilter();
 		
 		// we're on a CRUD route - set all the CRUD relevant variables (actions, menu, view, fieldlist, relations)
-		// except for those actions that don't have a view:
 		if(!in_array(strtolower($this->request->params['action']), array('delete','fix_order'))) $this->Crud->setCRUDenv();
 		
 		// maintain pagination settings
@@ -60,13 +59,13 @@ class CakeClientAppController extends AppController {
 	* This is...odd:
 	* We're using the hierarchically higher AppController to override the functions in here. 
 	* As this is only a generic plugin, that makes sense. 
-	* CakeClientAppController is only in effect, if we're on a CRUD route, however. 
+	* CakeclientAppController is only in effect, if we're on a CRUD route, however. 
 	*/
 	function _appControllerOverride($method = null, &$return) {
 		if(!empty($method) AND is_string($method)) {
 			// Do not use $this as the current object's reference - $this' parent class is already extended by $this!
 			// Naming $this by it's string classname checks the parent statically. 
-			if(method_exists(get_parent_class('CakeClientAppController'), $method)) {
+			if(method_exists(get_parent_class('CakeclientAppController'), $method)) {
 				$args = func_get_args();
 				// The first argument is the method name, second the return value(s). We don't want to pass them. 
 				array_shift($args);
@@ -87,7 +86,7 @@ class CakeClientAppController extends AppController {
 	* overridden in the application's AppController. 
 	*/
 	function _normalizePath($action = array()) {
-		if($this->_appControllerOverride('normalizePath', $return = null, $action)) return $return;
+		if($this->_appControllerOverride('normalizePath', $return, $action)) return $return;
 		
 		$normalizedPath = '';
 		if(!empty($action['plugin'])) {

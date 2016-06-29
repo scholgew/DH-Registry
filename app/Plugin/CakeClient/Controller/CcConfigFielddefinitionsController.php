@@ -1,5 +1,5 @@
 <?php
-class CcConfigFielddefinitionsController extends CakeClientAppController {
+class CcConfigFielddefinitionsController extends CakeclientAppController {
 	
 	
 	

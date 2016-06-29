@@ -1,7 +1,7 @@
 <?php
 class CrudComponent extends Component {
 	
-	/**	This component contains the relevant logic of CakeClient's applicational scaffolding (not the same as the cake scaffolding). 
+	/**	This component contains the relevant logic of Cakeclient's applicational scaffolding (not the same as the cake scaffolding). 
 	*	It is packed into a component to have it available in other controllers as well. 
 	*/
 	
@@ -37,8 +37,8 @@ class CrudComponent extends Component {
 		// property contains the name of the virtual controller - which finally is not the one in effect ($this)!
 		$this->virtualController = $this->controller->name;
 		// to make Crud views available outside the plugin, it requires setting an absolute path - also mention the file extension ".ctp"!
-		$this->viewPath = APP . 'Plugin' . DS . 'CakeClient' . DS . 'View' . DS . 'Crud' . DS;
-		if(Configure::read('CakeClient.layout')) $this->controller->layout = Configure::read('CakeClient.layout');
+		$this->viewPath = APP . 'Plugin' . DS . 'Cakeclient' . DS . 'View' . DS . 'Crud' . DS;
+		$this->controller->layout = 'Cakeclient.default';
 		
 		// map the special crud parameter to the action key - requests without the crud key won't arrive in here! (routes)
 		if(!empty($this->controller->request->params['crud'])) {
@@ -46,7 +46,7 @@ class CrudComponent extends Component {
 		}
 		
 		// work out the route we're at - if Cake's routing prefixes are in use, the plugin's routes will not set $prefix => true in router array (params), to disable prefix routing inside the plugin
-		// so the current route is set via a special router key: "model_admin.route"
+		// so the current route is set via a special router key: "cakeclient.route"
 		$prefix = null;
 		$routingPrefixes = Configure::read('Routing.prefixes');
 		if(!empty($this->controller->request->params['cakeclient.route'])) {
@@ -55,14 +55,14 @@ class CrudComponent extends Component {
 			}
 		}
 		// make the current prefix alias available - used in the CRUD views
-		Configure::write('CakeClient.prefix', $prefix);
+		Configure::write('Cakeclient.prefix', $prefix);
 		$this->controller->request->params['plugin'] = $prefix;
 		
 		// set the table name, as it is passed via the router array
 		if(!empty($this->controller->request->params['table'])) {
 			$this->virtualController = Inflector::camelize($this->controller->request->params['table']);
 			$modelName = Inflector::singularize($this->virtualController);
-			$tableConfigModelClass = Configure::read('CakeClient.tables.' . $this->controller->request->params['table'] . '.modelclass');
+			$tableConfigModelClass = Configure::read('Cakeclient.tables.' . $this->controller->request->params['table'] . '.modelclass');
 			if(!empty($tableConfigModelClass)) {
 				$modelName = $tableConfigModelClass;
 			}
@@ -72,7 +72,7 @@ class CrudComponent extends Component {
 		}
 		
 		// the page name
-		$page_title = Configure::read('CakeClient.page_title');
+		$page_title = Configure::read('Cakeclient.page_title');
 		if(empty($page_title)) {
 			// the domainname (+ subdomain)
 			$page_title = $this->controller->base;
@@ -80,7 +80,7 @@ class CrudComponent extends Component {
 		// ... and a dynamic title about the context
 		$title_for_layout = $this->virtualController;
 		// configuration might contain a translated label for that model
-		$label = Configure::read('CakeClient.tables.' . $this->controller->request->params['controller'] . '.label');
+		$label = Configure::read('Cakeclient.tables.' . $this->controller->request->params['controller'] . '.label');
 		if(!empty($label)) {
 			$title_for_layout = $label;
 		}
@@ -91,7 +91,7 @@ class CrudComponent extends Component {
 		
 		$this->defaultRedirect = array(
 			'action' => 'index',
-			'plugin' => Configure::read('CakeClient.prefix')
+			'plugin' => Configure::read('Cakeclient.prefix')
 		);
 	}
 	
@@ -113,7 +113,7 @@ class CrudComponent extends Component {
 		$this->setRelations();
 		
 		$this->setLogin();
-		$footer = Configure::read('CakeClient.footer');
+		$footer = Configure::read('Cakeclient.footer');
 		$this->controller->set(compact('footer'));
 	}
 	
@@ -241,7 +241,7 @@ class CrudComponent extends Component {
 					'action_id' => $action_id,
 					'url' => array(
 						'action' => $actionName,
-						'plugin' => Configure::read('CakeClient.prefix')
+						'plugin' => Configure::read('Cakeclient.prefix')
 					)
 				);
 				if(is_array($action) AND !empty($action['controller'])) {
@@ -329,7 +329,7 @@ class CrudComponent extends Component {
 		$crudMenu = Cache::read($role . '_menu', 'cakeclient');
 		if(empty($crudMenu)) {
 			
-			if(!$tables = Configure::read('CakeClient.tables')) {
+			if(!$tables = Configure::read('Cakeclient.tables')) {
 				// get all table names - that would do for linking all index pages
 				App::uses('ConnectionManager', 'Model');
 				$db = ConnectionManager::getDataSource($dataSource);
@@ -375,7 +375,7 @@ class CrudComponent extends Component {
 					'url' => array(
 						'action' => 'index',
 						'controller' => $tablename,
-						'plugin' => Configure::read('CakeClient.prefix')
+						'plugin' => Configure::read('Cakeclient.prefix')
 					),
 					'submenu' => $actions
 				);
@@ -417,7 +417,7 @@ class CrudComponent extends Component {
 		if(!$relations = Cache::read($cacheName, 'cakeclient')) {
 			if(!isset($this->controller->CcConfigTable)) $this->controller->loadModel('CcConfigTable');
 			if($table_id = $this->controller->CcConfigTable->getTable($table)) {
-				$tables = Configure::read('CakeClient.tables');
+				$tables = Configure::read('Cakeclient.tables');
 				$tableDef = false;
 				$modelClass = Inflector::classify($table);
 				if(!empty($tables[$table])) {
@@ -460,7 +460,7 @@ class CrudComponent extends Component {
 										'tablename' => $tablename,
 										'visible' => true,
 										'primary_key' => $primaryKey,
-										// add the ID of the related table in CakeClient table config table, for easy subsequent lookups
+										// add the ID of the related table in Cakeclient table config table, for easy subsequent lookups
 										'cc_config_table_id' => $tables[$tablename]['id']
 									);
 								}
@@ -503,7 +503,7 @@ class CrudComponent extends Component {
 				$currentAction_contains_form = $currentAction['CcConfigAction'][0]['has_form'];
 			}
 			
-			$tableConfig = Configure::read('CakeClient.tables');
+			$tableConfig = Configure::read('Cakeclient.tables');
 			$configList = false;
 			
 			if(!empty($tableConfig[$tableName]['fieldlists'][$action])) {
@@ -650,7 +650,7 @@ class CrudComponent extends Component {
 						// it's important to specify the correct controller name right here, as the classname might differ from the alias found in the data array
 						'url' => array(
 							'controller' => $relatedTable,
-							'plugin' => Configure::read('CakeClient.prefix')
+							'plugin' => Configure::read('Cakeclient.prefix')
 							// action & ID have to be specified somewhere else, if required - this will link to index-action by default
 						)
 					);
@@ -745,7 +745,7 @@ class CrudComponent extends Component {
 	
 	
 	function setLogin() {
-		$config = Configure::read('CakeClient.login');
+		$config = Configure::read('Cakeclient.login');
 		if(isset($config['simple']) AND $config['simple'] === 'true' AND isset($this->controller->Auth)) {
 			$controller = $this->controller->Auth->settings['loginAction']['controller'];
 			$action = $this->controller->Auth->settings['loginAction']['action'];
@@ -780,19 +780,19 @@ class CrudComponent extends Component {
 	function setReferer($default = '/') {
 		if(empty($this->referer)) {
 			$this->referer = $this->getCleanReferer($default);
-			$this->controller->Session->write('CakeClient.referer', $this->referer);
+			$this->controller->Session->write('Cakeclient.referer', $this->referer);
 		}
 		return $this->referer;
 	}
 	
 	function getReferer($default = '/') {
 		if(empty($this->referer)) {
-			$this->referer = $this->controller->Session->read('CakeClient.referer');
+			$this->referer = $this->controller->Session->read('Cakeclient.referer');
 		}
 		if(empty($this->referer)) {
 			$this->referer = $this->getCleanReferer($default);
 		}
-		$this->controller->Session->delete('CakeClient.referer');
+		$this->controller->Session->delete('Cakeclient.referer');
 		return $this->referer;
 	}
 	
@@ -827,7 +827,7 @@ class CrudComponent extends Component {
 			}
 			/** Check if method exists in custom controller
 			*	Check for an unique property in ModelsController to make sure we're not on a CRUD path, 
-			*	thus not invoking the 'delete' method on the CakeClientAppController again!
+			*	thus not invoking the 'delete' method on the CakeclientAppController again!
 			*/
 			if(empty($this->controller->crudController) AND method_exists($this->controller, $method)) {
 				$return = $this->controller->{$method}($items, $redirect = false);
@@ -950,7 +950,7 @@ class CrudComponent extends Component {
 	function updateFieldlistDefinitions($for_table = null, $for_context = null) {
 		// only admit a per-table, per-context policy
 		if(empty($for_table) OR empty($for_context)) return;
-		if($tables = Configure::read('CakeClient.tables')) {
+		if($tables = Configure::read('Cakeclient.tables')) {
 			// get the right tabledef from config
 			foreach($tables as $tablename => $tabledefinition) {
 				if($tablename == $for_table) {

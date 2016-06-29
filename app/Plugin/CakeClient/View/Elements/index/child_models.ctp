@@ -12,7 +12,7 @@ if(isset($crudRelations) AND !empty($crudRelations['hasMany'])) {
 			$link_url = array(
 				'action' => 'index',
 				'controller' => $assoc['tablename'],
-				'plugin' => Configure::read('CakeClient.prefix'),
+				'plugin' => Configure::read('Cakeclient.prefix'),
 				$assoc['foreign_key'] =>  $parent_id
 			);
 			if(!$parent_id) unset($link_url[$assoc['foreign_key']]);

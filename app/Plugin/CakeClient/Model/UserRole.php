@@ -5,7 +5,7 @@ if(file_exists(APP . 'Model' . DS . pathinfo(__FILE__, PATHINFO_BASENAME))) {
 	return;
 }
 
-class UserRole extends CakeClientAppModel {
+class UserRole extends CakeclientAppModel {
 	
 	/**
 	*  The reason for the User class is located in the application 

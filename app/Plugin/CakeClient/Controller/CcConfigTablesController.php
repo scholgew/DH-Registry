@@ -1,5 +1,5 @@
 <?php
-class CcConfigTablesController extends CakeClientAppController {
+class CcConfigTablesController extends CakeclientAppController {
 	
 	
 	

@@ -5,7 +5,7 @@ if(file_exists(APP . 'Model' . DS . pathinfo(__FILE__, PATHINFO_BASENAME))) {
 	return;
 }
 
-class CcConfigConfiguration extends CakeClientAppModel {
+class CcConfigConfiguration extends CakeclientAppModel {
 	
 	var $validate = array(
 		'key' => array(

@@ -1,5 +1,5 @@
 <?php
-class CakeClientAppModel extends AppModel {
+class CakeclientAppModel extends AppModel {
 	
 	var $recursive = 0;
 	
@@ -8,7 +8,7 @@ class CakeClientAppModel extends AppModel {
 	var $crud = false;
 	
 	var $actsAs = array(
-		'CakeClient.Configurable',
+		'Cakeclient.Configurable',
 		'Containable'
 	);
 	
