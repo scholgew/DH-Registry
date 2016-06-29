@@ -8,7 +8,8 @@ class CakeclientAppController extends AppController {
 	);
 	
 	var $helpers = array(
-		'Cakeclient.Display'
+		'Cakeclient.Display',
+		'Cakeclient.Asset'
 	);
 	
 	var $overrideController = null;

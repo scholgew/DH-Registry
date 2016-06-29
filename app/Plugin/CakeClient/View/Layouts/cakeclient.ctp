@@ -69,7 +69,7 @@
 		
 		<div id="footer">
 			<?php
-			if(!empty($footer)) {
+			if($footer = Configure::read('Cakeclient.footer')) {
 				if(is_string($footer)) {
 					echo $footer;
 				}

@@ -23,7 +23,7 @@ if(empty($modelName)) {
 ?>
 	
 <div class="scroll_wrapper">
-	<table>
+	<table  class="expandable">
 		<?php
 		echo $this->element('table/header');
 		

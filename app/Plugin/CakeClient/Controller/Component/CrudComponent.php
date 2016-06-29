@@ -113,8 +113,6 @@ class CrudComponent extends Component {
 		$this->setRelations();
 		
 		$this->setLogin();
-		$footer = Configure::read('Cakeclient.footer');
-		$this->controller->set(compact('footer'));
 	}
 	
 	
@@ -324,10 +322,12 @@ class CrudComponent extends Component {
 	
 	
 	
-	function getMenu($controlled = true, $dataSource = 'default') {
+	function getMenu($controlled = true, $dataSource = null, $cc_config = false) {
+		if(empty($dataSource)) $dataSource = 'default';
+		
 		$role = 'admin';
-		$crudMenu = Cache::read($role . '_menu', 'cakeclient');
-		if(empty($crudMenu)) {
+		$menu = Cache::read($role . '_menu', 'cakeclient');
+		if(empty($menu)) {
 			
 			if(!$tables = Configure::read('Cakeclient.tables')) {
 				// get all table names - that would do for linking all index pages
@@ -337,12 +337,20 @@ class CrudComponent extends Component {
 			}
 			
 			// enhance with index actionlist and countercheck with access lists
-			$_menu = array();
+			$menu = array();
 			foreach($tables as $k => $item) {
+				$cc_config = false;
 				$tablename = $item;
 				if(is_array($tablename)) {
 					$tablename = $item['name'];
 				}
+				// check for the plugin's internal configuration tables
+				if(	(strpos($tablename, 'cc_config_') !== false AND !$cc_config)
+				OR	(strpos($tablename, 'cc_config_') === false AND $cc_config)	
+				) {
+					continue;
+				}
+				
 				$title = Inflector::humanize($tablename);
 				if(is_array($item) AND !empty($item['label'])) {
 					$title = $item['label'];
@@ -388,20 +396,19 @@ class CrudComponent extends Component {
 					unset($menuEntry['url']['base']);
 				}
 				if(isset($menuEntry['url']) OR !empty($actions)) {
-					$_menu[] = $menuEntry;
+					$menu[] = $menuEntry;
 				}
 			}
-			$crudMenu = $_menu;
-			Cache::write($role . '_menu', $crudMenu, 'cakeclient');
+			Cache::write($role . '_menu', $menu, 'cakeclient');
 		}
-		return $crudMenu;
+		return $menu;
 	}
 	function setMenu() {
 		// get the default menu
-		$menu = $this->getMenu($controlled = true, $datasource = 'default');
+		$cakeclientMenu = $this->getMenu($controlled = true, null, $cc_config = false);
 		
-		$this->controller->set('menu', $menu);
-		return $menu;
+		$this->controller->set('cakeclientMenu', $cakeclientMenu);
+		return $cakeclientMenu;
 	}
 	
 	function getRelations($table = null, $from_model = false) {

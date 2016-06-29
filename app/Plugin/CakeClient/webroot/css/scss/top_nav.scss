@@ -1,0 +1,13 @@
+body {
+	margin-top: 50px;
+}
+
+#cakeclient_top_nav {
+	position: fixed;
+	height: 50px;
+	width: 100%;
+	top: 0;
+	background-color: black;
+	z-index: 100;
+	opacity: 0.8;
+}

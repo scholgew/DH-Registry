@@ -20,7 +20,7 @@ table {
 		border:0;
 		text-align: left;
 		vertical-align: middle;
-		padding:4px;
+		padding:4px 11px;
 		color: $table_header_font_color;
 		background-color: $table_header_background_color;
 		
@@ -63,22 +63,30 @@ table {
 		}
 	}
 	
+	&.expandable {
+		tr {
+			&.even {	/* because two rows (one of them initially hidden) are a pair that shall appear in the same colours, both get the same classname "even"/"odd", :nth-child does not work here */
+				background: $table_nth_row_background_color;
+			}
+			&:nth-child(even) {
+				border-top: 1px solid #ccc;
+			}
+			&.mouseover {	/* dynamically hover the paired siblings using js, because CSS cannot select a previous sibling*/
+				background-color: #ddd;
+				cursor: pointer;
+			}
+		}
+	}
 	tr {
-		&.even {	/* because two rows (one of them initially hidden) are a pair that shall appear in the same colours, both get the same classname "even"/"odd", :nth-child does not work here */
+		&:nth-child(even) {
 			background: $table_nth_row_background_color;
 		}
-		&:nth-child(even) {
-			border-top: 1px solid #ccc;
-		}
+		border-bottom: 1px solid #ccc;
 		td {
 			padding: 10px;
 			text-align: left;
 			vertical-align: middle;
 			min-width: 100px;
-		}
-		&.mouseover {	/* dynamically hover the paired siblings using js, because CSS cannot select a previous sibling*/
-			background-color: #ddd;
-			cursor: pointer;
 		}
 		
 		// the traffic-light system - build a ribbon
@@ -193,7 +201,7 @@ table {
 		a {
 			margin: 6px 6px;
 			padding: 0;
-			display: block;
+			display: inline;
 		}
 	}
 	td.actions a {

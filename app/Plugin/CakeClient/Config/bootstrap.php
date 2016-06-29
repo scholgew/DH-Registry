@@ -2,6 +2,9 @@
 	// set some defaults
 	// layout: [bool]false (don't override app-layout), any other
 	Configure::write('Cakeclient.layout', 'Cakeclient.cakeclient');	// Cakeclient default layout (naming conflict with 'default')
+	// do not show the table menu in top_nav as long it's shown in the layout 
+	// [bool]false or array containing the menu variable names
+	Configure::write('Cakeclient.topNav', array('cakeclientConfigMenu'));
 	// may contain either string or array('element' => 'path/to/element','text' => 'footer string')
 	Configure::write('Cakeclient.footer', '&copy; 2016 <a href="http://hendrikschmeer.de" target="_blank">Hendrik Schmeer</a>');
 	

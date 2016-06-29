@@ -29,7 +29,7 @@ if(!empty($edit)) $colspan++;
 ?>
 	
 <div class="scroll_wrapper">
-	<table>
+	<table class="expandable">
 		<?php
 		echo $this->element('courses/table/header', array('fieldlist' => $fieldlist));
 		
