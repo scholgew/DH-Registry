@@ -34,7 +34,8 @@ class CakeclientAppController extends AppController {
 		parent::beforeFilter();
 		
 		// we're on a CRUD route - set all the CRUD relevant variables (actions, menu, view, fieldlist, relations)
-		if(!in_array(strtolower($this->request->params['action']), array('delete','fix_order'))) $this->Crud->setCRUDenv();
+		if(!in_array(strtolower($this->request->params['action']), array('delete','fix_order')))
+			$this->Crud->setCRUDviewVars();
 		
 		// maintain pagination settings
 		if($paginate = $this->Session->read('Paginate')) $this->paginate = $paginate;

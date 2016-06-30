@@ -34,6 +34,7 @@ class AppController extends Controller {
 		'DebugKit.Toolbar',
 		'Paginator',
 		'Session',
+		'Cakeclient.Crud',
 		'RequestHandler'
 	);
 	
@@ -72,6 +73,10 @@ class AppController extends Controller {
 		
 		if(strpos(APP, 'xampp') !== false AND Configure::read('debug') > 0) {
 			$this->Auth->allow();
+		}
+		
+		if($this->Auth->user()) {
+			$this->Crud->setMenu();
 		}
 	}
 	

@@ -33,9 +33,11 @@ class CrudComponent extends Component {
 	
 	function initialize(Controller $controller) {
 		$this->controller = $controller;
-		
-		// property contains the name of the virtual controller - which finally is not the one in effect ($this)!
 		$this->virtualController = $this->controller->name;
+	}
+	
+	
+	function setCRUDenv() {
 		// to make Crud views available outside the plugin, it requires setting an absolute path - also mention the file extension ".ctp"!
 		$this->viewPath = APP . 'Plugin' . DS . 'Cakeclient' . DS . 'View' . DS . 'Crud' . DS;
 		if(Configure::read('Cakeclient.layout')) $this->controller->layout = Configure::read('Cakeclient.layout');
@@ -71,6 +73,32 @@ class CrudComponent extends Component {
 			$this->controller->request->params['controller'] = $this->controller->request->params['table'];
 		}
 		
+		$this->defaultRedirect = array(
+			'action' => 'index',
+			'plugin' => Configure::read('Cakeclient.prefix')
+		);
+	}
+	
+	
+	
+	function setCRUDviewVars() {
+		$this->setCRUDenv();
+		
+		// recieve model and table names, as set in initialize
+		$modelName = $this->controller->modelClass;
+		$controllerName = $this->virtualController;
+		$actionName = $this->controller->params['action'];
+		$primaryKeyName = $this->controller->$modelName->primaryKey;
+		
+		$this->controller->set(compact('modelName', 'controllerName', 'primaryKeyName', 'actionName'));
+		
+		// set the view for CRUD actions automatically
+		$this->setView();
+		$this->setMenu();
+		$this->setFieldlist();
+		$this->setActions();
+		$this->setRelations();
+		
 		// the page name
 		$page_title = Configure::read('Cakeclient.page_title');
 		if(empty($page_title)) {
@@ -88,31 +116,6 @@ class CrudComponent extends Component {
 			$title_for_layout = ucfirst($this->controller->request->params['action']) . ' ' . Inflector::singularize($title_for_layout);
 		}
 		$this->controller->set(compact('page_title', 'title_for_layout'));
-		
-		$this->defaultRedirect = array(
-			'action' => 'index',
-			'plugin' => Configure::read('Cakeclient.prefix')
-		);
-	}
-	
-	
-	function setCRUDenv() {
-		// recieve model and table names, as set in initialize
-		$modelName = $this->controller->modelClass;
-		$controllerName = $this->virtualController;
-		$actionName = $this->controller->params['action'];
-		$primaryKeyName = $this->controller->$modelName->primaryKey;
-		
-		$this->controller->set(compact('modelName', 'controllerName', 'primaryKeyName', 'actionName'));
-		
-		// set the view for CRUD actions automatically
-		$this->setView();
-		$this->setMenu();
-		$this->setFieldlist();
-		$this->setActions();
-		$this->setRelations();
-		
-		$this->setLogin();
 	}
 	
 	
@@ -337,7 +340,7 @@ class CrudComponent extends Component {
 			}
 			
 			// enhance with index actionlist and countercheck with access lists
-			$menu = array();
+			$_menu = array();
 			foreach($tables as $k => $item) {
 				$cc_config = false;
 				$tablename = $item;
@@ -366,6 +369,7 @@ class CrudComponent extends Component {
 				}
 				
 				// get the table's index view's actions - skip all record related and forbidden actions
+				$actions = array();
 				$actions = $this->getActions('index', $tablename, $controlled);
 				foreach($actions as $ak => $action) {
 					$contextual = false;
@@ -389,26 +393,31 @@ class CrudComponent extends Component {
 				);
 				// url base is for the router only to create the correct path - has to be unset afterwards
 				$menuEntry['url']['base'] = false;
-				$normalizedPath = $this->controller->_normalizePath($menuEntry['url']);
+				if(method_exists($this->controller, '_normalizePath'))
+					$normalizedPath = $this->controller->_normalizePath($menuEntry['url']);
 				if(!empty($allowed) AND !isset($allowed[$normalizedPath])) {
 					unset($menuEntry['url']);
 				}else{
 					unset($menuEntry['url']['base']);
 				}
 				if(isset($menuEntry['url']) OR !empty($actions)) {
-					$menu[] = $menuEntry;
+					$_menu[] = $menuEntry;
 				}
 			}
+			$menu['list'] = $_menu;
+			$menu['label'] = ($cc_config)? 'Configuration' : 'Tables';
 			Cache::write($role . '_menu', $menu, 'cakeclient');
 		}
 		return $menu;
 	}
 	function setMenu() {
-		// get the default menu
 		$cakeclientMenu = $this->getMenu($controlled = true, null, $cc_config = false);
+		$cakeclientMenu = $this->getMenu($controlled = true, null, $cc_config = true);
 		
-		$this->controller->set('cakeclientMenu', $cakeclientMenu);
-		return $cakeclientMenu;
+		$this->controller->set(compact('cakeclientMenu', 'cakeclientConfigMenu'));
+		if(	!in_array('Cakeclient.Asset', $this->controller->helpers)
+		AND	!isset($this->controller->helpers['Cakeclient.Asset']))
+			$this->controller->helpers[] = 'Cakeclient.Asset';
 	}
 	
 	function getRelations($table = null, $from_model = false) {

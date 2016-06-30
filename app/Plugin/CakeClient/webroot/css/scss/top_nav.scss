@@ -4,10 +4,29 @@ body {
 
 #cakeclient_top_nav {
 	position: fixed;
-	height: 50px;
+	height: 30px;
 	width: 100%;
 	top: 0;
-	background-color: black;
 	z-index: 100;
+	background-color: black;
 	opacity: 0.8;
+	color: #fff;
+	padding: 10px;
+	
+	ul {
+		list-style: none;
+		display: none;
+	}
+	
+	> ul {
+		> li {
+			display: block;
+			float: left;
+			> ul {
+				> li {
+					
+				}
+			}
+		}
+	}
 }
