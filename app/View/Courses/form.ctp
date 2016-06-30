@@ -32,9 +32,6 @@ if($this->action == 'edit') {
 	));
 	?>
 	</p>
-	
-	<p>Courses are not displayed any more, if the "last-update" field's date is too old. </p>
-	<p>To mark this record as up-to-date, you have to submit this form, even if the information did not change.</p>
 	<?php
 }
 
@@ -60,6 +57,15 @@ if(!empty($errors)) {
 
 if($this->action == 'edit') {
 	echo $this->Form->input('id');
+	?>
+	<div class="input text">
+		<label for="CourseId">Course ID</label>
+		<?php echo $this->request->data['Course']['id']; ?>
+	</div>
+	<p>Courses are not displayed any more, if the "last-update" field's date is too old. </p>
+	<p>To mark this record as up-to-date, you have to submit this form, even if the information did not change.</p>
+	
+	<?php
 	if(!empty($admin)) {
 		echo '<p>Admin: leave this box unchecked to *NOT* update the "last-update" field when saving your revisions.</p>';
 		echo '<p>Owners of course records are emailed based on the date in the field "last-update" to keep their entries alive.</p>';
@@ -75,9 +81,9 @@ if($this->action == 'edit') {
 
 <p>
 	Validation has been set up to assist you entering valid content. <br />
-	However, sometimes technique plays tricks on us (especially with the URL fields). 
+	However, sometimes technology plays tricks on us (especially with the URL fields). 
 </p>
-<p>Please only skip validation if you know why!</p>
+<p>Please check this box if you have trouble to pass URLs you otherwise experience being valid.</p>
 
 <?php
 echo $this->Form->input('skip_validation', array(
@@ -99,7 +105,8 @@ if(!empty($admin)) {
 }
 
 echo $this->Form->input('active', array('label' => 'publish'));
-echo $this->Form->input('name', array('type' => 'textarea'));
+echo $this->Form->input('name');
+echo $this->Form->input('description', array('type' => 'textarea'));
 echo $this->Form->input('course_type_id', array('empty' => ' -- none -- '));
 echo $this->Form->input('language_id', array('empty' => ' -- none -- '));
 echo $this->Form->input('access_requirements');

@@ -10,44 +10,79 @@
 }
 
 @mixin taxonomySelector {
-	div.input.taxonomy.select {
-		
+	.input.taxonomy.select.dropdown_checklist {
+		@include clearfix;
 		> label {width: 208px;}
-		
-		div.checkbox {
-			padding: 0 5px 0 5px;
-			width: 276px;
-			@include clearfix;
-			
-			label {
-				margin-top: 5px;
-				margin-bottom: 5px;
-				width: auto;
+		.wrapper {	// keep the checklist from tilting under the label if the display section is growing
+			float: left;
+			.checklist_toggle {
+				cursor: pointer;
+				position: relative;
+				margin-bottom: 1px;
+				padding: 2px 4px 1px;
+				&:hover {
+					background-color: #eee;
+				}
+				.display {
+					display: inline-block;
+					width: 258px;
+					overflow: hidden;
+				}
+				// borrowed from getbootstrap.com for dropdown checklists
+				.caret {
+					border-left: 4px solid transparent;
+					border-right: 4px solid transparent;
+					border-top: 4px dashed;
+					display: inline-block;
+					height: 0;
+					margin-left: 2px;
+					vertical-align: middle;
+					width: 0;
+					position: absolute;
+					right: 4px;
+					top: 46%;
+				}
+			}
+			.checklist{
 				float: none;
-			}
-			input {
-				width: 10px;
-				margin-right: 10px;
-				margin-top: 5px;
-				margin-bottom: 5px;
-				float: none;
-			}
-			&.primary {
-				background-color: #fff;
-				padding: 0 25px 0 5px;
-				width: 256px;
-			}
-			&.secondary {
-				background-color: #ddd;
-				padding-left: 15px;
-				padding-right: 15px;
-				width: 256px;
-			}
-			&.tertiary {
-				background-color: #bbb;
-				padding-left: 25px;
-				padding-right: 5px;
-				width: 256px;
+				div.checkbox {
+					margin-left: 0;
+					padding: 0 5px 0 5px;
+					width: 276px;
+					@include clearfix;
+					
+					label {
+						margin-top: 5px;
+						margin-bottom: 5px;
+						width: auto;
+						float: none;
+					}
+					input[type=checkbox] {
+						width: 10px;
+						margin-right: 10px;
+						margin-top: 5px;
+						margin-bottom: 5px;
+						float: none;
+						clear: none;
+					}
+					&.primary {
+						background-color: #fff;
+						padding: 0 25px 0 5px;
+						width: 256px;
+					}
+					&.secondary {
+						background-color: #ddd;
+						padding-left: 15px;
+						padding-right: 15px;
+						width: 256px;
+					}
+					&.tertiary {
+						background-color: #bbb;
+						padding-left: 25px;
+						padding-right: 5px;
+						width: 256px;
+					}
+				}
 			}
 		}
 	}

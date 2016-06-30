@@ -211,14 +211,14 @@ class CoursesController extends AppController {
 			ksort($countries);
 			$users = $users + $countries;
 		}
-		$universities = $this->Course->Institution->find('list', array(
+		$institutions = $this->Course->Institution->find('list', array(
 			'contain' => array('Country'),
 			'fields' => array('Institution.id', 'Institution.name', 'Country.name'),
 			'conditions' => array('Institution.is_university' => 1)
 		));
-		ksort($universities);
+		ksort($institutions);
 		$languages = $this->Course->Language->find('list');
-		$types = $this->Course->CourseType->find('list', array(
+		$courseTypes = $this->Course->CourseType->find('list', array(
 			'contain' => array('CourseParentType'),
 			'fields' => array('CourseType.id','CourseType.name','CourseParentType.name')
 		));
@@ -227,9 +227,9 @@ class CoursesController extends AppController {
 		
 		$this->set(compact(
 			'users',
-			'universities',
+			'institutions',
 			'languages',
-			'types',
+			'courseTypes',
 			'admin'
 		));
 	}

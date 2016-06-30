@@ -57,101 +57,51 @@ form {
 	p {
 		font-size: 12px;
 	}
-	.checklist {
-		float: left;
-		margin-left: 0;
-		.checkbox {
-			float: left;
-			margin-left: 0;
-			clear: left;
-			margin-bottom: 0.5em;
-			input[type=checkbox] {
-				clear: none;
-				width: 20px;
-			}
-			label {
-				width: 198px;
-				margin: 0;
-				font-weight: normal;
-			}
-		}
-	}
-	.dropdown_checklist {
+	
+	
+	@include taxonomySelector;
+	// override the styles
+	.input.taxonomy.select.dropdown_checklist {
 		@include clearfix;
+		> label {width: 70px;}
 		.wrapper {	// keep the checklist from tilting under the label if the display section is growing
-			
-			.checklist{ float: none; }
+			float: none;
 			.checklist_toggle {
-				cursor: pointer;
-				position: relative;
-				margin-bottom: 1px;
 				margin-top: -3px;
 				padding: 0 4px 1px;
 				float: left;
-				&:hover {
-					background-color: #eee;
-				}
 				.display {
 					display: inline-block;
-					width: 131px;
-					overflow: hidden;
+					width: 130px;
 					font-size: 10px;
 					font-weight: normal;
 				}
-				// borrowed from getbootstrap.com for dropdown checklists
-				.caret {
-					border-left: 4px solid transparent;
-					border-right: 4px solid transparent;
-					border-top: 4px dashed;
-					display: inline-block;
-					height: 0;
-					margin-left: 2px;
-					vertical-align: middle;
-					width: 0;
-					position: absolute;
-					right: 4px;
-					top: 46%;
+			}
+			.checklist{
+				div.checkbox {
+					margin-bottom: 0.5em;
+					label {
+						width: 198px;
+						margin: 0;
+						margin-top: 4px;
+						float: left;
+						font-weight: normal;
+					}
+					input[type=checkbox] {
+						clear: none;
+						width: 20px;
+						float: left;
+					}
+					&.primary, &.secondary, &.tertiary {
+						width: 200px;
+						background-color: transparent;
+						label {
+							width: 170px;
+						}
+					}
 				}
 			}
 		}
 	}
-	p.taxonomy.selection {
-		font-size: 10px;
-		&:hover {
-			cursor: pointer;
-			text-decoration: underline;
-		}
-		
-		span {
-			font-weight: normal;
-		}
-	}
 	
-	div.taxonomy.keywords {
-		@include taxonomySelector;
-		
-		position: absolute;
-		z-index: 10000;
-		padding: 20px;
-		background-color: #fff;
-		width: 880px;
-		border: 3px solid #ccc;
-		border-radius: 10px;
-		/* experimental! (browser support?) column layout */
-		-webkit-column-count: 3; /* Chrome, Safari, Opera */
-		-moz-column-count: 3; /* Firefox */
-		column-count: 3;
-		
-		div.input.taxonomy.select {
-			label {margin-bottom: 15px;}
-			div.checkbox {
-				clear: both;
-				label, input {display: inline;}
-			}
-		}
-		button {
-			float: right;
-			margin: 10px 10px 0;
-		}
-	}
 }

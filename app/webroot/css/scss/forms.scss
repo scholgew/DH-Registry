@@ -136,55 +136,6 @@ form {
 		background-color: #f0f0aa;
 	}
 
-	
-	
-	
-	.checklist {
-		float: left;
-		.checkbox {
-			margin-left: 0;
-			input[type=checkbox] {
-				clear: none;
-			}
-		}
-	}
-	.dropdown_checklist {
-		@include clearfix;
-		.wrapper {	// keep the checklist from tilting under the label if the display section is growing
-			float: left;
-			.checklist{ float: none; }
-			.checklist_toggle {
-				cursor: pointer;
-				position: relative;
-				margin-bottom: 1px;
-				padding: 2px 4px 1px;
-				&:hover {
-					background-color: #eee;
-				}
-				.display {
-					display: inline-block;
-					width: 258px;
-					overflow: hidden;
-				}
-				// borrowed from getbootstrap.com for dropdown checklists
-				.caret {
-					border-left: 4px solid transparent;
-					border-right: 4px solid transparent;
-					border-top: 4px dashed;
-					display: inline-block;
-					height: 0;
-					margin-left: 2px;
-					vertical-align: middle;
-					width: 0;
-					position: absolute;
-					right: 4px;
-					top: 46%;
-				}
-			}
-		}
-	}
-	
-	
 	option {
 		padding: 0 3px;
 	}
@@ -209,7 +160,7 @@ form {
 	}
 	
 	
-	/* Radio Buttons, Checkboxen / Radio- & Checkbox-Selects*/
+	/* Radio Buttons, Checkboxen */
 	
 	/* Anzeige linksbündig, OHNE DIV */
 	input[type=radio], input[type=checkbox] {
