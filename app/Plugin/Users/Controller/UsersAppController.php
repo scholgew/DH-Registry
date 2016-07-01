@@ -20,7 +20,9 @@ App::uses('AppController', 'Controller');
 
 class UsersAppController extends AppController {
 	
-	
+	public $components = array(
+		'Users.DefaultAuth'	// you need to include this component also on app-level
+	);
 	
 	protected function _getMailInstance() {
 		App::uses('CakeEmail', 'Network/Email');
@@ -50,10 +52,6 @@ class UsersAppController extends AppController {
 		}
 	}
 	
-	
-	protected function _isAdmin() {
-		return (bool)$this->Auth->user('is_admin');
-	}
 	
 	
 	

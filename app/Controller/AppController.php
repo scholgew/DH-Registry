@@ -78,6 +78,7 @@ class AppController extends Controller {
 		if($this->Auth->user()) {
 			$this->Crud->setMenu();
 		}
+		
 	}
 	
 	

@@ -113,7 +113,7 @@ class UsersController extends UsersAppController {
 	
 	
 	public function dashboard() {
-		if($this->_isAdmin()) {
+		if($this->DefaultAuth->isAdmin()) {
 			// admin dashboard
 			$inactive = $this->AppUser->find('all', array(
 				'conditions' => array($this->modelClass . '.active' => 0)
@@ -133,7 +133,7 @@ class UsersController extends UsersAppController {
 		if(!empty($auth_user)) {
 			$user[$this->modelClass] = $auth_user;
 		}
-		if(!empty($id) AND $this->_isAdmin()) {
+		if(!empty($id) AND $this->DefaultAuth->isAdmin()) {
 			$user = $this->{$this->modelClass}->find('first', array(
 				'contain' => array(),
 				'conditions' => array($this->modelClass . '.id' => $id)
@@ -461,7 +461,7 @@ class UsersController extends UsersAppController {
 	
 	public function approve($id = null) {
 		$proceed = false;
-		if($this->_isAdmin() AND !empty($id) AND ctype_digit($id)) {
+		if($this->DefaultAuth->isAdmin() AND !empty($id) AND ctype_digit($id)) {
 			$proceed = true;
 		}else{
 			$user = $this->{$this->modelClass}->find('first', array(
@@ -488,7 +488,7 @@ class UsersController extends UsersAppController {
 			$this->Session->setFlash('The account has been approved successfully.');
 		}
 		
-		if($this->_isAdmin()) $this->redirect(array(
+		if($this->DefaultAuth->isAdmin()) $this->redirect(array(
 			'plugin' => null,
 			'controller' => 'users',
 			'action' => 'dashboard'
@@ -498,7 +498,7 @@ class UsersController extends UsersAppController {
 	
 	
 	public function delete($id = null) {
-		if($this->_isAdmin() AND !empty($id)) {
+		if($this->DefaultAuth->isAdmin() AND !empty($id)) {
 			$this->AppUser->delete($id, $cascade = false);
 		}
 		$this->redirect(array(

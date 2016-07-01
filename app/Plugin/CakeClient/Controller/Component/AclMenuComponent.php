@@ -3,7 +3,7 @@ class AclMenuComponent extends Component {
 	
 	var $model = null;
 	
-	var $modelName = 'Menu';
+	var $modelName = 'CcConfigMenu';
 	
 	var $controller = null;
 	
@@ -11,7 +11,9 @@ class AclMenuComponent extends Component {
 	var $userLevel = null;
 	
 	// the Access Controling Field
-	var $acf = 'role_id';
+	var $acf = 'user_role_id';
+	
+	public $aro_model = 'UserRole';
 	
 	var $contextPath = null;
 	
@@ -19,6 +21,53 @@ class AclMenuComponent extends Component {
 	var $normalizedPath = null;
 	
 	
+	/*
+	* don't do anything about authorisation at this stage, 
+	* the component might be used to generate a menu alone
+	*/
+	public function initialize(Controller $controller) {
+		$this->controller = $controller;
+		if(!isset($controller->{$this->modelName}))
+			$controller->loadModel($this->modelName);
+		$this->model = $controller->{$this->modelName};
+	}
+	
+	
+	/*
+	* requires: DefaAuthComponent (includes AuthComponent)
+	* doing ACL authorisation in this method
+	*/
+	public function check($aro_id = null, $aro_model = null) {
+		if(empty($aro_id) AND isset($this->controller->Auth))
+			$aro_id = $this->controller->Auth->user($this->acf);
+		
+		// give way for the admin
+		if(	isset($this->controller->DefaultAuth)
+		AND	$this->controller->DefaultAuth->isAdmin()
+		) {
+			return true;
+		}else{
+			// now authorize against the list! (if any)
+			$acl = $this->model->find('first', array(
+				'contain' => array(
+					'CcConfigTable' => array(
+						'CcConfigAction'
+					)
+				),
+				'conditions' => array(
+					'foreign_key' => $aro_id,
+					'model' => $this->aro_model
+				)
+			));
+			if(!empty($acl)) {
+				
+			}
+		}
+		
+		return false;
+	}
+	
+	/*
 	function initialize(&$controller) {
 		$this->controller = $controller;
 		foreach($this->settings as $key => $value) {
@@ -63,6 +112,7 @@ class AclMenuComponent extends Component {
 			}
 		}
 	}
+	*/
 	
 	function authorizePath($path = null) {
 		if(empty($path)) {
@@ -174,7 +224,7 @@ class AclMenuComponent extends Component {
 					$this->controller->allowedActions = array();
 					if(isset($this->controller->Auth)) {
 						// make all actions public if we're in debug mode and debugging admin while not logged in
-						$this->controller->Auth->allowedActions = array('*');
+						$this->controller->Auth->allowedActions = array();
 					}
 					return true;
 			}

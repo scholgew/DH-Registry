@@ -24,14 +24,33 @@ class CakeclientAppController extends AppController {
 	
 	
 	
-	/**
-	* These callbacks check if a requested CRUD method exists in the applicational controller. 
-	* If yes, the controller becomes instantiated and the method invoked instead of the generic function. 
-	* The resulting viewVars are merged into the actual request's viewVars. 
-	*/
+	
 	function beforeFilter() {
 		// check with main application AppController, if we got permission to proceed
 		parent::beforeFilter();
+		// require Auth or 
+		if(Configure::read('Cakeclient.AclChecking')) {
+			if(!isset($this->Auth)) {
+				$this->Auth = $this->Components->load(Configure::read('Cakeclient.AuthComponent'));
+				// if not loaded before beforeFilter, we need to initialize manually
+				$this->Auth->initialize($this);
+				debug('foo');
+			}
+			// yet we do not have permission from the app-level controller
+			if(!$this->Auth->isAuthorized()) {
+				if(!isset($this->AclMenu)) {
+					$this->AclMenu = $this->Components->load('Cakeclient.AclMenu');
+					// if not loaded before beforeFilter, we need to initialize manually
+					$this->AclMenu->initialize($this);
+				}
+				if($this->AclMenu->check()) {
+					// allow the requested action
+					$this->Auth->allow();
+				}
+				debug($this->Auth->isAuthorized());exit;
+			
+			}
+		}
 		
 		// we're on a CRUD route - set all the CRUD relevant variables (actions, menu, view, fieldlist, relations)
 		if(!in_array(strtolower($this->request->params['action']), array('delete','fix_order')))
@@ -88,6 +107,7 @@ class CakeclientAppController extends AppController {
 	* overridden in the application's AppController. 
 	*/
 	function _normalizePath($action = array()) {
+		$return = array();
 		if($this->_appControllerOverride('normalizePath', $return, $action)) return $return;
 		
 		$normalizedPath = '';

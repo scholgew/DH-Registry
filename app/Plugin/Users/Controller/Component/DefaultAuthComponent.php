@@ -7,6 +7,8 @@ class DefaultAuthComponent extends Component {
 	
 	public $settings = array();
 	
+	private $controller = null;
+	
 	
 	public function __construct(ComponentCollection $collection, $settings = array()) {
 		parent::__construct($collection, $settings);
@@ -14,7 +16,7 @@ class DefaultAuthComponent extends Component {
 		$this->settings = Hash::merge($this->_defaults(), $settings);
 	}
 	
-	protected function _defaults() {
+	private function _defaults() {
 		return array(
 			'Auth' => array(
 				'priority' => 2,
@@ -46,6 +48,7 @@ class DefaultAuthComponent extends Component {
 	
 	
 	public function initialize(Controller $controller) {
+		$this->controller = $controller;
 		foreach($this->settings as $component => $settings) {
 			$controller->components[$component] = $settings;
 			$controller->{$component} = $controller->Components->load($component, $settings);
@@ -53,8 +56,12 @@ class DefaultAuthComponent extends Component {
 		}
 		$controller->set('auth_user', $controller->Auth->user());
 		if (Configure::read('Users.disableDefaultAuth') === true) {
-			$controller->Auth->allow('*');
+			$controller->Auth->allow();
 		}
+	}
+	
+	public function isAdmin() {
+		return ((bool)$this->controller->Auth->user('is_admin') || (int)$this->controller->Auth->user('group_id') === 1);
 	}
 	
 }

@@ -8,6 +8,9 @@
 	// may contain either string or array('element' => 'path/to/element','text' => 'footer string')
 	Configure::write('Cakeclient.footer', '&copy; 2016 <a href="http://hendrikschmeer.de" target="_blank">Hendrik Schmeer</a>');
 	
+	Configure::write('Cakeclient.AclChecking', true);
+	Configure::read('Cakeclient.AuthComponent', 'Auth');
+	
 	
 	// make the plugin controllers & models available to the application
 	App::build(array('Controller' => App::path('Controller', 'Cakeclient')));

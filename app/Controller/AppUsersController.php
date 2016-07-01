@@ -95,7 +95,7 @@ class AppUsersController extends UsersController {
 		));
 		$this->set(compact('courses'));
 		
-		if($this->_isAdmin()) {
+		if($this->DefaultAuth->isAdmin()) {
 			// admin dashboard
 			$unapproved = $this->AppUser->find('all', array(
 				'contain' => array('Institution'),
@@ -129,7 +129,7 @@ class AppUsersController extends UsersController {
 	
 	// technically, this is a admin-triggered password reset - thus the email template reads somewhat different
 	public function invite($param = null) {
-		if(!$this->_isAdmin()) $this->redirect('/users/dashboard');
+		if(!$this->DefaultAuth->isAdmin()) $this->redirect('/users/dashboard');
 		
 		$mailOpts = array(
 			'template' => 'invite_user',
