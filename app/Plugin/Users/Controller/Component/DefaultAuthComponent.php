@@ -40,6 +40,9 @@ class DefaultAuthComponent extends Component {
 						)
 					)
 				),
+				'authorize' => array(
+					'Users.AllowedActions'
+				),
 				'loginRedirect' => array('action' => 'dashboard','controller' => 'users','plugin' => 'users'),
 				'logoutRedirect' => '/'
 			)
@@ -49,11 +52,13 @@ class DefaultAuthComponent extends Component {
 	
 	public function initialize(Controller $controller) {
 		$this->controller = $controller;
+		// load all components
 		foreach($this->settings as $component => $settings) {
 			$controller->components[$component] = $settings;
 			$controller->{$component} = $controller->Components->load($component, $settings);
 			$controller->{$component}->initialize($controller);
 		}
+		
 		$controller->set('auth_user', $controller->Auth->user());
 		if (Configure::read('Users.disableDefaultAuth') === true) {
 			$controller->Auth->allow();

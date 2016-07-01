@@ -34,7 +34,6 @@ class CakeclientAppController extends AppController {
 				$this->Auth = $this->Components->load(Configure::read('Cakeclient.AuthComponent'));
 				// if not loaded before beforeFilter, we need to initialize manually
 				$this->Auth->initialize($this);
-				debug('foo');
 			}
 			// yet we do not have permission from the app-level controller
 			if(!$this->Auth->isAuthorized()) {
@@ -47,7 +46,6 @@ class CakeclientAppController extends AppController {
 					// allow the requested action
 					$this->Auth->allow();
 				}
-				debug($this->Auth->isAuthorized());exit;
 			
 			}
 		}
