@@ -31,10 +31,11 @@ class AclMenuComponent extends Component {
 	*/
 	public function initialize(Controller $controller) {
 		$this->controller = $controller;
+		
 		if(!isset($controller->{$this->menuModelName}))
 			$controller->loadModel($this->menuModelName);
-		
 		$this->menuModel = $controller->{$this->menuModelName};
+		
 		$this->request = $controller->request;
 		
 		if(isset($this->controller->Auth))
@@ -48,7 +49,12 @@ class AclMenuComponent extends Component {
 	*/
 	public function check($aro_id = null, $aro_model = null) {
 		if(empty($aro_id)) $aro_id = $this->_aro_id;
-		
+		$checkPath = str_replace(
+			$this->request->base, '',
+			Router::url($this->controller->request->params)
+		);
+		debug($checkPath);
+		//debug($this->controller->request);
 		// give way for the admin
 		if(	isset($this->controller->DefaultAuth)
 		AND	$this->controller->DefaultAuth->isAdmin()
@@ -67,16 +73,28 @@ class AclMenuComponent extends Component {
 					'foreign_key' => $aro_id,
 					'model' => $this->aro_model
 				)
-			));
+			));debug($aro_id);
 			if(!empty($acl)) {
+				debug($acl);
 				foreach($acl[$this->tableModelName] as $t => $table) {
 					if($table['name'] == $this->request->params['controller']) {
 						if(!empty($table['allow_all'])) return true;
 						
 						if(!empty($entry[$this->actionModelName])) {
 							foreach($entry[$this->actionModelName] as $a => $action)
-								if($action['name'] == $this->request->params['action'])
-									return true;
+								if($action['name'] == $this->request->params['action']) {
+									if(!empty($action['url'])) {
+										/* Can't imagine a situation where 
+										* additional parameters are allowed, 
+										* but not the action without parameter...
+										* AS LONG THE ACTION IS MENTIONED IN THE PATH!!!
+										* But we might have a prefixed URL, like /admin routing
+										*/
+										if(strpos($checkPath, $action['url']) === 0) return true;
+									}else{
+										return true;
+									}
+								}
 							break;
 						}
 					}
@@ -88,8 +106,8 @@ class AclMenuComponent extends Component {
 	}
 	
 	
-	function getMenu($controlled = true, $dataSource = null, $cc_config = false) {
-		if(empty($dataSource)) $dataSource = 'default';
+	public function getMenu($controlled = true, $dataSource = null, $cc_config = false) {
+		
 		
 		$menuName = $this->acf.'_'.$this->_aro_id.'_menu';
 		$menu = Cache::read($menuName, 'cakeclient');
@@ -97,38 +115,16 @@ class AclMenuComponent extends Component {
 			
 			// #ToDo: try reading from the cc_config_tables table before
 			
-			if(empty($tables)) {
-				// get all table names - that would do for linking all index pages
-				App::uses('ConnectionManager', 'Model');
-				$db = ConnectionManager::getDataSource($dataSource);
-				$tables = $db->listSources();
-			}
+			if(empty($tables)) $tables = $this->getDatabaseTables($dataSource, $cc_config = false);
 			
 			// enhance with index actionlist and countercheck with access lists
 			$_menu = array();
 			foreach($tables as $k => $item) {
 				$cc_config = false;
-				$tablename = $item;
-				if(is_array($tablename)) {
-					$tablename = $item['name'];
-				}
-				// check for the plugin's internal configuration tables
-				if(	(strpos($tablename, $this->configPrefix) !== false AND !$cc_config)
-				OR	(strpos($tablename, $this->configPrefix) === false AND $cc_config)	
-				) {
-					continue;
-				}
+				$tablename = $item['name'];
 				
-				$title = $tablename;
-				if($cc_config) $title = str_replace($this->configPrefix, '', $title);
-				$title = Inflector::humanize($tittle);
-				if(is_array($item) AND !empty($item['label'])) $title = $item['label'];
-				
-				// get the allowed actions
-				$allowed = array();
-				if($controlled AND !empty($this->controller->Auth->allowedActions)) {
-					$allowed = $this->controller->Auth->allowedActions;
-				}
+				$label = $this->makeTableLabel($tablename);
+				if(!empty($item['label'])) $label = $item['label'];
 				
 				// get the table's index view's actions - skip all record related and forbidden actions
 				$actions = array();
@@ -145,7 +141,7 @@ class AclMenuComponent extends Component {
 				}
 				
 				$menuEntry = array(
-					'title' => $title,
+					'label' => $label,
 					'url' => array(
 						'action' => 'index',
 						'controller' => $tablename,
@@ -153,15 +149,8 @@ class AclMenuComponent extends Component {
 					),
 					'submenu' => $actions
 				);
-				// url base is for the router only to create the correct path - has to be unset afterwards
-				$menuEntry['url']['base'] = false;
-				if(method_exists($this->controller, '_normalizePath'))
-					$normalizedPath = $this->controller->_normalizePath($menuEntry['url']);
-				if(!empty($allowed) AND !isset($allowed[$normalizedPath])) {
-					unset($menuEntry['url']);
-				}else{
-					unset($menuEntry['url']['base']);
-				}
+				
+				// build the output list
 				if(isset($menuEntry['url']) OR !empty($actions)) {
 					$_menu[] = $menuEntry;
 				}
@@ -174,18 +163,53 @@ class AclMenuComponent extends Component {
 	}
 	
 	
-	function setMenu($role_id = null) {
+	public function setMenu($role_id = null) {
 		$cakeclientMenu = $this->getMenu($controlled = true, null, $cc_config = false);
 		$cakeclientConfigMenu = $this->getMenu($controlled = true, null, $cc_config = true);
 		
+		if(!$this->request->is('requested') AND Configure::read('Cakeclient.topNav')) {
+			// load the AssetHelper which appends the top_nav Menu to whichever layout
+			if(	!in_array('Cakeclient.Asset', $this->controller->helpers)
+			AND	!isset($this->controller->helpers['Cakeclient.Asset']))
+				$this->controller->helpers[] = 'Cakeclient.Asset';
+		}
+		
 		$this->controller->set(compact('cakeclientMenu', 'cakeclientConfigMenu'));
-		if(	!in_array('Cakeclient.Asset', $this->controller->helpers)
-		AND	!isset($this->controller->helpers['Cakeclient.Asset']))
-			$this->controller->helpers[] = 'Cakeclient.Asset';
 	}
 	
 	
-	function getActions($action = null, $table = null, $controlled = true) {
+	public function getDatabaseTables($dataSource = null, $cc_config = false) {
+		if(empty($dataSource)) $dataSource = 'default';
+		App::uses('ConnectionManager', 'Model');
+		$db = ConnectionManager::getDataSource($dataSource);
+		$tables = $db->listSources();
+		if(!empty($tables)) foreach($tables as $k => &$item) {
+			// check for the plugin's internal configuration tables
+			if(	(strpos($item, $this->configPrefix) !== false AND !$cc_config)
+			OR	(strpos($item, $this->configPrefix) === false AND $cc_config)	
+			) {
+				unset($tables[$k]);
+				continue; 
+			}
+			$label = $this->makeTableLabel($item, $cc_config = false);
+			$item = array(
+				'name' => $item,
+				'label' => $label
+			);
+		}
+		
+		return $tables;
+	}
+	
+	
+	public function makeTableLabel($tablename = null, $cc_config = false) {
+		$label = $tablename;
+		if($cc_config) $label = str_replace($this->configPrefix, '', $label);
+		return $label = Inflector::humanize($label);
+	}
+	
+	
+	public function getActions($action = null, $table = null, $controlled = true) {
 		if(empty($action))
 			$action = $this->controller->request->params['action'];
 		if(empty($table))
@@ -259,24 +283,24 @@ class AclMenuComponent extends Component {
 				if(is_array($action)) {
 					if(!$action['show']) continue;
 					if(!empty($action['label'])) {
-						$title = $action['label'];
+						$label = $action['label'];
 					}else{
-						$title = Inflector::humanize(Inflector::underscore($action['name']));
+						$label = Inflector::humanize(Inflector::underscore($action['name']));
 					}
 					$actionName = $action['name'];
 					if(!empty($action['id'])) $action_id = $action['id'];
 				}else{
 					// mangling the default lists
-					$title = Inflector::humanize(Inflector::underscore($action));
+					$label = Inflector::humanize(Inflector::underscore($action));
 					switch($action) {
-						case 'add': $title .= ' '.$modelName; break;
-						case 'index': $title = 'List '.$this->virtualController; break;
+						case 'add': $label .= ' '.$modelName; break;
+						case 'index': $label = 'List '.$this->virtualController; break;
 					}
 					$actionName = $action;
 				}
 				// set the route prefix to be the plugin element of the url, as this will appear in front of it all, and not named "plugin"
 				$_action = array(
-					'title' => $title,
+					'label' => $label,
 					'action_id' => $action_id,
 					'url' => array(
 						'action' => $actionName,

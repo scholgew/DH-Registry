@@ -29,18 +29,16 @@ class CrudComponent extends Component {
 	public $referer = null;
 	
 	
+	protected $onCrud = false;	// indicate wether the special behavior is active or not
+	
 	protected $modelName = null;
 	
 	
 	function initialize(Controller $controller) {
 		$this->controller = $controller;
 		$this->virtualController = $this->controller->name;
-		// prerequisite for AclMenuComponent to work properly when on CRUD-route
-		$this->_restoreRequest();
-	}
-	
-	
-	protected function _restoreRequest() {
+		
+		// we're on a special route (#ToDo: could that be checked against cakeclient.route?)
 		if(!empty($this->controller->request->params['table'])) {
 			// set the table name, as it is passed via the router array
 			$this->virtualController = Inflector::camelize($this->controller->request->params['table']);
@@ -52,45 +50,60 @@ class CrudComponent extends Component {
 			if(!empty($tableConfigModelClass)) {
 				$this->modelName = $tableConfigModelClass;
 			}
+			$this->controller->uses = array($this->modelName);
+			$this->controller->modelClass = $this->modelName;	// this does the trick!
+			
+			// map the special crud parameters to their respective keys - requests without those won't arrive in here!
 			$this->controller->request->params['controller'] = $this->controller->request->params['table'];
+			if(!empty($this->controller->request->params['crud'])) {
+				$this->controller->request->params['action'] = $this->controller->request->params['crud'];
+			}
+			
+			// work out the route we're at - if Cake's routing prefixes are in use, 
+			// the plugin routes will not set $prefix => true in router array (params), 
+			// to disable prefix routing inside the plugin, 
+			// so the current route is set via a special router key: "cakeclient.route"
+			$prefix = null;
+			$routingPrefixes = Configure::read('Routing.prefixes');
+			if(!empty($this->controller->request->params['cakeclient.route'])) {
+				if(empty($routingPrefixes) OR !empty($this->controller->request->params['crud'])) {
+					$prefix = $this->controller->request->params['cakeclient.route'];
+				}
+			}
+			// make the current prefix alias available - used in the CRUD views
+			Configure::write('Cakeclient.prefix', $prefix);
+			$this->controller->request->params['plugin'] = $prefix;
+			
+			// restore the request - prerequisite for AclMenuComponent to work properly when on CRUD-route
+			unset($this->controller->request->params['table']);
+			unset($this->controller->request->params['crud']);
+			unset($this->controller->request->params['cakeclient.route']);
+			
+			$this->onCrud = true;
+		}
+	}
+	
+	
+	public function loadAclMenu() {
+		if(!isset($this->controller->AclMenu)) {
+			$this->controller->AclMenu = $this->controller->Components->load('Cakeclient.AclMenu');
+			// if not loaded before beforeFilter, we need to initialize manually
+			$this->controller->AclMenu->initialize($this->controller);
 		}
 	}
 	
 	
 	function setCRUDenv() {
-		// to make Crud views available outside the plugin, it requires setting an absolute path - also mention the file extension ".ctp"!
-		$this->viewPath = APP . 'Plugin' . DS . 'Cakeclient' . DS . 'View' . DS . 'Crud' . DS;
-		if(Configure::read('Cakeclient.layout')) $this->controller->layout = Configure::read('Cakeclient.layout');
-		
-		// map the special crud parameter to the action key - requests without the crud key won't arrive in here! (routes)
-		if(!empty($this->controller->request->params['crud'])) {
-			$this->controller->request->params['action'] = $this->controller->request->params['crud'];
+		if($this->onCrud) {
+			// to make Crud views available outside the plugin, it requires setting an absolute path
+			// one also needs to mention the file extension ".ctp"!
+			$this->viewPath = APP . 'Plugin' . DS . 'Cakeclient' . DS . 'View' . DS . 'Crud' . DS;
+			if(Configure::read('Cakeclient.layout')) $this->controller->layout = Configure::read('Cakeclient.layout');
+			$this->defaultRedirect = array(
+				'action' => 'index',
+				'plugin' => Configure::read('Cakeclient.prefix')
+			);
 		}
-		
-		// work out the route we're at - if Cake's routing prefixes are in use, the plugin's routes will not set $prefix => true in router array (params), to disable prefix routing inside the plugin
-		// so the current route is set via a special router key: "cakeclient.route"
-		$prefix = null;
-		$routingPrefixes = Configure::read('Routing.prefixes');
-		if(!empty($this->controller->request->params['cakeclient.route'])) {
-			if(empty($routingPrefixes) OR !empty($this->controller->request->params['crud'])) {
-				$prefix = $this->controller->request->params['cakeclient.route'];
-			}
-		}
-		// make the current prefix alias available - used in the CRUD views
-		Configure::write('Cakeclient.prefix', $prefix);
-		$this->controller->request->params['plugin'] = $prefix;
-		
-		
-		if(!empty($this->controller->request->params['table'])) {
-			$this->controller->uses = array($this->modelName);
-			$this->controller->modelClass = $this->modelName;	// this does the trick!
-			$this->controller->request->params['controller'] = $this->controller->request->params['table'];
-		}
-		
-		$this->defaultRedirect = array(
-			'action' => 'index',
-			'plugin' => Configure::read('Cakeclient.prefix')
-		);
 	}
 	
 	
@@ -109,9 +122,9 @@ class CrudComponent extends Component {
 		// set the view for CRUD actions automatically
 		$this->setView();
 		$this->setFieldlist();
-		//$this->setMenu();
-		//$this->setActions();
 		$this->setRelations();
+		$this->controller->AclMenu->setMenu();
+		$this->controller->AclMenu->setActions();
 		
 		// the page name
 		$page_title = Configure::read('Cakeclient.page_title');
@@ -138,9 +151,6 @@ class CrudComponent extends Component {
 		if(empty($table)) {
 			// get the table name to use
 			$table = $this->controller->request->params['controller'];
-			if(!empty($this->controller->request->params['table'])) {
-				$table = $this->controller->request->params['table'];
-			}
 		}
 		return $table;
 	}
@@ -344,102 +354,7 @@ class CrudComponent extends Component {
 	}*/
 	
 	
-	/*
-	function getMenu($controlled = true, $dataSource = null, $cc_config = false) {
-		if(empty($dataSource)) $dataSource = 'default';
-		
-		$role = 'admin';
-		$menu = Cache::read($role . '_menu', 'cakeclient');
-		if(empty($menu)) {
-			
-			if(!$tables = Configure::read('Cakeclient.tables')) {
-				// get all table names - that would do for linking all index pages
-				App::uses('ConnectionManager', 'Model');
-				$db = ConnectionManager::getDataSource($dataSource);
-				$tables = $db->listSources();
-			}
-			
-			// enhance with index actionlist and countercheck with access lists
-			$_menu = array();
-			foreach($tables as $k => $item) {
-				$cc_config = false;
-				$tablename = $item;
-				if(is_array($tablename)) {
-					$tablename = $item['name'];
-				}
-				// check for the plugin's internal configuration tables
-				if(	(strpos($tablename, 'cc_config_') !== false AND !$cc_config)
-				OR	(strpos($tablename, 'cc_config_') === false AND $cc_config)	
-				) {
-					continue;
-				}
-				
-				$title = Inflector::humanize($tablename);
-				if(is_array($item) AND !empty($item['label'])) {
-					$title = $item['label'];
-				}
-				
-				// get the allowed actions
-				$allowed = array();
-				// we do not read the table's controller - for simplicity, go for the AppController only
-				// best would be, to set a list of accessible actions dynamically per user/group from AppController or AuthComponent as some kind of ACL
-				// this is what AclMenuComponent in plugin UtilClasses does!
-				if($controlled AND !empty($this->controller->Auth->allowedActions)) {
-					$allowed = $this->controller->Auth->allowedActions;
-				}
-				
-				// get the table's index view's actions - skip all record related and forbidden actions
-				$actions = array();
-				$actions = $this->getActions('index', $tablename, $controlled);
-				foreach($actions as $ak => $action) {
-					$contextual = false;
-					if(isset($action['contextual'])) {
-						$contextual = (bool) $action['contextual'];
-					}
-					unset($action['contextual']);
-					if($contextual) {
-						unset($actions[$ak]);
-					}
-				}
-				
-				$menuEntry = array(
-					'title' => $title,
-					'url' => array(
-						'action' => 'index',
-						'controller' => $tablename,
-						'plugin' => Configure::read('Cakeclient.prefix')
-					),
-					'submenu' => $actions
-				);
-				// url base is for the router only to create the correct path - has to be unset afterwards
-				$menuEntry['url']['base'] = false;
-				if(method_exists($this->controller, '_normalizePath'))
-					$normalizedPath = $this->controller->_normalizePath($menuEntry['url']);
-				if(!empty($allowed) AND !isset($allowed[$normalizedPath])) {
-					unset($menuEntry['url']);
-				}else{
-					unset($menuEntry['url']['base']);
-				}
-				if(isset($menuEntry['url']) OR !empty($actions)) {
-					$_menu[] = $menuEntry;
-				}
-			}
-			$menu['list'] = $_menu;
-			$menu['label'] = ($cc_config)? 'Configuration' : 'Tables';
-			Cache::write($role . '_menu', $menu, 'cakeclient');
-		}
-		return $menu;
-	}
-	function setMenu() {
-		$cakeclientMenu = $this->getMenu($controlled = true, null, $cc_config = false);
-		$cakeclientConfigMenu = $this->getMenu($controlled = true, null, $cc_config = true);
-		
-		$this->controller->set(compact('cakeclientMenu', 'cakeclientConfigMenu'));
-		if(	!in_array('Cakeclient.Asset', $this->controller->helpers)
-		AND	!isset($this->controller->helpers['Cakeclient.Asset']))
-			$this->controller->helpers[] = 'Cakeclient.Asset';
-	}
-	*/
+	
 	
 	function getRelations($table = null, $from_model = false) {
 		// params-controller will contain the virtual controller name - which in turn is the table we are looking at!
@@ -762,7 +677,7 @@ class CrudComponent extends Component {
 				break;
 		}
 		// don't set a view if non-CRUD
-		if(!empty($view) AND !empty($this->controller->request->params['table'])) {
+		if(!empty($view) AND !empty($this->controller->request->params['controller'])) {
 			// check for an override view
 			if(	is_file(APP . 'View' . DS . $this->virtualController . DS . $view . '.ctp')
 			OR	is_file(APP . 'View' . DS . $this->virtualController . DS . $action . '.ctp')

@@ -75,12 +75,14 @@ class AppController extends Controller {
 		if(strpos(APP, 'xampp') !== false AND Configure::read('debug') > 0) {
 			$this->Auth->allow();
 			//$this->DefaultAuth->is_admin = true;
+			debug('allowed by debug settings');
 		}
 		
 		if($this->Auth->user()) {
+			// dynamically load the AclMenu
+			$this->Crud->loadAclMenu();
 			$this->AclMenu->setMenu();
 		}
-		
 	}
 	
 	

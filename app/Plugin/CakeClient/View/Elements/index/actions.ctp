@@ -21,11 +21,11 @@
 				if(!empty($record_id)) {
 					$action['url'][] = $record_id;
 				}
-				$options = array('class' => strtolower($action['title']));
+				$options = array('class' => strtolower($action['label']));
 				if(strtolower($action['url']['action']) == 'delete') {
 					$options['confirm']  = 'Are you sure to delete ' . $modelName . ' with ID ' . $record_id . '?';
 				}
-				echo $this->Html->link($action['title'], $action['url'], $options);
+				echo $this->Html->link($action['label'], $action['url'], $options);
 			}
 		}
 	}

@@ -34,12 +34,12 @@
 								$action['url'][] = $record_id;
 							}
 						}
-						$options = array('class' => strtolower($action['title']));
-						if(strtolower($action['title']) == 'delete') {
+						$options = array('class' => strtolower($action['label']));
+						if(strtolower($action['label']) == 'delete') {
 							$options['confirm']  = 'Are you sure to delete ' . $modelName . ' with ID ' . $action['url'][0] . '?';
 						}
 						echo '<li>';
-							echo $this->Html->link($action['title'], $action['url'], $options);
+							echo $this->Html->link($action['label'], $action['url'], $options);
 						echo '</li>';
 					}
 				echo '</ul>';

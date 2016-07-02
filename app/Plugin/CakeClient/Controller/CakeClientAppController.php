@@ -1,18 +1,19 @@
 <?php
 class CakeclientAppController extends AppController {
 	
-	var $components = array(
+	public $components = array(
 		'Cakeclient.Crud',
 		'Session',
-		'Paginator'
+		'Paginator',
+		//'Cakeclient.AclMenu'	// dynamically loaded on demand
 	);
 	
-	var $helpers = array(
+	public $helpers = array(
 		'Cakeclient.Display',
-		'Cakeclient.Asset'
+		//'Cakeclient.Asset'	// dynamically loaded on AclMenu->setMenu()
 	);
 	
-	var $overrideController = null;
+	public $overrideController = null;
 	
 	// paging defaults
 	public $paginate = array(
@@ -25,10 +26,15 @@ class CakeclientAppController extends AppController {
 	
 	
 	
+	
 	function beforeFilter() {
 		// check with main application AppController, if we got permission to proceed
 		parent::beforeFilter();
-		// require Auth or 
+		
+		// dynamically load the AclMenu
+		$this->Crud->loadAclMenu();
+		
+		// require Auth or custom class
 		if(Configure::read('Cakeclient.AclChecking')) {
 			if(!isset($this->Auth)) {
 				$this->Auth = $this->Components->load(Configure::read('Cakeclient.AuthComponent'));
@@ -37,11 +43,6 @@ class CakeclientAppController extends AppController {
 			}
 			// yet we do not have permission from the app-level controller
 			if(!$this->Auth->isAuthorized()) {
-				if(!isset($this->AclMenu)) {
-					$this->AclMenu = $this->Components->load('Cakeclient.AclMenu');
-					// if not loaded before beforeFilter, we need to initialize manually
-					$this->AclMenu->initialize($this);
-				}
 				if($this->AclMenu->check()) {
 					// allow the requested action
 					$this->Auth->allow();

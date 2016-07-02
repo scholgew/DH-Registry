@@ -6,7 +6,7 @@
 			if(!empty($action['bulk_processing']) AND !empty($action['contextual'])) {
 				// key is the string method name, if the action was defined via the default CRUD action list, numeric if from db
 				$key = (!empty($action['action_id'])) ? $key = $action['action_id'] : $action['url']['action'];
-				$bulk_options[$key] = $action['title'];
+				$bulk_options[$key] = $action['label'];
 				$bulkprocessing = 1;
 				unset($crudActions[$k]);
 			}
