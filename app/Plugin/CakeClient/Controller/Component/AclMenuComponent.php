@@ -1,28 +1,55 @@
 <?php
 class AclMenuComponent extends Component {
 	
-	public $menuModel = null;
+	public $menuModel, $menuModelName, $tableModelName, $acf = null;
+	public $actionModelName, $controller, $request, $aro_model = null;
 	
-	public $menuModelName = 'CcConfigMenu';
-	public $tableModelName = 'CcConfigTable';
-	public $actionModelName = 'CcConfigAction';
+	// acf - the access controling field ;)
+	public $acf_adminValue = 1;
 	
-	public $controller = null;
-	
-	public $request = null;
-	
-	// the Access Controling Field
-	public $acf = 'user_role_id';
-	
-	public $aro_model = 'UserRole';
-	
-	public $configPrefix = 'cc_config_';
-	
+	public $settings, $defaultMenus = array();
 	
 	protected $_aro_id = null;
 	
 	
 	
+	
+	
+	
+	
+	public function __construct(ComponentCollection $collection, $settings = array()) {
+		parent::__construct($collection, $settings);
+		$this->settings = $settings;
+	}
+	
+	
+	private function _defaults() {
+		$defaults =  array(
+			'menuModelName' => 'CcConfigMenu',
+			'tableModelName' => 'CcConfigTable',
+			'actionModelName' => 'CcConfigAction',
+			'acf' => 'user_role_id',
+			'aro_model' => 'UserRole',
+			'defaultMenus' => array(
+				array(
+					'name' => 'Config',
+					'prefix' => 'cc_config_',
+					'dataSource' => 'default'
+				),
+				array(
+					'name' => 'Tables',
+					'dataSource' => 'default'
+					// no prefix - gather all tables without prefix
+				)
+				// extend with further prefixed (plugin) table groups
+			)
+		);
+		if(isset($this->controller->DefaultAuth)) {
+			$defaults['acf'] = $this->controller->DefaultAuth->userRoleField;
+			$defaults['acf_adminValue'] = $this->controller->DefaultAuth->userRoleAdminValue,
+		}
+		return $defaults;
+	}
 	
 	
 	/*
@@ -40,6 +67,10 @@ class AclMenuComponent extends Component {
 		
 		if(isset($this->controller->Auth))
 			$this->_aro_id = $this->controller->Auth->user($this->acf);
+		
+		$this->settings = Hash::merge($this->_defaults(), $this->settings);
+		foreach($this->settings as $key => $value)
+			$this->{$key} = $value;
 	}
 	
 	
@@ -110,7 +141,7 @@ class AclMenuComponent extends Component {
 	}
 	
 	
-	public function getMenu($controlled = true, $name = null, $cc_config = null, $dataSource = null) {
+	public function getMenu($controlled = true, $name = null, $cc_prefix = null, $dataSource = null) {
 		
 		
 		$menuName = $this->acf.'_'.$this->_aro_id.'_menu';
@@ -119,7 +150,7 @@ class AclMenuComponent extends Component {
 			
 			// #ToDo: try reading from the cc_config_tables table before
 			
-			if(empty($tables)) $tables = $this->getDatabaseTables($dataSource, $cc_config);
+			if(empty($tables)) $tables = $this->getDatabaseMenu($dataSource, $cc_prefix);
 			
 			// enhance with index actionlist and countercheck with access lists
 			$_menu = array();
@@ -168,7 +199,8 @@ class AclMenuComponent extends Component {
 	
 	
 	public function setMenu() {
-		$cakeclientMenu = $this->getMenu($controlled = true, $name = 'Tables', $cc_config = null, null);
+		// better get all menus instead...
+		$cakeclientMenu = $this->getMenu($controlled = true, $name = 'Tables', $cc_prefix = null, null);
 		$cakeclientConfigMenu = $this->getMenu($controlled = true, $name = 'Config', $this->configPrefix, null);
 		
 		if(!$this->request->is('requested') AND Configure::read('Cakeclient.topNav')) {
@@ -182,33 +214,70 @@ class AclMenuComponent extends Component {
 	}
 	
 	
-	public function getDatabaseTables($dataSource = null, $cc_config = null) {
+	public function getDatabaseMenu($dataSource = null, $cc_prefix = null) {
+		$menu = array();
 		if(empty($dataSource)) $dataSource = 'default';
-		App::uses('ConnectionManager', 'Model');
-		$db = ConnectionManager::getDataSource($dataSource);
-		$tables = $db->listSources();
-		if(!empty($tables)) foreach($tables as $k => &$item) {
-			// check for the plugin's internal configuration tables
-			if(	(strpos($item, $this->configPrefix) !== false AND !$cc_config)
-			OR	(strpos($item, $this->configPrefix) === false AND $cc_config)	
-			) {
-				unset($tables[$k]);
-				continue; 
-			}
-			$label = $this->makeTableLabel($item, $cc_config);
-			$item = array(
-				'name' => $item,
-				'label' => $label
+		
+		if(empty($this->defaultMenus)) $this->defaultMenus = array(
+			array(
+				'name' => 'Tables',
+				'dataSource' => 'default'
+				// no prefix - gather all tables without prefix
+			)
+		);
+		$prefixes = Hash::extract($this->defaultMenus, '{n}.prefix');
+		
+		foreach($this->defaultMenus as $k => $group) {
+			$source = (!empty($group['dataSource'])) ? $group['dataSource'] : $dataSource;
+			App::uses('ConnectionManager', 'Model');
+			$db = ConnectionManager::getDataSource($source);
+			$tables = $db->listSources();
+			
+			$prefix = (!empty($group['prefix'])) ? $group['prefix'] : null;
+			$name = (!empty($group['name'])) ? $group['name'] : 'Menu '.$k+1;
+			
+			$menu[$k][$this->menuModelName] = array(
+				'name' => $name,
+				'position' => $k+1,
+				'foreign_key' => $this->acf_adminValue,
+				'model' => $this->aro_model,
+				'comment' => 'generated'
 			);
+			
+			if(!empty($tables)) foreach($tables as $i => $item) {
+				$hit = false;
+				if(empty($prefix)) {
+					foreach($prefixes as $pr) {
+						if(strpos($item, $pr) !== false) {
+							$hit = true;
+							break;
+						}
+					}
+					if($hit) continue;
+				}else{
+					if(strpos($item, $prefix) === false) continue;
+				}
+				
+				$label = $this->makeTableLabel($item, $prefix);
+				
+				$menu[$k][$this->tableModelName][$i] = array(
+					//'cc_config_menu_id',
+					'position' => $i+1,
+					'name' => $item,
+					'label' => $label,
+					'model' => Inflector::classify($item),
+					'controller' => $item
+				);
+			}
 		}
 		
-		return $tables;
+		return $menu;
 	}
 	
 	
-	public function makeTableLabel($tablename = null, $cc_config = null) {
+	public function makeTableLabel($tablename = null, $prefix = null) {
 		$label = $tablename;
-		if($cc_config) $label = str_replace($cc_config, '', $label);
+		if($prefix) $label = str_replace($prefix, '', $label);
 		return $label = Inflector::humanize($label);
 	}
 	

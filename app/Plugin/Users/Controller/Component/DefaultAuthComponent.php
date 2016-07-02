@@ -11,11 +11,11 @@ class DefaultAuthComponent extends Component {
 	
 	public $components = array();
 	
-	private $_adminField = null;
+	public $userRoleField = null;
 	
-	private $_userRoleField = null;
+	public $userRoleAdminValue = null;
 	
-	private $_userRoleAdminValue = null;
+	private $adminField = null;
 	
 	private $controller = null;
 	
@@ -30,9 +30,9 @@ class DefaultAuthComponent extends Component {
 	
 	private function _defaults() {
 		return array(
-			'_adminField' => 'is_admin',
-			'_userRoleField' => 'user_role_id',
-			'_userRoleAdminValue' => 1,
+			'adminField' => 'is_admin',
+			'userRoleField' => 'user_role_id',
+			'userRoleAdminValue' => 1,
 			'components' => array(
 				'Auth' => array(
 					'priority' => 2,
