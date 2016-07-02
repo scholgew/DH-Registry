@@ -49,15 +49,19 @@ class AclMenuComponent extends Component {
 	*/
 	public function check($aro_id = null, $aro_model = null) {
 		if(empty($aro_id)) $aro_id = $this->_aro_id;
+		$params = $this->controller->request->params;
+		if(!empty($params['pass'])) foreach($params['pass'] as $arg) {
+			$params[] = $arg;
+		}
+		unset($params['pass']);
 		$checkPath = str_replace(
 			$this->request->base, '',
-			Router::url($this->controller->request->params)
+			Router::url($params)
 		);
-		debug($checkPath);
-		//debug($this->controller->request);
 		// give way for the admin
-		if(	isset($this->controller->DefaultAuth)
-		AND	$this->controller->DefaultAuth->isAdmin()
+		//if(	isset($this->controller->DefaultAuth)
+		//AND	$this->controller->DefaultAuth->isAdmin()
+		if(0
 		) {
 			return true;
 		}else{
@@ -73,15 +77,14 @@ class AclMenuComponent extends Component {
 					'foreign_key' => $aro_id,
 					'model' => $this->aro_model
 				)
-			));debug($aro_id);
+			));
 			if(!empty($acl)) {
-				debug($acl);
 				foreach($acl[$this->tableModelName] as $t => $table) {
 					if($table['name'] == $this->request->params['controller']) {
 						if(!empty($table['allow_all'])) return true;
 						
-						if(!empty($entry[$this->actionModelName])) {
-							foreach($entry[$this->actionModelName] as $a => $action)
+						if(!empty($table[$this->actionModelName])) {
+							foreach($table[$this->actionModelName] as $a => $action) {
 								if($action['name'] == $this->request->params['action']) {
 									if(!empty($action['url'])) {
 										/* Can't imagine a situation where 
@@ -95,6 +98,7 @@ class AclMenuComponent extends Component {
 										return true;
 									}
 								}
+							}
 							break;
 						}
 					}
@@ -106,7 +110,7 @@ class AclMenuComponent extends Component {
 	}
 	
 	
-	public function getMenu($controlled = true, $dataSource = null, $cc_config = false) {
+	public function getMenu($controlled = true, $name = null, $cc_config = null, $dataSource = null) {
 		
 		
 		$menuName = $this->acf.'_'.$this->_aro_id.'_menu';
@@ -115,7 +119,7 @@ class AclMenuComponent extends Component {
 			
 			// #ToDo: try reading from the cc_config_tables table before
 			
-			if(empty($tables)) $tables = $this->getDatabaseTables($dataSource, $cc_config = false);
+			if(empty($tables)) $tables = $this->getDatabaseTables($dataSource, $cc_config);
 			
 			// enhance with index actionlist and countercheck with access lists
 			$_menu = array();
@@ -156,16 +160,16 @@ class AclMenuComponent extends Component {
 				}
 			}
 			$menu['list'] = $_menu;
-			$menu['label'] = ($cc_config)? 'Configuration' : 'Tables';
+			$menu['label'] = $name;
 			Cache::write($menuName, $menu, 'cakeclient');
 		}
 		return $menu;
 	}
 	
 	
-	public function setMenu($role_id = null) {
-		$cakeclientMenu = $this->getMenu($controlled = true, null, $cc_config = false);
-		$cakeclientConfigMenu = $this->getMenu($controlled = true, null, $cc_config = true);
+	public function setMenu() {
+		$cakeclientMenu = $this->getMenu($controlled = true, $name = 'Tables', $cc_config = null, null);
+		$cakeclientConfigMenu = $this->getMenu($controlled = true, $name = 'Config', $this->configPrefix, null);
 		
 		if(!$this->request->is('requested') AND Configure::read('Cakeclient.topNav')) {
 			// load the AssetHelper which appends the top_nav Menu to whichever layout
@@ -178,7 +182,7 @@ class AclMenuComponent extends Component {
 	}
 	
 	
-	public function getDatabaseTables($dataSource = null, $cc_config = false) {
+	public function getDatabaseTables($dataSource = null, $cc_config = null) {
 		if(empty($dataSource)) $dataSource = 'default';
 		App::uses('ConnectionManager', 'Model');
 		$db = ConnectionManager::getDataSource($dataSource);
@@ -191,7 +195,7 @@ class AclMenuComponent extends Component {
 				unset($tables[$k]);
 				continue; 
 			}
-			$label = $this->makeTableLabel($item, $cc_config = false);
+			$label = $this->makeTableLabel($item, $cc_config);
 			$item = array(
 				'name' => $item,
 				'label' => $label
@@ -202,9 +206,9 @@ class AclMenuComponent extends Component {
 	}
 	
 	
-	public function makeTableLabel($tablename = null, $cc_config = false) {
+	public function makeTableLabel($tablename = null, $cc_config = null) {
 		$label = $tablename;
-		if($cc_config) $label = str_replace($this->configPrefix, '', $label);
+		if($cc_config) $label = str_replace($cc_config, '', $label);
 		return $label = Inflector::humanize($label);
 	}
 	

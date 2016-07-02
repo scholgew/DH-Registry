@@ -83,7 +83,6 @@ class DefaultAuthComponent extends Component {
 	}
 	
 	public function isAdmin() {
-		if(Configure::read('debug') > 0) return $this->is_admin;
 		return	((bool)$this->controller->Auth->user($this->_adminField)
 			||	(int)$this->controller->Auth->user($this->_userRoleField) === $this->_userRoleAdminValue
 		);
