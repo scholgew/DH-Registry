@@ -56,7 +56,7 @@
 			// one would expect the parameter 'crud' here as well, but this is set by the router itself!
 		),
 		array(
-			'crud' => 'add|view|index|edit|delete|fix_order'
+			'crud' => 'add|view|index|edit|delete|reset_order'
 		)
 	);
 	Router::connect('/cakeclient/:controller/:action/*', array(
@@ -163,7 +163,7 @@
 			$url_prefix . '/:table/:crud/*',
 			$long_url_array,
 			array(
-				'crud' => 'add|view|index|edit|delete|fix_order'
+				'crud' => 'add|view|index|edit|delete|reset_order'
 			)
 		);
 		

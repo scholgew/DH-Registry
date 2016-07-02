@@ -72,14 +72,14 @@ class CcConfigAction extends CakeclientAppModel {
 			$methods = get_class_methods($controllerName);
 			foreach($methods as $i => $method) {
 				if(strpos($method, '_') === 0) 			unset($methods[$i]);
-				if(strpos($method, 'fix_order') === 0)	unset($methods[$i]);
+				if(strpos($method, 'reset_order') === 0)	unset($methods[$i]);
 				if(in_array($method, $pParentMethods)) 	unset($methods[$i]);
 			}
 		}
 		
-		// access the model's behaviors, if it uses Sortable, add the method "fix_order"
+		// access the model's behaviors, if it uses Sortable, add the method "reset_order"
 		if($$modelName->Behaviors->loaded('Sortable')) {
-			$methods[] = 'fix_order';
+			$methods[] = 'reset_order';
 		}
 		
 		return $methods;

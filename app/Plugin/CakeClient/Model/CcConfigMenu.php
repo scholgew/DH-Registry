@@ -7,11 +7,13 @@ if(file_exists(APP . 'Model' . DS . pathinfo(__FILE__, PATHINFO_BASENAME))) {
 
 class CcConfigMenu extends CakeclientAppModel {
 	
+	/* Virtually - yes. 
 	var $belongsTo = array(
 		'UserRole' => array(
 			'className' => 'UserRole'
 		)
 	);
+	*/
 	
 	var $hasMany = array(
 		'CcConfigTable' => array(

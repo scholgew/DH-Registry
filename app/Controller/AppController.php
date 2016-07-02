@@ -71,12 +71,14 @@ class AppController extends Controller {
 		
 		if($this->request->params['action'] != 'edit') $this->Session->delete('edit');
 		
+		// for debugging purposes
 		if(strpos(APP, 'xampp') !== false AND Configure::read('debug') > 0) {
 			$this->Auth->allow();
+			//$this->DefaultAuth->is_admin = true;
 		}
 		
 		if($this->Auth->user()) {
-			$this->Crud->setMenu();
+			$this->AclMenu->setMenu();
 		}
 		
 	}

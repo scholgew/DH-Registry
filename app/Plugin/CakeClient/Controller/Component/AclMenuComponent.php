@@ -1,24 +1,26 @@
 <?php
 class AclMenuComponent extends Component {
 	
-	var $model = null;
+	public $model = null;
 	
-	var $modelName = 'CcConfigMenu';
+	public $modelName = 'CcConfigMenu';
 	
-	var $controller = null;
+	public $controller = null;
 	
-	// NULL is the "public" accessLevel
-	var $userLevel = null;
+	public $request = null;
 	
 	// the Access Controling Field
-	var $acf = 'user_role_id';
+	public $acf = 'user_role_id';
 	
 	public $aro_model = 'UserRole';
 	
-	var $contextPath = null;
+	public $configPrefix = 'cc_config_';
 	
-	// the current request - /controller will be normalized to /controller/index, the base url is removed, if any
-	var $normalizedPath = null;
+	
+	protected $_aro_id = null;
+	
+	
+	
 	
 	
 	/*
@@ -30,6 +32,10 @@ class AclMenuComponent extends Component {
 		if(!isset($controller->{$this->modelName}))
 			$controller->loadModel($this->modelName);
 		$this->model = $controller->{$this->modelName};
+		$this->request = $controller->request;
+		
+		if(isset($this->controller->Auth))
+			$this->_aro_id = $this->controller->Auth->user($this->acf);
 	}
 	
 	
@@ -38,8 +44,7 @@ class AclMenuComponent extends Component {
 	* doing ACL authorisation in this method
 	*/
 	public function check($aro_id = null, $aro_model = null) {
-		if(empty($aro_id) AND isset($this->controller->Auth))
-			$aro_id = $this->controller->Auth->user($this->acf);
+		if(empty($aro_id) $aro_id = $this->_aro_id;
 		
 		// give way for the admin
 		if(	isset($this->controller->DefaultAuth)
@@ -51,6 +56,7 @@ class AclMenuComponent extends Component {
 			$acl = $this->model->find('first', array(
 				'contain' => array(
 					'CcConfigTable' => array(
+						'conditions' => array('name' => $this->request->params['controller']),
 						'CcConfigAction'
 					)
 				),
@@ -60,261 +66,119 @@ class AclMenuComponent extends Component {
 				)
 			));
 			if(!empty($acl)) {
-				
+				foreach($acl['CcConfigTable'] as $t => $table) {
+					if($table['name'] == $this->request->params['controller']) {
+						if(!empty($table['allow_all'])) return true;
+						
+						if(!empty($entry['CcConfigAction'])) {
+							foreach($entry['CcConfigAction'] as $a => $action)
+								if($action['name'] == $this->request->params['action'])
+									return true;
+							break;
+						}
+					}
+				}
 			}
 		}
 		
 		return false;
 	}
 	
-	/*
-	function initialize(&$controller) {
-		$this->controller = $controller;
-		foreach($this->settings as $key => $value) {
-			$this->$key = $value;
-		}
-		$this->model = $this->controller->{$this->modelName};
-		
-		if(isset($this->controller->Auth)) {
-			$user = $this->controller->Auth->user();
-			if(is_array($user)) {
-				if(isset($user[$this->acf])) {
-					$this->userLevel = $user[$this->acf];
-				}
-			}
-		}
-		
-		// fill in the allowedActions array
-		$records = $this->model->find('all', array(
-			'conditions' => array(
-				'role_id' => $this->userLevel
-			)
-		));
-		
-		$path = $this->setNormalizedPath();
-		
-		foreach($records as $i => $record) {
-			$record = $record['Menu'];
-			$this->controller->allowedActions[$record['path']] = array(
-				'title' => $record['title'],
-				'url' => $record['path']
-			);
-			// set the contextPath
-			if(strpos($path, $record['path']) === 0) {
-				if(!empty($this->contextPath)) {
-					// get the longest path
-					if(strlen($record['path']) > strlen($this->contextPath)) {
-						$this->contextPath = $record['path'];
-					}
-				}else{
-					$this->contextPath = $record['path'];
-				}
-			}
-		}
-	}
-	*/
 	
-	function authorizePath($path = null) {
-		if(empty($path)) {
-			$path = $this->normalizedPath;
-		}
-		if(empty($this->controller->allowedActions) OR isset($this->controller->allowedActions[$path])) {
-			return true;
-		}
+	function getMenu($controlled = true, $dataSource = null, $cc_config = false) {
+		if(empty($dataSource)) $dataSource = 'default';
 		
-		if($this->controller->request->url === false) {
-			// make sure this URL '/' is routed correctly!
-			return true;
-		}
-		
-		// allow all Auth->allowedActions on controller level - additionally allow Auth login and logoff actions
-		// remeber to allow all public actions in UsersController!
-		if(isset($this->controller->Auth)) {
-			$allowed = $this->controller->Auth->allowedActions;
-			if(	$allowed == array('*') OR $allowed == '*'
-			OR	in_array($this->controller->params['action'], $allowed)
-			) {
-				return true;
+		$menuName = $this->acf.'_'.$this->_aro_id.'_menu';
+		$menu = Cache::read($menuName, 'cakeclient');
+		if(empty($menu)) {
+			
+			// #ToDo: try reading from the cc_config_tables table before
+			
+			if(empty($tables)) {
+				// get all table names - that would do for linking all index pages
+				App::uses('ConnectionManager', 'Model');
+				$db = ConnectionManager::getDataSource($dataSource);
+				$tables = $db->listSources();
 			}
-			// allow the login action, as it most probably won't appear in the Auth->allowedActions array
-			$loginAction = $this->controller->Auth->loginAction;
-			if(	$this->controller->request->params['action'] == $loginAction['action']
-			AND	$this->controller->request->params['controller'] == $loginAction['controller']
-			) {
-				return true;
-			}
-			if(	$this->controller->request->params['action'] == 'logout'
-			AND	$this->controller->request->params['controller'] == $loginAction['controller']
-			) {
-				return true;
-			}
-		}
-		
-		// there's not even a basic match - deny
-		if(empty($this->contextPath)) {
-			return false;
-		}
-		// match as soon there are parameters extending the allowed path defined in the menu
-		$context = Router::parse($this->contextPath);
-		$path = Router::parse($path);
-		foreach($path as $key => $value) {
-			switch($key) {
-				case 'pass':
-				case 'named':
+			
+			// enhance with index actionlist and countercheck with access lists
+			$_menu = array();
+			foreach($tables as $k => $item) {
+				$cc_config = false;
+				$tablename = $item;
+				if(is_array($tablename)) {
+					$tablename = $item['name'];
+				}
+				// check for the plugin's internal configuration tables
+				if(	(strpos($tablename, $this->configPrefix) !== false AND !$cc_config)
+				OR	(strpos($tablename, $this->configPrefix) === false AND $cc_config)	
+				) {
 					continue;
-					break;
-				case 'controller':
-				case 'action':
-					if(empty($context[$key]) OR $context[$key] != $value) {
-						return false;
+				}
+				
+				$title = $tablename;
+				if($cc_config) $title = str_replace($this->configPrefix, '', $title);
+				$title = Inflector::humanize($tittle);
+				if(is_array($item) AND !empty($item['label'])) $title = $item['label'];
+				
+				// get the allowed actions
+				$allowed = array();
+				if($controlled AND !empty($this->controller->Auth->allowedActions)) {
+					$allowed = $this->controller->Auth->allowedActions;
+				}
+				
+				// get the table's index view's actions - skip all record related and forbidden actions
+				$actions = array();
+				$actions = $this->getActions('index', $tablename, $controlled);
+				foreach($actions as $ak => $action) {
+					$contextual = false;
+					if(isset($action['contextual'])) {
+						$contextual = (bool) $action['contextual'];
 					}
-					break;
-				case 'plugin':
-					if($value === null AND empty($context[$key])) {
-						continue;
+					unset($action['contextual']);
+					if($contextual) {
+						unset($actions[$ak]);
 					}
-					elseif(empty($context[$key]) OR $context[$key] != $value) {
-						return false;
-					}
-			}
-		}
-
-		return true;
-	}
-	
-	// convenience method for use in controllers
-	function isAuthorized($user = null) {
-		// removes the base path, if any and adds the leading '/'
-		$path = $this->normalizedPath;
-		
-		if(!empty($user) and is_array($user)) {
-			switch($user[$this->acf]) {
-				case 1:
-					$this->controller->admin = true;
-					$this->userLevel = 1;
-					// allow all actions - important for context menus
-					$this->controller->allowedActions = array();
-					return true;
-				default: 
-					$this->userLevel = $user[$this->acf];
-			}
-		}
-		if($this->authorizePath($path)) {
-			return true;
-		}
-		
-		return false;
-	}
-	
-	// check if admin and set properties (we need to do this before AuthComponent comes in on Component::startup)
-	function authorizeAdmin($user) {
-		// allow users on admin route to go anywhere - in debug mode only!
-		if(Configure::read('debug') > 0 AND !empty($this->controller->request->params['admin'])) {
-			if(!is_array($user)) {
-				$user = array();
-			}
-			$user[$this->acf] = $this->controller->user[$this->acf] = 1;
-		}
-		if(!empty($user) and is_array($user)) {
-			switch($user[$this->acf]) {
-				case 1:
-					$this->controller->admin = true;
-					$this->userLevel = 1;
-					// allow all actions - important for context menus
-					$this->controller->allowedActions = array();
-					if(isset($this->controller->Auth)) {
-						// make all actions public if we're in debug mode and debugging admin while not logged in
-						$this->controller->Auth->allowedActions = array();
-					}
-					return true;
-			}
-		}
-	}
-	
-	function getContext($path = null) {
-		$context = null;
-		if(empty($path)) {
-			$path = $this->getNormalizedPath();
-		}
-		foreach($this->controller->allowedActions as $template => $content) {
-			if(strpos($path, $template) === 0) {
-				if(!empty($context)) {
-					// get the longest path
-					if(strlen($template) > strlen($context)) {
-						$context = $template;
-					}
+				}
+				
+				$menuEntry = array(
+					'title' => $title,
+					'url' => array(
+						'action' => 'index',
+						'controller' => $tablename,
+						'plugin' => Configure::read('Cakeclient.prefix')
+					),
+					'submenu' => $actions
+				);
+				// url base is for the router only to create the correct path - has to be unset afterwards
+				$menuEntry['url']['base'] = false;
+				if(method_exists($this->controller, '_normalizePath'))
+					$normalizedPath = $this->controller->_normalizePath($menuEntry['url']);
+				if(!empty($allowed) AND !isset($allowed[$normalizedPath])) {
+					unset($menuEntry['url']);
 				}else{
-					$context = $template;
+					unset($menuEntry['url']['base']);
+				}
+				if(isset($menuEntry['url']) OR !empty($actions)) {
+					$_menu[] = $menuEntry;
 				}
 			}
-		}
-		
-		return $context;
-	}
-	
-	function setContext() {
-		return $this->contextPath = $this->getContext(Router::normalize($this->controller->request->url));
-	}
-	
-	function getNormalizedPath() {
-		return Router::normalize($this->controller->request->url);
-	}
-	
-	function setNormalizedPath() {
-		return $this->normalizedPath = $this->getNormalizedPath();
-	}
-	
-	function getMenu($role_id = null) {
-		if(empty($role_id)) {
-			$role_id = $this->userLevel;
-		}
-		$records = $this->model->find('all', array(
-			'contain' => '',
-			'conditions' => array(
-				'role_id' => $role_id,
-				'parent_id' => null,
-				'menu_type_id' => 1	// main menu
-			),
-			'order' => array(
-				'lft' => 'ASC'
-			)
-		));
-		
-		$menu = array();
-		foreach($records as $i => $record) {
-			$record = $record['Menu'];
-			
-			$submenu = array();
-			if(isset($this->controller->Crud)) {
-				$parsed = Router::parse($record['path']);
-				$controller = null;
-				if(!empty($parsed['controller'])) {
-					$controller = $parsed['controller'];
-				}
-				if(!empty($parsed['table'])) {
-					$controller = $parsed['table'];
-				}
-				if(!empty($controller)) {
-					//$submenu = $this->controller->Crud->getActions($parsed['action'], $controller);
-				}
-			}
-			
-			$menu[$record['path']] = array(
-				'title' => $record['title'],
-				'url' => $record['path'],
-				'submenu' => $submenu
-			);
+			$menu['list'] = $_menu;
+			$menu['label'] = ($cc_config)? 'Configuration' : 'Tables';
+			Cache::write($menuName, $menu, 'cakeclient');
 		}
 		return $menu;
 	}
+	
 	
 	function setMenu($role_id = null) {
-		if(empty($role_id)) {
-			$role_id = $this->userLevel;
-		}
-		$menu = $this->getMenu($role_id);
-		$this->controller->set(compact('menu'));
-		return $menu;
+		$cakeclientMenu = $this->getMenu($controlled = true, null, $cc_config = false);
+		$cakeclientConfigMenu = $this->getMenu($controlled = true, null, $cc_config = true);
+		
+		$this->controller->set(compact('cakeclientMenu', 'cakeclientConfigMenu'));
+		if(	!in_array('Cakeclient.Asset', $this->controller->helpers)
+		AND	!isset($this->controller->helpers['Cakeclient.Asset']))
+			$this->controller->helpers[] = 'Cakeclient.Asset';
 	}
 }
 ?>

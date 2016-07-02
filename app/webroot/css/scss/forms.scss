@@ -143,19 +143,25 @@ form {
 	div.time, 
 	div.date,
 	div.datetime {
+		max-width: 501px;
 		
 		select {
 			width: 91px;
+			display: inline-block;
+			margin-left: 2px;
+			margin-right: 2px;
+			&:first-of-type,
+			&:nth-of-type(4) {
+				margin-left: 0;
+			}
+			&:last-of-type {
+				margin-right: 0;
+			}
 		}
 	}
-
 	div.datetime {
-		
 		label {
-			margin-bottom: 45px;
-		}
-		select {
-			margin-bottom: 2px;
+			margin-bottom: 12px;
 		}
 	}
 	

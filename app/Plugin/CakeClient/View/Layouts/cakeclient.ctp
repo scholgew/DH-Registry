@@ -60,7 +60,6 @@
 			<div id="content">
 				<h2><?php echo $title_for_layout; ?></h2>
 				<?php
-				echo $this->element('layout/actions', array(), array('plugin' => 'Cakeclient'));
 				echo $this->Session->flash();
 				echo $this->fetch('content');
 				?>

@@ -46,12 +46,11 @@ class CakeclientAppController extends AppController {
 					// allow the requested action
 					$this->Auth->allow();
 				}
-			
 			}
 		}
 		
 		// we're on a CRUD route - set all the CRUD relevant variables (actions, menu, view, fieldlist, relations)
-		if(!in_array(strtolower($this->request->params['action']), array('delete','fix_order')))
+		if(!in_array(strtolower($this->request->params['action']), array('delete','reset_order')))
 			$this->Crud->setCRUDviewVars();
 		
 		// maintain pagination settings
@@ -159,8 +158,8 @@ class CakeclientAppController extends AppController {
 		$this->Crud->delete($id);
 	}
 	
-	function fix_order() {
-		$this->Crud->fix_order();
+	function reset_order() {
+		$this->Crud->reset_order();
 	}
 }
 

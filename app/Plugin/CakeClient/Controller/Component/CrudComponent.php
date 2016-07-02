@@ -10,30 +10,50 @@ class CrudComponent extends Component {
 	/**	Default setting, which CRUD actions shall be linked from which CRUD view. 
 	*	(no view for delete)
 	*/
-	var $indexActions = array(
+	public $indexActions = array(
 		'add', 'view', 'edit', 'delete'
 	);
-	var $addActions = array(
+	public $addActions = array(
 		'index'
 	);
-	var $editActions = array(
+	public $editActions = array(
 		'index', 'view', 'delete'
 	);
-	var $viewActions = array(
+	public $viewActions = array(
 		'index', 'edit', 'delete'
 	);
 	
 	
-	var $defaultRedirect = '/';
+	public $defaultRedirect = '/';
 	
-	var $referer = null;
+	public $referer = null;
 	
 	
+	protected $modelName = null;
 	
 	
 	function initialize(Controller $controller) {
 		$this->controller = $controller;
 		$this->virtualController = $this->controller->name;
+		// prerequisite for AclMenuComponent to work properly when on CRUD-route
+		$this->_restoreRequest();
+	}
+	
+	
+	protected function _restoreRequest() {
+		if(!empty($this->controller->request->params['table'])) {
+			// set the table name, as it is passed via the router array
+			$this->virtualController = Inflector::camelize($this->controller->request->params['table']);
+			$this->modelName = Inflector::singularize($this->virtualController);
+			
+			// #ToDo: read from CcConfigTable instead!
+			
+			//$tableConfigModelClass = Configure::read('Cakeclient.tables.' . $this->controller->request->params['table'] . '.modelclass');
+			if(!empty($tableConfigModelClass)) {
+				$this->modelName = $tableConfigModelClass;
+			}
+			$this->controller->request->params['controller'] = $this->controller->request->params['table'];
+		}
 	}
 	
 	
@@ -60,16 +80,10 @@ class CrudComponent extends Component {
 		Configure::write('Cakeclient.prefix', $prefix);
 		$this->controller->request->params['plugin'] = $prefix;
 		
-		// set the table name, as it is passed via the router array
+		
 		if(!empty($this->controller->request->params['table'])) {
-			$this->virtualController = Inflector::camelize($this->controller->request->params['table']);
-			$modelName = Inflector::singularize($this->virtualController);
-			$tableConfigModelClass = Configure::read('Cakeclient.tables.' . $this->controller->request->params['table'] . '.modelclass');
-			if(!empty($tableConfigModelClass)) {
-				$modelName = $tableConfigModelClass;
-			}
-			$this->controller->uses = array($modelName);
-			$this->controller->modelClass = $modelName;	// this does the trick!
+			$this->controller->uses = array($this->modelName);
+			$this->controller->modelClass = $this->modelName;	// this does the trick!
 			$this->controller->request->params['controller'] = $this->controller->request->params['table'];
 		}
 		
@@ -213,7 +227,7 @@ class CrudComponent extends Component {
 					$$tableModel = ClassRegistry::init($tableModel);
 					// access the model's behaviors and add a special method if Sortable is loaded
 					if($$tableModel->Behaviors->loaded('Sortable')) {
-						$actions[] = 'fix_order';
+						$actions[] = 'reset_order';
 					}
 				}
 			}
@@ -233,7 +247,12 @@ class CrudComponent extends Component {
 					$actionName = $action['name'];
 					if(!empty($action['id'])) $action_id = $action['id'];
 				}else{
+					// mangling the default lists
 					$title = Inflector::humanize(Inflector::underscore($action));
+					switch($action) {
+						case 'add': $title .= ' '.$this->modelName; break;
+						case 'index': $title = 'List '.$this->virtualController; break;
+					}
 					$actionName = $action;
 				}
 				// set the route prefix to be the plugin element of the url, as this will appear in front of it all, and not named "plugin"
@@ -253,7 +272,7 @@ class CrudComponent extends Component {
 				
 				// handle appending record id's or appearance in index tables
 				$_action['contextual'] = $_action['append_id'] = false;
-				if(!in_array($actionName, array('add', 'index', 'fix_order'))) {
+				if(!in_array($actionName, array('add', 'index', 'reset_order'))) {
 					$_action['contextual'] = $_action['append_id'] = true;
 				}
 				if(is_array($action)) {
@@ -324,7 +343,7 @@ class CrudComponent extends Component {
 	}
 	
 	
-	
+	/*
 	function getMenu($controlled = true, $dataSource = null, $cc_config = false) {
 		if(empty($dataSource)) $dataSource = 'default';
 		
@@ -364,8 +383,8 @@ class CrudComponent extends Component {
 				// we do not read the table's controller - for simplicity, go for the AppController only
 				// best would be, to set a list of accessible actions dynamically per user/group from AppController or AuthComponent as some kind of ACL
 				// this is what AclMenuComponent in plugin UtilClasses does!
-				if($controlled AND !empty($this->controller->allowedActions)) {
-					$allowed = $this->controller->allowedActions;
+				if($controlled AND !empty($this->controller->Auth->allowedActions)) {
+					$allowed = $this->controller->Auth->allowedActions;
 				}
 				
 				// get the table's index view's actions - skip all record related and forbidden actions
@@ -412,13 +431,14 @@ class CrudComponent extends Component {
 	}
 	function setMenu() {
 		$cakeclientMenu = $this->getMenu($controlled = true, null, $cc_config = false);
-		$cakeclientMenu = $this->getMenu($controlled = true, null, $cc_config = true);
+		$cakeclientConfigMenu = $this->getMenu($controlled = true, null, $cc_config = true);
 		
 		$this->controller->set(compact('cakeclientMenu', 'cakeclientConfigMenu'));
 		if(	!in_array('Cakeclient.Asset', $this->controller->helpers)
 		AND	!isset($this->controller->helpers['Cakeclient.Asset']))
 			$this->controller->helpers[] = 'Cakeclient.Asset';
 	}
+	*/
 	
 	function getRelations($table = null, $from_model = false) {
 		// params-controller will contain the virtual controller name - which in turn is the table we are looking at!
@@ -947,10 +967,10 @@ class CrudComponent extends Component {
 		return $return;
 	}
 	
-	function fix_order($redirect = true) {
+	function reset_order($redirect = true) {
 		$modelName = $this->controller->modelClass;
 		if(isset($this->controller->$modelName->Behaviors->Sortable)) {
-			$this->controller->$modelName->crud = 'fix_order';
+			$this->controller->$modelName->crud = 'reset_order';
 			$data = $this->controller->$modelName->find('all');
 			$this->controller->$modelName->fixOrder($data);
 		}
