@@ -108,9 +108,9 @@ class CrudComponent extends Component {
 		
 		// set the view for CRUD actions automatically
 		$this->setView();
-		$this->setMenu();
 		$this->setFieldlist();
-		$this->setActions();
+		//$this->setMenu();
+		//$this->setActions();
 		$this->setRelations();
 		
 		// the page name
@@ -168,6 +168,7 @@ class CrudComponent extends Component {
 	
 	
 	// get list of actions to display
+	/*
 	function getActions($action = null, $table = null, $controlled = true) {
 		if(empty($action)) {
 			$action = $this->controller->request->params['action'];
@@ -194,7 +195,7 @@ class CrudComponent extends Component {
 		*	"index" views display many records and thus must check if an action belongs into a records context. 
 		*	Actions that are contextual (edit, view) don't have to check for the menu-action's context, 
 		*	as the context is already set by the record's ID.
-		*/
+		*
 		$current_action_must_check_context = true;
 		if($action != 'index') $current_action_must_check_context = false;
 		if(isset($currentAction['CcConfigAction'][0]['contextual']))
@@ -340,7 +341,7 @@ class CrudComponent extends Component {
 		$actions = $this->getActions($action, $table, $controlled);
 		$this->controller->set('crudActions', $actions);
 		return $actions;
-	}
+	}*/
 	
 	
 	/*
