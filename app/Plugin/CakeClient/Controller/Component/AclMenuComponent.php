@@ -13,7 +13,8 @@ class AclMenuComponent extends Component {
 	
 	
 	
-	
+	// require Auth
+	// optional DefaultAuth (admin check)
 	
 	
 	
@@ -46,9 +47,38 @@ class AclMenuComponent extends Component {
 		);
 		if(isset($this->controller->DefaultAuth)) {
 			$defaults['acf'] = $this->controller->DefaultAuth->userRoleField;
-			$defaults['acf_adminValue'] = $this->controller->DefaultAuth->userRoleAdminValue,
+			$defaults['acf_adminValue'] = $this->controller->DefaultAuth->userRoleAdminValue;
 		}
 		return $defaults;
+	}
+	
+	
+	public function isAdmin() {
+		
+		// #ToDo: check if a controller method exists
+		
+		if(	(isset($this->controller->DefaultAuth)
+			AND $this->controller->DefaultAuth->isAdmin())
+		OR	(isset($this->controller->Auth)
+			AND $this->controller->Auth->user($this->acf) == $this->acf_adminValue)
+		) return true;
+		return false;
+	}
+	
+	
+	public function getAclMenu($aro_id = null) {
+		return $this->menuModel->find('all', array(
+			'contain' => array(
+				$this->tableModelName => array(
+					'conditions' => array('name' => $this->request->params['controller']),
+					$this->actionModelName
+				)
+			),
+			'conditions' => array(
+				'foreign_key' => $aro_id,
+				'model' => $this->aro_model
+			)
+		));
 	}
 	
 	
@@ -59,6 +89,10 @@ class AclMenuComponent extends Component {
 	public function initialize(Controller $controller) {
 		$this->controller = $controller;
 		
+		$this->settings = Hash::merge($this->_defaults(), $this->settings);
+		foreach($this->settings as $key => $value)
+			$this->{$key} = $value;
+		
 		if(!isset($controller->{$this->menuModelName}))
 			$controller->loadModel($this->menuModelName);
 		$this->menuModel = $controller->{$this->menuModelName};
@@ -66,11 +100,8 @@ class AclMenuComponent extends Component {
 		$this->request = $controller->request;
 		
 		if(isset($this->controller->Auth))
-			$this->_aro_id = $this->controller->Auth->user($this->acf);
-		
-		$this->settings = Hash::merge($this->_defaults(), $this->settings);
-		foreach($this->settings as $key => $value)
-			$this->{$key} = $value;
+			if(!$this->_aro_id = $this->controller->Auth->user($this->acf))
+				$this->_aro_id = null;	// just to make sure the value is not (bool)false
 	}
 	
 	
@@ -90,47 +121,39 @@ class AclMenuComponent extends Component {
 			Router::url($params)
 		);
 		// give way for the admin
-		//if(	isset($this->controller->DefaultAuth)
-		//AND	$this->controller->DefaultAuth->isAdmin()
-		if(0
-		) {
+		if($this->isAdmin()) {
 			return true;
 		}else{
+			
+			// #ToDo: make a quicker check, that doesn't iterate over the entire tree - use joins
+			
 			// now authorize against the list! (if any)
-			$acl = $this->menuModel->find('first', array(
-				'contain' => array(
-					$this->tableModelName => array(
-						'conditions' => array('name' => $this->request->params['controller']),
-						$this->actionModelName
-					)
-				),
-				'conditions' => array(
-					'foreign_key' => $aro_id,
-					'model' => $this->aro_model
-				)
-			));
+			$acl = $this->getAclMenu($aro_id);
+			
 			if(!empty($acl)) {
-				foreach($acl[$this->tableModelName] as $t => $table) {
-					if($table['name'] == $this->request->params['controller']) {
-						if(!empty($table['allow_all'])) return true;
-						
-						if(!empty($table[$this->actionModelName])) {
-							foreach($table[$this->actionModelName] as $a => $action) {
-								if($action['name'] == $this->request->params['action']) {
-									if(!empty($action['url'])) {
-										/* Can't imagine a situation where 
-										* additional parameters are allowed, 
-										* but not the action without parameter...
-										* AS LONG THE ACTION IS MENTIONED IN THE PATH!!!
-										* But we might have a prefixed URL, like /admin routing
-										*/
-										if(strpos($checkPath, $action['url']) === 0) return true;
-									}else{
-										return true;
+				foreach($acl as $i => $menu) {
+					foreach($menu[$this->tableModelName] as $t => $table) {
+						if($table['name'] == $this->request->params['controller']) {
+							if(!empty($table['allow_all'])) return true;
+							
+							if(!empty($table[$this->actionModelName])) {
+								foreach($table[$this->actionModelName] as $a => $action) {
+									if($action['name'] == $this->request->params['action']) {
+										if(!empty($action['url'])) {
+											/* Can't imagine a situation where 
+											* additional parameters are allowed, 
+											* but not the action without parameter...
+											* AS LONG THE ACTION IS MENTIONED IN THE PATH!!!
+											* But we might have a prefixed URL, like /admin routing
+											*/
+											if(strpos($checkPath, $action['url']) === 0) return true;
+										}else{
+											return true;
+										}
 									}
 								}
+								break;
 							}
-							break;
 						}
 					}
 				}
@@ -141,67 +164,82 @@ class AclMenuComponent extends Component {
 	}
 	
 	
-	public function getMenu($controlled = true, $name = null, $cc_prefix = null, $dataSource = null) {
+	public function getMenu($acf_value = null, $dataSource = null, $default = false) {
+		$controlled = true;
 		
-		
-		$menuName = $this->acf.'_'.$this->_aro_id.'_menu';
+		$menuName = $this->acf.'_'.$acf_value.'_menu';
 		$menu = Cache::read($menuName, 'cakeclient');
 		if(empty($menu)) {
 			
-			// #ToDo: try reading from the cc_config_tables table before
+			// try reading from the cc_config_tables tables
+			//$menu = $this->getAclMenu($acf_value);
+			//$menu = $this->getAclMenu(2);
 			
-			if(empty($tables)) $tables = $this->getDatabaseMenu($dataSource, $cc_prefix);
+			// only if demanded or admin: get defaults if no menu available
+			if($default OR (empty($menu) AND $this->isAdmin())) {
+				$menu = $this->getDatabaseMenu($dataSource);
+			}	
+			debug($menu);
 			
-			// enhance with index actionlist and countercheck with access lists
+			// basically do some cleaning...
 			$_menu = array();
-			foreach($tables as $k => $item) {
-				$cc_config = false;
-				$tablename = $item['name'];
+			foreach($menu as $k => &$item) {
+				if(empty($item[$this->menuModelName]['label'])) 
+					$item[$this->menuModelName]['label'] = 'Menu '.$k+1;
 				
-				$label = $this->makeTableLabel($tablename);
-				if(!empty($item['label'])) $label = $item['label'];
-				
-				// get the table's index view's actions - skip all record related and forbidden actions
-				$actions = array();
-				$actions = $this->getActions('index', $tablename, $controlled);
-				foreach($actions as $ak => $action) {
-					$contextual = false;
-					if(isset($action['contextual'])) {
-						$contextual = (bool) $action['contextual'];
+				foreach($item[$this->tableModelName] as $i => &$table) {
+					$tableName = $table['name'];
+					if(!empty($item['label']))
+						$table['label'] = $table->makeTableLabel($tableName);
+					
+					
+					// #ToDo: put this into the getTableDefaults() method
+					/*
+					// get the table's index view's actions - skip all record related and forbidden actions
+					$actions = array();
+					$actions = $this->getActions('index', $tableName, $controlled);
+					foreach($actions as $ak => $action) {
+						$contextual = false;
+						if(isset($action['contextual'])) {
+							$contextual = (bool) $action['contextual'];
+						}
+						unset($action['contextual']);
+						if($contextual) {
+							unset($actions[$ak]);
+						}
 					}
-					unset($action['contextual']);
-					if($contextual) {
-						unset($actions[$ak]);
+					*/
+					
+					
+					// #ToDo: move this to view
+					/*
+					$menuEntry = array(
+						'label' => $label,
+						'url' => array(
+							'action' => 'index',
+							'controller' => $tableName,
+							'plugin' => Configure::read('Cakeclient.prefix')
+						),
+						'submenu' => $actions
+					);
+					*/
+					
+					
+					// build the output list
+					if(!isset($menuEntry['url']) AND empty($actions)) {
+						unset($item[$this->tableModelName][$i]);
 					}
-				}
-				
-				$menuEntry = array(
-					'label' => $label,
-					'url' => array(
-						'action' => 'index',
-						'controller' => $tablename,
-						'plugin' => Configure::read('Cakeclient.prefix')
-					),
-					'submenu' => $actions
-				);
-				
-				// build the output list
-				if(isset($menuEntry['url']) OR !empty($actions)) {
-					$_menu[] = $menuEntry;
 				}
 			}
-			$menu['list'] = $_menu;
-			$menu['label'] = $name;
 			Cache::write($menuName, $menu, 'cakeclient');
 		}
+		
 		return $menu;
 	}
 	
 	
 	public function setMenu() {
-		// better get all menus instead...
-		$cakeclientMenu = $this->getMenu($controlled = true, $name = 'Tables', $cc_prefix = null, null);
-		$cakeclientConfigMenu = $this->getMenu($controlled = true, $name = 'Config', $this->configPrefix, null);
+		$cakeclientMenu = $this->getMenu($this->_aro_id);
 		
 		if(!$this->request->is('requested') AND Configure::read('Cakeclient.topNav')) {
 			// load the AssetHelper which appends the top_nav Menu to whichever layout
@@ -210,24 +248,19 @@ class AclMenuComponent extends Component {
 				$this->controller->helpers[] = 'Cakeclient.Asset';
 		}
 		
-		$this->controller->set(compact('cakeclientMenu', 'cakeclientConfigMenu'));
+		$this->controller->set(compact('cakeclientMenu'));
 	}
 	
 	
-	public function getDatabaseMenu($dataSource = null, $cc_prefix = null) {
+	public function getDatabaseMenu($dataSource = null, $groups = array()) {
 		$menu = array();
 		if(empty($dataSource)) $dataSource = 'default';
 		
-		if(empty($this->defaultMenus)) $this->defaultMenus = array(
-			array(
-				'name' => 'Tables',
-				'dataSource' => 'default'
-				// no prefix - gather all tables without prefix
-			)
-		);
-		$prefixes = Hash::extract($this->defaultMenus, '{n}.prefix');
+		$menuGroups = $this->defaultMenus;
+		if(!empty($groups)) $menuGroups = $groups;
+		$prefixes = Hash::extract($menuGroups, '{n}.prefix');
 		
-		foreach($this->defaultMenus as $k => $group) {
+		foreach($menuGroups as $k => $group) {
 			$source = (!empty($group['dataSource'])) ? $group['dataSource'] : $dataSource;
 			App::uses('ConnectionManager', 'Model');
 			$db = ConnectionManager::getDataSource($source);
@@ -237,11 +270,11 @@ class AclMenuComponent extends Component {
 			$name = (!empty($group['name'])) ? $group['name'] : 'Menu '.$k+1;
 			
 			$menu[$k][$this->menuModelName] = array(
-				'name' => $name,
+				'label' => $name,
 				'position' => $k+1,
+				'block' => 'cakeclient_nav',
 				'foreign_key' => $this->acf_adminValue,
 				'model' => $this->aro_model,
-				'comment' => 'generated'
 			);
 			
 			if(!empty($tables)) foreach($tables as $i => $item) {
@@ -258,20 +291,46 @@ class AclMenuComponent extends Component {
 					if(strpos($item, $prefix) === false) continue;
 				}
 				
-				$label = $this->makeTableLabel($item, $prefix);
-				
-				$menu[$k][$this->tableModelName][$i] = array(
-					//'cc_config_menu_id',
-					'position' => $i+1,
-					'name' => $item,
-					'label' => $label,
-					'model' => Inflector::classify($item),
-					'controller' => $item
-				);
+				$menu[$k][$this->tableModelName][$i] = $this->getTableDefaults($item, $i, $prefix);
 			}
 		}
 		
 		return $menu;
+	}
+	
+	
+	public function getTableDefaults($tablename, $i = 0, $prefix = null) {
+		$label = $this->makeTableLabel($tablename, $prefix);
+		return array(
+			//'id' => '1',
+			//'cc_config_menu_id' => 1,
+			'position' => $i+1,
+			'name' => $tablename,
+			'allow_all' => false,	// admin is allowed anyway
+			'label' => $label,
+			'model' => Inflector::classify($tablename),
+			'controller' => $tablename,
+			'displayfield' => null,
+			'displayfield_label' => null,
+			'show_associations' => true,
+			'CcConfigAction' => array(
+				array(
+					//'id' => '1',
+					//'cc_config_table_id' => '1',
+					'position' => '1',
+					'show' => true,
+					// #ToDo: maintain the Cakeclient route prefix in this URL
+					'url' => '/'.$tablename.'/index',
+					'name' => 'index',
+					'label' => 'List '.Inflector::classify($tablename),
+					'comment' => null,
+					'contextual' => false,
+					'has_form' => false,
+					'bulk_processing' => false,
+					'has_view' => true
+				)
+			)
+		);
 	}
 	
 	
