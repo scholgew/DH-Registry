@@ -13,6 +13,29 @@ class AclMenuComponent extends Component {
 	
 	
 	
+	/**	Default setting, which CRUD actions shall be linked from which CRUD view. 
+	*	(no view for delete)
+	*/
+	public $indexActions = array(
+		'add', 'view', 'edit', 'delete'
+	);
+	public $addActions = array(
+		'index'
+	);
+	public $editActions = array(
+		'index', 'view', 'delete'
+	);
+	public $viewActions = array(
+		'index', 'edit', 'delete'
+	);
+	// for the main menu
+	public $menuActions = array(
+		'add', 'index'
+	);
+	
+	
+	
+	
 	// require Auth
 	// optional DefaultAuth (admin check)
 	
@@ -66,7 +89,7 @@ class AclMenuComponent extends Component {
 	}
 	
 	
-	public function getAclMenu($aro_id = null) {
+	public function getAcl($aro_id = null) {
 		return $this->menuModel->find('all', array(
 			'contain' => array(
 				$this->tableModelName => array(
@@ -128,7 +151,7 @@ class AclMenuComponent extends Component {
 			// #ToDo: make a quicker check, that doesn't iterate over the entire tree - use joins
 			
 			// now authorize against the list! (if any)
-			$acl = $this->getAclMenu($aro_id);
+			$acl = $this->getAcl($aro_id);
 			
 			if(!empty($acl)) {
 				foreach($acl as $i => $menu) {
@@ -172,8 +195,8 @@ class AclMenuComponent extends Component {
 		if(empty($menu)) {
 			
 			// try reading from the cc_config_tables tables
-			//$menu = $this->getAclMenu($acf_value);
-			//$menu = $this->getAclMenu(2);
+			//$menu = $this->getAcl($acf_value);
+			//$menu = $this->getAcl(2);
 			
 			// only if demanded or admin: get defaults if no menu available
 			if($default OR (empty($menu) AND $this->isAdmin())) {
@@ -280,8 +303,9 @@ class AclMenuComponent extends Component {
 			if(!empty($tables)) foreach($tables as $i => $item) {
 				$hit = false;
 				if(empty($prefix)) {
+					// get only those tables that don't match any prefix
 					foreach($prefixes as $pr) {
-						if(strpos($item, $pr) !== false) {
+						if(strpos($item, $pr) === 0) {
 							$hit = true;
 							break;
 						}
@@ -301,6 +325,14 @@ class AclMenuComponent extends Component {
 	
 	public function getTableDefaults($tablename, $i = 0, $prefix = null) {
 		$label = $this->makeTableLabel($tablename, $prefix);
+		$urlPrefix = Configure::read('Cakeclient.prefix');
+		$labelPrefix = null;
+		if(!empty($urlPrefix)) {
+			$urlPrefix = '/'.$urlPrefix;
+			$labelPrefix = Inflector::classify($urlPrefix).' ';
+		}else{
+			$urlPrefix = null;
+		}
 		return array(
 			//'id' => '1',
 			//'cc_config_menu_id' => 1,
@@ -313,31 +345,95 @@ class AclMenuComponent extends Component {
 			'displayfield' => null,
 			'displayfield_label' => null,
 			'show_associations' => true,
-			'CcConfigAction' => array(
+			'CcConfigActionsCcConfigTable' => array(
+				
+				// get this from getActionDefaults:
+				
 				array(
-					//'id' => '1',
-					//'cc_config_table_id' => '1',
-					'position' => '1',
-					'show' => true,
-					// #ToDo: maintain the Cakeclient route prefix in this URL
-					'url' => '/'.$tablename.'/index',
-					'name' => 'index',
-					'label' => 'List '.Inflector::classify($tablename),
-					'comment' => null,
-					'contextual' => false,
-					'has_form' => false,
-					'bulk_processing' => false,
-					'has_view' => true
+					//'id',
+					//'cc_config_table_id',
+					//'cc_config_action_id'
+					'position' => 1,
+					'CcConfigAction' => array(
+						array(
+							//'id' => '1',
+							//'cc_config_table_id' => '1',
+							'show' => true,
+							'url' => $urlPrefix.'/'.$tablename.'/add',
+							'name' => 'add',
+							'label' => $labelPrefix.'Add '.Inflector::singularize($label),
+							'comment' => null,
+							'contextual' => false,
+							'has_form' => true,
+							'bulk_processing' => false,
+							'has_view' => true
+						)
+					)
+				),
+				array(
+					//'id',
+					//'cc_config_table_id',
+					//'cc_config_action_id'
+					'position' => 2,
+					'CcConfigAction' => array(
+						array(
+							//'id' => '1',
+							//'cc_config_table_id' => '1',
+							'show' => true,
+							'url' => $urlPrefix.'/'.$tablename.'/index',
+							'name' => 'index',
+							'label' => $labelPrefix.$label.' List',
+							'comment' => null,
+							'contextual' => false,
+							'has_form' => false,
+							'bulk_processing' => false,
+							'has_view' => true
+						)
+					)
 				)
 			)
 		);
 	}
 	
 	
+	public function getActionDefaults($viewName = null, $tablename = null, $urlPrefix = null) {
+		$tableLabel = $this->makeTableLabel($tablename, $prefix);
+		$_keys = array(
+			//'id', 'cc_config_table_id',
+			'position', 'show', 'url', 'name', 'label',
+			'comment', 'contextual', 'has_form',
+			'bulk_processing', 'has_view'
+		);
+		switch($actionName) {
+		case 'menu':
+		case 'index':
+		case 'add'
+		case 'view'
+		}
+	}
+	
+	
+	public function getDefaultAdd() {
+		return array(
+			//'id' => '1',
+			//'cc_config_table_id' => '1',
+			'show' => true,
+			'url' => $urlPrefix.'/'.$tablename.'/add',
+			'name' => 'add',
+			'label' => $labelPrefix.'Add '.Inflector::singularize($label),
+			'comment' => null,
+			'contextual' => false,
+			'has_form' => true,
+			'bulk_processing' => false,
+			'has_view' => true
+		)
+	}
+	
+	
 	public function makeTableLabel($tablename = null, $prefix = null) {
 		$label = $tablename;
 		if($prefix) $label = str_replace($prefix, '', $label);
-		return $label = Inflector::humanize($label);
+		return $label = Inflector::camelize($label);
 	}
 	
 	
@@ -347,10 +443,12 @@ class AclMenuComponent extends Component {
 		if(empty($table))
 			$table = $this->controller->request->params['controller'];
 		
-		$prefix = !empty($this->controller->request->params['cakeclient.route'])
-			? $this->controller->request->params['cakeclient.route'] : false;
+		$prefix = Configure::read('Cakeclient.prefix');
+		if(!$prefix) $prefix = false;
 		
 		$modelName = $this->controller->modelClass;
+		
+		
 		
 		if(!isset($this->controller->{$this->tableModelName}))
 			$this->controller->loadModel($this->tableModelName);
@@ -436,7 +534,7 @@ class AclMenuComponent extends Component {
 					'action_id' => $action_id,
 					'url' => array(
 						'action' => $actionName,
-						'plugin' => Configure::read('Cakeclient.prefix')
+						'plugin' => $prefix
 					)
 				);
 				if(is_array($action) AND !empty($action['controller'])) {
@@ -478,23 +576,6 @@ class AclMenuComponent extends Component {
 								$prefixed = true;
 							}
 						}
-					}
-				}
-				
-				// we do not read the table's controller - for simplicity, go for the AppController only
-				// best would be, to set a list of accessible actions dynamically per user/group from AppController or AuthComponent as some kind of ACL
-				// this is what AclMenuComponent in plugin UtilClasses does!
-				$allowed = array();
-				if($controlled AND !empty($this->controller->allowedActions)) {
-					$allowed = $this->controller->allowedActions;
-				}
-				if(!empty($allowed)) {
-					// get the action's cake-path - like it is done in AclMenuComponent
-					$normalizedPath = $this->controller->_normalizePath($_action['url']);
-					if(!isset($allowed[$normalizedPath])) {
-						$add = false;
-					}else{
-						unset($_action['url']['base']);
 					}
 				}
 				

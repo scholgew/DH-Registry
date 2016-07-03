@@ -9,12 +9,6 @@ class CcConfigAction extends CakeclientAppModel {
 	
 	var $displayField = 'label';
 	
-	var $actsAs = array(
-		'Utils.Sortable' => array(
-			'parentId' => 'cc_config_table_id'
-		)
-	);
-	
 	var $belongsTo = array(
 		'CcConfigTable' => array(
 			'className' => 'CcConfigTable',

@@ -7,21 +7,6 @@ class CrudComponent extends Component {
 	
 	
 	
-	/**	Default setting, which CRUD actions shall be linked from which CRUD view. 
-	*	(no view for delete)
-	*/
-	public $indexActions = array(
-		'add', 'view', 'edit', 'delete'
-	);
-	public $addActions = array(
-		'index'
-	);
-	public $editActions = array(
-		'index', 'view', 'delete'
-	);
-	public $viewActions = array(
-		'index', 'edit', 'delete'
-	);
 	
 	
 	public $defaultRedirect = '/';
@@ -31,25 +16,45 @@ class CrudComponent extends Component {
 	
 	protected $onCrud = false;	// indicate wether the special behavior is active or not
 	
-	protected $modelName = null;
+	protected $modelName = null;	// the model used by the virtual controller
+	
+	protected $virtualController = null;	// the controller name indicated by params['table']
+	
+	
+	
+	
+	public function __construct(ComponentCollection $collection, $settings = array()) {
+		parent::__construct($collection, $settings);
+		$this->settings = Hash::merge($this->_defaults(), $settings);
+		foreach($this->settings as $key => $value)
+			$this->{$key} = $value;
+	}
+	
+	
+	private function _defaults() {
+		return array(
+			'menuModelName' => 'CcConfigMenu',
+			'tableModelName' => 'CcConfigTable',
+			'actionModelName' => 'CcConfigAction'
+		);
+	}
 	
 	
 	function initialize(Controller $controller) {
 		$this->controller = $controller;
-		$this->virtualController = $this->controller->name;
+		$this->virtualController = $controller->name;
 		
 		// we're on a special route (#ToDo: could that be checked against cakeclient.route?)
 		if(!empty($this->controller->request->params['table'])) {
 			// set the table name, as it is passed via the router array
-			$this->virtualController = Inflector::camelize($this->controller->request->params['table']);
+			$table = $this->controller->request->params['table'];
+			$this->virtualController = Inflector::camelize($table);
 			$this->modelName = Inflector::singularize($this->virtualController);
 			
-			// #ToDo: read from CcConfigTable instead!
+			// check if there's an override
+			if($tableConfig = $this->getTableConfig($table))
+				$this->modelName = $tableConfig[$this->tableModel]['model'];
 			
-			//$tableConfigModelClass = Configure::read('Cakeclient.tables.' . $this->controller->request->params['table'] . '.modelclass');
-			if(!empty($tableConfigModelClass)) {
-				$this->modelName = $tableConfigModelClass;
-			}
 			$this->controller->uses = array($this->modelName);
 			$this->controller->modelClass = $this->modelName;	// this does the trick!
 			
@@ -84,6 +89,20 @@ class CrudComponent extends Component {
 	}
 	
 	
+	public function getTableConfig($table = null) {
+		if(!isset($controller->{$this->tableModelName}))
+			$controller->loadModel($this->tableModelName);
+		
+		// #ToDo: get the right table entry that belongs to the action that was being called!
+		// acf_value, Model to get the right menu...
+		
+		return $tableConfig = $controller->{$this->tableModelName}->find('first', array(
+			'contain' => array(),
+			'conditions' => array($this->tableModelName.'.name' => $table)
+		));
+	}
+	
+	
 	public function loadAclMenu() {
 		if(!isset($this->controller->AclMenu)) {
 			$this->controller->AclMenu = $this->controller->Components->load('Cakeclient.AclMenu');
@@ -105,7 +124,6 @@ class CrudComponent extends Component {
 			);
 		}
 	}
-	
 	
 	
 	function setCRUDviewVars() {
@@ -144,18 +162,6 @@ class CrudComponent extends Component {
 		}
 		$this->controller->set(compact('page_title', 'title_for_layout'));
 	}
-	
-	
-	
-	function getTable(&$table = null) {
-		if(empty($table)) {
-			// get the table name to use
-			$table = $this->controller->request->params['controller'];
-		}
-		return $table;
-	}
-	
-	
 	
 	
 	// set an option list for hasMany relations. list depends on model's displayField
@@ -660,7 +666,6 @@ class CrudComponent extends Component {
 	}
 	
 	
-	
 	function setView($action = null) {
 		if(empty($action)) {
 			$action = $this->controller->params['action'];
@@ -694,37 +699,6 @@ class CrudComponent extends Component {
 	}
 	
 	
-	
-	
-	function setLogin() {
-		$config = Configure::read('Cakeclient.login');
-		if(isset($config['simple']) AND $config['simple'] === 'true' AND isset($this->controller->Auth)) {
-			$controller = $this->controller->Auth->settings['loginAction']['controller'];
-			$action = $this->controller->Auth->settings['loginAction']['action'];
-			if($this->controller->Auth->loggedIn()) {
-				$action = 'logout';
-			}
-			$login_info = array(
-				'controller' => $controller,
-				'action' => $action,
-				'title' => ucfirst($action)
-			);
-			if(!isset($config['hide']) OR $config['hide'] === 'false') {
-				$this->controller->set(compact('login_info'));
-			}
-			elseif($this->controller->Auth->loggedIn()) {
-				$this->controller->set(compact('login_info'));
-			}
-		}
-		elseif(isset($config['element'])) {
-			// deliver the element as well as the hide status
-			$login_info = $config;
-			$this->controller->set(compact('login_info'));
-		}
-	}
-
-
-
 	/**
 	* These functions set the referer:
 	* where to redirect to after any CRUD action (except for the "R").

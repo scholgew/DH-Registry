@@ -7,6 +7,12 @@ if(file_exists(APP . 'Model' . DS . pathinfo(__FILE__, PATHINFO_BASENAME))) {
 
 class CcConfigMenu extends CakeclientAppModel {
 	
+	var $actsAs = array(
+		'Utils.Sortable' => array(
+			'parentId' => 'model.foreign_key'
+		)
+	);
+	
 	/* Virtually - yes. 
 	var $belongsTo = array(
 		'UserRole' => array(
