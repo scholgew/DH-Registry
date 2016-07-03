@@ -1,5 +1,0 @@
-<?php
-$filename = APP . 'Config' . DS . 'Users' . 'bootstrap.php';
-if(file_exists($filename)) {
-    include($filename);
-}

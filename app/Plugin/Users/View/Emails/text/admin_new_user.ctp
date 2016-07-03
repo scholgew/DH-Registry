@@ -10,6 +10,7 @@ if(!empty($user[$model])) {
 	}
 	echo "\n\n";
 	echo "Click here for instant approval: \n";
+	
 	echo Router::url(array(
 		'admin' => false,
 		'plugin' => 'users',
