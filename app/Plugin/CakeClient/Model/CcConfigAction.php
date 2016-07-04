@@ -127,25 +127,57 @@ class CcConfigAction extends CakeclientAppModel {
 	
 	
 	function getMethods($tableName = null, $methods = array()) {
-		$methods = array();
-		$controllerName = Inflector::camelize($tableName) . 'Controller';
+		$plugin = $pluginAppOverride = false;
+		$controllerMethods = array();
+		$controllerName = Inflector::camelize($tableName).'Controller';
+		// plugins need to extend the App::paths() array in order to be detected
+		// App::build(array('Controller' => App::path('Controller', 'Plugin')));
 		App::uses($controllerName, 'Controller');
 		
+		// determine wether it's a plugin controller
+		$reflector = new ReflectionClass($controllerName);
+        $dir = dirname($reflector->getFileName());
+		if(strpos($dir, 'Plugin')) {
+			$plugin = true;
+			// test for an app-level override
+			$_controllerName = Inflector::camelize('app_'.$tableName).'Controller';
+			App::uses($_controllerName, 'Controller');
+			if(class_exists($_controllerName, true)) {
+				$pluginAppOverride = true;
+				$controllerName = $_controllerName;
+			}
+		}
+		
+		$excludes = array('reset_order',);
+		if($appExcludes = Configure::read('AclMenu.excludes'))
+			$excludes = array_unique(array_merge($excludes, $appExcludes));
+		Configure::write('AclMenu.excludes', $excludes);
+		
 		if(class_exists($controllerName, true)) {
-			$parent = get_parent_class($controllerName);	// AppController
-			$pParent = get_parent_class($parent);			// CakeCore Controller
+			if($plugin) {
+				if($pluginAppOverride) {
+					$pluginController = get_parent_class($controllerName);
+					$pluginAppController = get_parent_class($pluginController);
+				}else{
+					$pluginAppController = get_parent_class($controllerName);
+				}
+				$appController = get_parent_class($pluginAppController);
+			}
+			$coreController = get_parent_class($appController);
+			
 			// we don't want the methods defined in Cake's core controller
-			$pParentMethods = get_class_methods($pParent);
+			$coreControllerMethods = get_class_methods($coreController);
 			$controllerMethods = get_class_methods($controllerName);
 			foreach($controllerMethods as $i => $method) {
-				if(strpos($method, '_') === 0) 			unset($controllerMethods[$i]);
-				if(strpos($method, 'reset_order') === 0)	unset($controllerMethods[$i]);
-				if(!empty($pParentMethods) AND in_array($method, $pParentMethods)) 	unset($controllerMethods[$i]);
+				if(strpos($method, '_') === 0) 		unset($controllerMethods[$i]);
+				if(in_array($method, $excludes))	unset($controllerMethods[$i]);
+				if(!empty($coreControllerMethods) AND in_array($method, $coreControllerMethods)) 
+													unset($controllerMethods[$i]);
 				if(in_array($method, $methods)) 	unset($controllerMethods[$i]);
 			}
 		}
 		
-		return $methods;
+		return $controllerMethods;
 	}
 	
 	

@@ -13,6 +13,24 @@ Configure::write('Users.userModel', 'Users.User');
 
 
 
+
+// make the plugin controllers & models available to the application
+//App::uses('UsersAppController', 'Controller');
+//App::uses('UsersAppModel', 'Model');
+
+// extend the App::paths() array in order to make the plugin controllers 
+// available to the AclMenuComponent method detection
+App::build(array('Controller' => App::path('Controller', 'Users')));
+App::build(array('Model' => App::path('Model', 'Users')));
+// set some methods *not* to include into the defaultMenu
+$usersExcludes = array('login','logout','blackHole','request_new_password',
+	'reset_password','register','request_email_verification','verify_email','reset');
+if($excludes = Configure::read('AclMenu.excludes'))
+	$usersExcludes = array_unique(array_merge($excludes, $usersExcludes));
+Configure::write('AclMenu.excludes', $usersExcludes);
+
+
+
 /**
 * not fully tested
 */

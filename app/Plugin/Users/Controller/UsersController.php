@@ -112,14 +112,20 @@ class UsersController extends UsersAppController {
 	}
 	
 	
-	public function dashboard() {
+	public function dashboard($id = null) {
 		if($this->DefaultAuth->isAdmin()) {
-			// admin dashboard
-			$inactive = $this->AppUser->find('all', array(
-				'conditions' => array($this->modelClass . '.active' => 0)
-			));
-			$this->set('inactive', $inactive);
-			$this->render('admin_dashboard');
+			if(empty($id)) {
+				// admin dashboard
+				$inactive = $this->AppUser->find('all', array(
+					'conditions' => array($this->modelClass . '.active' => 0)
+				));
+				$this->set('inactive', $inactive);
+				$this->render('admin_dashboard');
+			}else{
+				// possibly we want to render some user-specific data,
+				// but this can only be implemented at app-level
+				$this->render('user_dashboard');
+			}
 		}else{
 			$this->render('user_dashboard');
 		}

@@ -13,25 +13,7 @@ class AclMenuComponent extends Component {
 	
 	
 	
-	/**	Default setting, which CRUD actions shall be linked from which CRUD view. 
-	*	(no view for delete)
-	*/
-	public $indexActions = array(
-		'add', 'view', 'edit', 'delete', 'reset_order'
-	);
-	public $addActions = array(
-		'index'
-	);
-	public $editActions = array(
-		'index', 'view', 'delete'
-	);
-	public $viewActions = array(
-		'index', 'edit', 'delete'
-	);
-	// for the main menu
-	public $menuActions = array(
-		'add', 'index'
-	);
+	
 	
 	
 	public function loadModel($modelName = null) {
@@ -65,7 +47,9 @@ class AclMenuComponent extends Component {
 				array(
 					'name' => 'Config',
 					'prefix' => 'cc_config_',
-					'dataSource' => 'default'
+					'dataSource' => 'default',
+					// #ToDo: implement this (default false):
+					'classPrefix' => false
 				),
 				array(
 					'name' => 'Tables',
@@ -213,35 +197,9 @@ class AclMenuComponent extends Component {
 			/*
 			$_menu = array();
 			foreach($menu as $k => &$item) {
-				if(empty($item[$this->menuModelName]['label'])) 
-					$item[$this->menuModelName]['label'] = 'Menu '.$k+1;
 				
-				foreach($item[$this->tableModelName] as $i => &$table) {
-					$tableName = $table['name'];
-					if(!empty($item['label']))
-						$table['label'] = $table->makeTableLabel($tableName);
-					
-					
-					// #ToDo: put this into the getTableDefaults() method
-					/*
-					// get the table's index view's actions - skip all record related and forbidden actions
-					$actions = array();
-					$actions = $this->getActions('index', $tableName, $controlled);
-					foreach($actions as $ak => $action) {
-						$contextual = false;
-						if(isset($action['contextual'])) {
-							$contextual = (bool) $action['contextual'];
-						}
-						unset($action['contextual']);
-						if($contextual) {
-							unset($actions[$ak]);
-						}
-					}
-					*/
-					
-					
 					// #ToDo: move this to view
-					/*
+					
 					$menuEntry = array(
 						'label' => $label,
 						'url' => array(
@@ -251,9 +209,8 @@ class AclMenuComponent extends Component {
 						),
 						'submenu' => $actions
 					);
-					*/
 					
-					/*
+					
 					// build the output list
 					if(!isset($menuEntry['url']) AND empty($actions)) {
 						unset($item[$this->tableModelName][$i]);
@@ -287,49 +244,10 @@ class AclMenuComponent extends Component {
 		$menuModel->acf_value = $this->acf_adminValue;
 		$menuModel->aro_model = $this->aro_model;
 		if(empty($groups)) $groups = $this->defaultMenus;
-		$menu = $menuModel->getDefaultMenuTree($dataSource, $groups);
 		
-		
-		/*
-		$menu = array();
-		$menuGroups = $this->defaultMenus;
-		if(!empty($groups)) $menuGroups = $groups;
-		$prefixes = Hash::extract($menuGroups, '{n}.prefix');
-		$tableModel = $this->loadModel($tableModelName);
-		$menuModel = $this->loadModel($menuModelName);
-		
-		foreach($menuGroups as $k => $group) {
-			
-			$menu[$k][$this->menuModelName] = $menuModel->getDefaultMenu(
-				$group, $k, $this->aro_model, 
-				$this->acf_adminValue
-			);
-			
-			$source = (!empty($group['dataSource'])) ? $group['dataSource'] : $dataSource;
-			
-			
-			$tables = $tableModel->getTables($source);
-			
-			if(!empty($tables)) foreach($tables as $i => $item) {
-				$hit = false;
-				if(empty($prefix)) {
-					// get only those tables that don't match any prefix
-					foreach($prefixes as $pr) {
-						if(strpos($item, $pr) === 0) {
-							$hit = true;
-							break;
-						}
-					}
-					if($hit) continue;
-				}else{
-					if(strpos($item, $prefix) === false) continue;
-				}
-				
-				$menu[$k][$this->tableModelName][$i] = $tableModel->getTableDefaults($item, $i, $prefix);
-			}
-		}
-		*/
-		return $menu;
+		debug($this->menuModel->CcConfigTable->CcConfigAction->getDefaultActions('users'));
+		exit;
+		return $menuModel->getDefaultMenuTree($dataSource, $groups);
 	}
 	
 	/*

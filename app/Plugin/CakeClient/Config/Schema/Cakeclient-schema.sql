@@ -10,14 +10,13 @@
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 
--- Exportiere Struktur von Tabelle cc_development.cc_config_actions
+-- Exportiere Struktur von Tabelle dh-registry.cc_config_actions
+DROP TABLE IF EXISTS `cc_config_actions`;
 CREATE TABLE IF NOT EXISTS `cc_config_actions` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `cc_config_table_id` int(11) NOT NULL,
-  `position` int(3) DEFAULT NULL,
-  `show` tinyint(1) NOT NULL DEFAULT '1' COMMENT 'To disable an action without deleting it with it''s whole subtree you may just uncheck this box.',
+  `url` varchar(255) COLLATE utf8_unicode_ci NOT NULL COMMENT 'The final Auth-check is performed against this path. Consider possible plugin routes here.',
   `name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
-  `controller` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL COMMENT 'If this action belongs to a foreign controller, mention the controller here.',
   `label` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   `comment` text COLLATE utf8_unicode_ci,
   `contextual` tinyint(1) NOT NULL DEFAULT '1' COMMENT 'Makes clear if the action belongs into a record''s context or not. If yes, the record identifier will be appended, if bulk_processing ability is false. If not, it will also appear in more general areas such as the main menu or on top of an index view.',
@@ -32,10 +31,29 @@ CREATE TABLE IF NOT EXISTS `cc_config_actions` (
 -- Daten Export vom Benutzer nicht ausgewählt
 
 
--- Exportiere Struktur von Tabelle cc_development.cc_config_actions_views
+-- Exportiere Struktur von Tabelle dh-registry.cc_config_actions_cc_config_tables
+DROP TABLE IF EXISTS `cc_config_actions_cc_config_tables`;
+CREATE TABLE IF NOT EXISTS `cc_config_actions_cc_config_tables` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `position` int(3) DEFAULT NULL,
+  `cc_config_table_id` int(11) NOT NULL,
+  `cc_config_action_id` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FK_cc_config_actions_cc_config_tables_cc_config_tables` (`cc_config_table_id`),
+  KEY `FK_cc_config_actions_cc_config_tables_cc_config_actions` (`cc_config_action_id`),
+  CONSTRAINT `FK_cc_config_actions_cc_config_tables_cc_config_actions` FOREIGN KEY (`cc_config_action_id`) REFERENCES `cc_config_actions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_cc_config_actions_cc_config_tables_cc_config_tables` FOREIGN KEY (`cc_config_table_id`) REFERENCES `cc_config_tables` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+-- Daten Export vom Benutzer nicht ausgewählt
+
+
+-- Exportiere Struktur von Tabelle dh-registry.cc_config_actions_views
+DROP TABLE IF EXISTS `cc_config_actions_views`;
 CREATE TABLE IF NOT EXISTS `cc_config_actions_views` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `position` int(3) NOT NULL,
+  `show` tinyint(1) NOT NULL DEFAULT '1',
   `parent_action_id` int(11) NOT NULL,
   `child_action_id` int(11) NOT NULL,
   PRIMARY KEY (`id`),
@@ -48,7 +66,8 @@ CREATE TABLE IF NOT EXISTS `cc_config_actions_views` (
 -- Daten Export vom Benutzer nicht ausgewählt
 
 
--- Exportiere Struktur von Tabelle cc_development.cc_config_configurations
+-- Exportiere Struktur von Tabelle dh-registry.cc_config_configurations
+DROP TABLE IF EXISTS `cc_config_configurations`;
 CREATE TABLE IF NOT EXISTS `cc_config_configurations` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `key` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
@@ -59,7 +78,8 @@ CREATE TABLE IF NOT EXISTS `cc_config_configurations` (
 -- Daten Export vom Benutzer nicht ausgewählt
 
 
--- Exportiere Struktur von Tabelle cc_development.cc_config_displayedrelations
+-- Exportiere Struktur von Tabelle dh-registry.cc_config_displayedrelations
+DROP TABLE IF EXISTS `cc_config_displayedrelations`;
 CREATE TABLE IF NOT EXISTS `cc_config_displayedrelations` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `cc_config_table_id` int(11) NOT NULL,
@@ -80,7 +100,8 @@ CREATE TABLE IF NOT EXISTS `cc_config_displayedrelations` (
 -- Daten Export vom Benutzer nicht ausgewählt
 
 
--- Exportiere Struktur von Tabelle cc_development.cc_config_fielddefinitions
+-- Exportiere Struktur von Tabelle dh-registry.cc_config_fielddefinitions
+DROP TABLE IF EXISTS `cc_config_fielddefinitions`;
 CREATE TABLE IF NOT EXISTS `cc_config_fielddefinitions` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `cc_config_table_id` int(11) DEFAULT NULL COMMENT 'Define a fieldlist belonging to the table directly as a default fieldlist, applying to any action. Leave empty action_id then.',
@@ -101,60 +122,20 @@ CREATE TABLE IF NOT EXISTS `cc_config_fielddefinitions` (
 -- Daten Export vom Benutzer nicht ausgewählt
 
 
--- Exportiere Struktur von Tabelle cc_development.cc_config_menus
+-- Exportiere Struktur von Tabelle dh-registry.cc_config_menus
+DROP TABLE IF EXISTS `cc_config_menus`;
 CREATE TABLE IF NOT EXISTS `cc_config_menus` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `user_role_id` int(11) DEFAULT NULL,
-  `name` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `position` int(3) DEFAULT '0',
+  `lable` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `block` varchar(255) COLLATE utf8_unicode_ci NOT NULL DEFAULT 'cakeclient_nav',
+  `foreign_key` int(11) DEFAULT NULL COMMENT 'Public menus have a NULL value here and belong to no ARO',
+  `model` varchar(255) COLLATE utf8_unicode_ci DEFAULT 'UserRole' COMMENT 'eg, could also be User',
   `comment` text COLLATE utf8_unicode_ci,
   PRIMARY KEY (`id`),
-  KEY `FK_cc_config_menus_user_roles` (`user_role_id`),
-  CONSTRAINT `FK_cc_config_menus_user_roles` FOREIGN KEY (`user_role_id`) REFERENCES `user_roles` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
--- Daten Export vom Benutzer nicht ausgewählt
-
-
--- Exportiere Struktur von Tabelle cc_development.cc_config_tables
-CREATE TABLE IF NOT EXISTS `cc_config_tables` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `cc_config_menu_id` int(11) DEFAULT NULL,
-  `position` int(3) DEFAULT NULL COMMENT 'sorting for menu generation',
-  `name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
-  `label` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `modelclass` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `displayfield` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `displayfield_label` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `show_associations` tinyint(1) NOT NULL DEFAULT '1' COMMENT 'if associated tables are shown AT ALL',
-  PRIMARY KEY (`id`),
-  KEY `FK_cc_config_tables_cc_config_menus` (`cc_config_menu_id`),
-  CONSTRAINT `FK_cc_config_tables_cc_config_menus` FOREIGN KEY (`cc_config_menu_id`) REFERENCES `cc_config_menus` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
--- Daten Export vom Benutzer nicht ausgewählt
-
-
--- Exportiere Struktur von Tabelle cc_development.users
-CREATE TABLE IF NOT EXISTS `users` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `is_admin` tinyint(1) NOT NULL DEFAULT '0',
-  `user_role_id` int(11) DEFAULT NULL,
-  `email` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
-  `password` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `email` (`email`),
-  KEY `FK_users_user_roles` (`user_role_id`),
-  CONSTRAINT `FK_users_user_roles` FOREIGN KEY (`user_role_id`) REFERENCES `user_roles` (`id`) ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
--- Daten Export vom Benutzer nicht ausgewählt
-
-
--- Exportiere Struktur von Tabelle cc_development.user_roles
-CREATE TABLE IF NOT EXISTS `user_roles` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
-  PRIMARY KEY (`id`)
+  KEY `FK_cc_config_menus_user_roles` (`foreign_key`),
+  KEY `model` (`model`),
+  CONSTRAINT `FK_cc_config_menus_user_roles` FOREIGN KEY (`foreign_key`) REFERENCES `user_roles` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- Daten Export vom Benutzer nicht ausgewählt

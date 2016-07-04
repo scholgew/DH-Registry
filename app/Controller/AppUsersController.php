@@ -86,39 +86,49 @@ class AppUsersController extends UsersController {
 	}
 	
 	
-	public function dashboard() {
+	public function dashboard($id = null) {
+		if(!empty($id) AND $this->DefaultAuth-isAdmin())
+			$course_user_id = $id;
+		else
+			$course_user_id = $this->Auth->user('id');
+		
 		$courses = $this->AppUser->Course->find('all', array(
 			'conditions' => array(
-				'Course.user_id' => $this->Auth->user('id'),
+				'Course.user_id' => $course_user_id,
 				'Course.updated >' => date('Y-m-d H:i:s', time() - Configure::read('App.CourseArchivalPeriod'))
 			)
 		));
 		$this->set(compact('courses'));
 		
 		if($this->DefaultAuth->isAdmin()) {
-			// admin dashboard
-			$unapproved = $this->AppUser->find('all', array(
-				'contain' => array('Institution'),
-				'conditions' => array(
-					$this->modelClass . '.active' => 0,
-					$this->modelClass . '.approved' => 0
-				)
-			));
-			
-			$invited = $this->AppUser->find('all', array(
-				'contain' => array('Institution'),
-				'conditions' => array(
-					'OR' => array(
-						$this->modelClass . '.password IS NULL',
-						$this->modelClass . '.password' => ''
-					),
-					$this->modelClass . '.active' => 1
-				)
-			));
-			
-			$this->set(compact('unapproved', 'invited'));
-			
-			$this->render('admin_dashboard');
+			if(empty($id)) {
+				// admin dashboard
+				$unapproved = $this->AppUser->find('all', array(
+					'contain' => array('Institution'),
+					'conditions' => array(
+						$this->modelClass . '.active' => 0,
+						$this->modelClass . '.approved' => 0
+					)
+				));
+				
+				$invited = $this->AppUser->find('all', array(
+					'contain' => array('Institution'),
+					'conditions' => array(
+						'OR' => array(
+							$this->modelClass . '.password IS NULL',
+							$this->modelClass . '.password' => ''
+						),
+						$this->modelClass . '.active' => 1
+					)
+				));
+				
+				$this->set(compact('unapproved', 'invited'));
+				$this->render('admin_dashboard');
+				
+			}else{
+				$this->set('notice', 'You are viewing the dashboard of User '.$id);
+				$this->render('user_dashboard');
+			}
 			
 		}else{
 			// user dashboard

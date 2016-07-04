@@ -15,10 +15,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-?>
-<h2>Your Courses</h2>
+ 
 
-<?php
+ 
+ if(!empty($notice)) {
+	echo '<h2>User Courses</h2>';
+	echo '<p class="notice">'.$notice.'</p>';
+}else{
+	echo '<h2>Your Courses</h2>';
+}
+
 if(empty($courses)) {
 	echo '<p>There are no courses in the registry owned by you.</p>';
 	echo $this->Html->tag('div', $this->Html->link('Add a Course', array(
@@ -26,7 +32,7 @@ if(empty($courses)) {
 		'action' => 'add'
 	)), array('class' => 'actions'));
 }else{
-	echo $this->element('courses/map');
+	//echo $this->element('courses/map');
 	echo $this->Html->tag('div', $this->Html->link('Add new Course', array(
 		'controller' => 'courses',
 		'action' => 'add'
