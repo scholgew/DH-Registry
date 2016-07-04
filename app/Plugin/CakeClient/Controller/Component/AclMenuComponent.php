@@ -17,7 +17,7 @@ class AclMenuComponent extends Component {
 	*	(no view for delete)
 	*/
 	public $indexActions = array(
-		'add', 'view', 'edit', 'delete'
+		'add', 'view', 'edit', 'delete', 'reset_order'
 	);
 	public $addActions = array(
 		'index'
@@ -32,6 +32,13 @@ class AclMenuComponent extends Component {
 	public $menuActions = array(
 		'add', 'index'
 	);
+	
+	
+	public function loadModel($modelName = null) {
+		if(!isset($this->controller->{$modelName}))
+			$this->controller->loadModel($modelName);
+		return $this->controller->{$modelName};
+	}
 	
 	
 	
@@ -116,9 +123,7 @@ class AclMenuComponent extends Component {
 		foreach($this->settings as $key => $value)
 			$this->{$key} = $value;
 		
-		if(!isset($controller->{$this->menuModelName}))
-			$controller->loadModel($this->menuModelName);
-		$this->menuModel = $controller->{$this->menuModelName};
+		$this->menuModel = $this->loadModel($this->menuModelName);
 		
 		$this->request = $controller->request;
 		
@@ -200,7 +205,7 @@ class AclMenuComponent extends Component {
 			
 			// only if demanded or admin: get defaults if no menu available
 			if($default OR (empty($menu) AND $this->isAdmin())) {
-				$menu = $this->getDatabaseMenu($dataSource);
+				$menu = $this->getDefaultMenu($dataSource);
 			}	
 			debug($menu);
 			
@@ -275,30 +280,34 @@ class AclMenuComponent extends Component {
 	}
 	
 	
-	public function getDatabaseMenu($dataSource = null, $groups = array()) {
-		$menu = array();
-		if(empty($dataSource)) $dataSource = 'default';
+	public function getDefaultMenu($dataSource = null, $groups = array()) {
+		$menuModel = $this->loadModel($menuModelName);
+		$menuModel->acf_value = $this->acf_adminValue;
+		$menuModel->aro_model = $this->aro_model;
+		$menuGroups = $this->defaultMenus;
+		if(!empty($groups)) $menuGroups = $groups;
+		$menu = $menuModel->createDefaultMenuTree($dataSource, $groups);
 		
+		
+		/*
+		$menu = array();
 		$menuGroups = $this->defaultMenus;
 		if(!empty($groups)) $menuGroups = $groups;
 		$prefixes = Hash::extract($menuGroups, '{n}.prefix');
+		$tableModel = $this->loadModel($tableModelName);
+		$menuModel = $this->loadModel($menuModelName);
 		
 		foreach($menuGroups as $k => $group) {
-			$source = (!empty($group['dataSource'])) ? $group['dataSource'] : $dataSource;
-			App::uses('ConnectionManager', 'Model');
-			$db = ConnectionManager::getDataSource($source);
-			$tables = $db->listSources();
 			
-			$prefix = (!empty($group['prefix'])) ? $group['prefix'] : null;
-			$name = (!empty($group['name'])) ? $group['name'] : 'Menu '.$k+1;
-			
-			$menu[$k][$this->menuModelName] = array(
-				'label' => $name,
-				'position' => $k+1,
-				'block' => 'cakeclient_nav',
-				'foreign_key' => $this->acf_adminValue,
-				'model' => $this->aro_model,
+			$menu[$k][$this->menuModelName] = $menuModel->getDefaultMenu(
+				$group, $k, $this->aro_model, 
+				$this->acf_adminValue
 			);
+			
+			$source = (!empty($group['dataSource'])) ? $group['dataSource'] : $dataSource;
+			
+			
+			$tables = $tableModel->getTables($source);
 			
 			if(!empty($tables)) foreach($tables as $i => $item) {
 				$hit = false;
@@ -315,24 +324,16 @@ class AclMenuComponent extends Component {
 					if(strpos($item, $prefix) === false) continue;
 				}
 				
-				$menu[$k][$this->tableModelName][$i] = $this->getTableDefaults($item, $i, $prefix);
+				$menu[$k][$this->tableModelName][$i] = $tableModel->getTableDefaults($item, $i, $prefix);
 			}
 		}
-		
+		*/
 		return $menu;
 	}
 	
-	
+	/*
 	public function getTableDefaults($tablename, $i = 0, $prefix = null) {
 		$label = $this->makeTableLabel($tablename, $prefix);
-		$urlPrefix = Configure::read('Cakeclient.prefix');
-		$labelPrefix = null;
-		if(!empty($urlPrefix)) {
-			$urlPrefix = '/'.$urlPrefix;
-			$labelPrefix = Inflector::classify($urlPrefix).' ';
-		}else{
-			$urlPrefix = null;
-		}
 		return array(
 			//'id' => '1',
 			//'cc_config_menu_id' => 1,
@@ -379,7 +380,6 @@ class AclMenuComponent extends Component {
 						array(
 							//'id' => '1',
 							//'cc_config_table_id' => '1',
-							'show' => true,
 							'url' => $urlPrefix.'/'.$tablename.'/index',
 							'name' => 'index',
 							'label' => $labelPrefix.$label.' List',
@@ -394,48 +394,17 @@ class AclMenuComponent extends Component {
 			)
 		);
 	}
+	*/
 	
 	
-	public function getActionDefaults($viewName = null, $tablename = null, $urlPrefix = null) {
-		$tableLabel = $this->makeTableLabel($tablename, $prefix);
-		$_keys = array(
-			//'id', 'cc_config_table_id',
-			'position', 'show', 'url', 'name', 'label',
-			'comment', 'contextual', 'has_form',
-			'bulk_processing', 'has_view'
-		);
-		switch($actionName) {
-		case 'menu':
-		case 'index':
-		case 'add'
-		case 'view'
-		}
-	}
 	
-	
-	public function getDefaultAdd() {
-		return array(
-			//'id' => '1',
-			//'cc_config_table_id' => '1',
-			'show' => true,
-			'url' => $urlPrefix.'/'.$tablename.'/add',
-			'name' => 'add',
-			'label' => $labelPrefix.'Add '.Inflector::singularize($label),
-			'comment' => null,
-			'contextual' => false,
-			'has_form' => true,
-			'bulk_processing' => false,
-			'has_view' => true
-		)
-	}
-	
-	
+	/*
 	public function makeTableLabel($tablename = null, $prefix = null) {
 		$label = $tablename;
 		if($prefix) $label = str_replace($prefix, '', $label);
 		return $label = Inflector::camelize($label);
 	}
-	
+	*/
 	
 	public function getActions($action = null, $table = null, $controlled = true) {
 		if(empty($action))
@@ -450,9 +419,8 @@ class AclMenuComponent extends Component {
 		
 		
 		
-		if(!isset($this->controller->{$this->tableModelName}))
-			$this->controller->loadModel($this->tableModelName);
-		$currentAction = $this->controller->{$this->tableModelName}->find('first', array(
+		$model = $this->loadModel($this->tableModelName);
+		$currentAction = $model->find('first', array(
 			'contain' => array(
 				$this->actionModelName => array(
 					'conditions' => array($this->actionModelName.'.name' => $action),

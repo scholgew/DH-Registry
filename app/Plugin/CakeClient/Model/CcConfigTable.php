@@ -43,6 +43,82 @@ class CcConfigTable extends CakeclientAppModel {
 	);
 	
 	
+	public function getTables($source = null) {
+		if(empty($source)) $source = 'default';
+		App::uses('ConnectionManager', 'Model');
+		$db = ConnectionManager::getDataSource($source);
+		return $db->listSources();
+	}
+	
+	
+	public function getDefaultTable($tablename, $i = 0, $prefix = null) {
+		$tableLabel = $this->makeTableLabel($tableName, $prefix);
+		return array(
+			//'id' => '1',
+			//'cc_config_menu_id' => 1,
+			'position' => $i+1,
+			'name' => $tableName,
+			'allow_all' => false,	// admin is allowed anyway
+			'label' => $tableLabel,
+			'model' => Inflector::classify($tableName),
+			'controller' => $tableName,
+			'displayfield' => null,
+			'displayfield_label' => null,
+			'show_associations' => true
+		);
+	}
+	
+	
+	public function getGroupTables($source = null, $group = array(), $prefixes = array()) {
+		$prefix = (!empty($group['prefix'])) ? $group['prefix'] : null;
+		
+		$_tables = $this->getTables($source);
+		$tables = array();
+		if(!empty($_tables)) foreach($_tables as $i => $tableName) {
+			$hit = false;
+			if(empty($prefix)) {
+				// get only those tables that don't match any prefix
+				foreach($prefixes as $pr) {
+					if(strpos($tableName, $pr) === 0) {
+						$hit = true;
+						break;
+					}
+				}
+				if($hit) continue;
+			}else{
+				if(strpos($tableName, $prefix) === false) continue;
+			}
+			
+			$tables[] = $this->CcConfigTable->getDefaultTable($tableName, $i, $prefix);
+		}
+		
+		return $tables;
+	}
+	
+	
+	public function getDefaultTableTree($source = null, $group = array(), $prefixes = array()) {
+		$tables = $this->getGroupTables($source, $group, $prefixes);
+		$prefix = (!empty($group['prefix'])) ? $group['prefix'] : null;
+		if(!empty($tables)) foreach($tables as $i => &$table) {
+			$table['CcConfigActionsCcConfigTable'] = array();
+			$actions = $this->CcConfigAction->getDefaultActions($table['name'] = null, 'menu', $prefix);
+			if(!empty($actions)) foreach($actions as $k => $action) {
+				$table['CcConfigActionsCcConfigTable'][] = array(
+					//'id',
+					//'cc_config_table_id',
+					//'cc_config_action_id'
+					'position' => $k+1,
+					'CcConfigAction' => $action
+				);
+			}
+		}
+	}
+	
+	
+	
+	
+	
+	
 	/**
 	* Takes either a table ID or a table name as argument, 
 	* returns the table ID, sets the table name by reference.
@@ -67,7 +143,7 @@ class CcConfigTable extends CakeclientAppModel {
 				$stored = $this->find('first', array(
 					'conditions' => array(
 						'name' => $table,
-						// #ToDo 'cc_config_menu_id' => Configure::read('Cakeclient.config_id')
+						// #ToDo: 'cc_config_menu_id'
 					),
 					'recursive' => -1
 				));

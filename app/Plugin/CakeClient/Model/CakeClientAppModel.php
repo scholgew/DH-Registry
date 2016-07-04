@@ -12,9 +12,15 @@ class CakeclientAppModel extends AppModel {
 		'Containable'
 	);
 	
-	function afterSave($created, $options = array()) {
+	public function afterSave($created, $options = array()) {
 		// move this to affected models later on.
 		Cache::clear($check_expiry = false, 'cakeclient');
+	}
+	
+	public function makeTableLabel($tablename = null, $prefix = null) {
+		$label = $tablename;
+		if($prefix) $label = str_replace($prefix, '', $label);
+		return $label = Inflector::camelize($label);
 	}
 	
 }

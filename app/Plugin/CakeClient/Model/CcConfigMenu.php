@@ -7,25 +7,65 @@ if(file_exists(APP . 'Model' . DS . pathinfo(__FILE__, PATHINFO_BASENAME))) {
 
 class CcConfigMenu extends CakeclientAppModel {
 	
-	var $actsAs = array(
+	public $actsAs = array(
 		'Utils.Sortable' => array(
 			'parentId' => 'model.foreign_key'
 		)
 	);
 	
 	/* Virtually - yes. 
-	var $belongsTo = array(
+	public $belongsTo = array(
 		'UserRole' => array(
 			'className' => 'UserRole'
 		)
 	);
 	*/
 	
-	var $hasMany = array(
+	public $hasMany = array(
 		'CcConfigTable' => array(
 			'className' => 'CcConfigTable'
 		)
 	);
+	
+	public $aro_model = 'UserRole';
+	public $aro_value = 1;
+	
+	
+	
+	public function getDefaultMenu($group = array(), $k = 0) {
+		$source = (!empty($group['dataSource'])) ? $group['dataSource'] : null;
+		$tables = $this->CcConfigTable->getTables($source);
+		
+		$prefix = (!empty($group['prefix'])) ? $group['prefix'] : null;
+		$name = (!empty($group['name'])) ? $group['name'] : 'Menu '.$k+1;
+		
+		return array(
+			//'id',
+			'label' => $name,
+			'position' => $k+1,
+			'block' => 'cakeclient_nav',
+			'foreign_key' => $this->aro_value,
+			'model' => $this->aro_model
+		);
+	}
+	
+	
+	public function createDefaultMenuTree($dataSource = null, $menuGroups = array()) {
+		$menu = array();
+		$prefixes = Hash::extract($menuGroups, '{n}.prefix');
+		
+		if(!empty($menuGroups)) foreach($menuGroups as $k => $group) {
+			
+			$menu[$k]['CcConfigMenu'] = $this->getDefaultMenu($group, $k);
+			
+			$source = (!empty($group['dataSource'])) ? $group['dataSource'] : $dataSource;
+			
+			//$menu[$k]['CcConfigTable'] = $this->CcConfigTable->getDefaultTables($source, $group, $prefixes);
+			$menu[$k]['CcConfigTable'] = $this->CcConfigTable->createDefaultTableTree($source, $group, $prefixes);
+		}
+		
+		return $menu;
+	}
 	
 	
 	/* Copied over from the former configuration model

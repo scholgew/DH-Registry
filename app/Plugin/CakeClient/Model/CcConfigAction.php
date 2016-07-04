@@ -51,41 +51,112 @@ class CcConfigAction extends CakeclientAppModel {
 	
 	
 	
-	function getMethods($table_name = null) {
-		$methods = array();
-		$controllerName = Inflector::camelize($table_name) . 'Controller';
-		$modelName = Inflector::classify($table_name);
-		App::uses($controllerName, 'Controller');
+	public function getDefaultActions($tableName = null, $viewName = null, $tablePrefix = null) {
+		$actions = array();
+		$tableLabel = $this->makeTableLabel($tableName, $tablePrefix);
+		$urlPrefix = Configure::read('Cakeclient.prefix');
+		$labelPrefix = null;
+		if(!empty($urlPrefix)) {
+			$urlPrefix = '/'.$urlPrefix;
+			$labelPrefix = Inflector::classify($urlPrefix).' ';
+		}else{
+			$urlPrefix = null;
+		}
+		
+		// default CRUD actions
+		$methods = array('add','index','view','edit','delete');
+		
+		// access the model's behaviors, if it uses Sortable, add the method "reset_order"
+		$modelName = Inflector::classify($tableName);
 		$$modelName = ClassRegistry::init($modelName);
+		if($$modelName->Behaviors->loaded('Sortable')) {
+			$methods[] = 'reset_order';
+		}
+		
+		// get the existant controller functions
+		$methods = array_merge($methods, $this->getMethods($tableName, $methods));
+		
+		foreach($methods as $i => $method) {
+			$contextual = 1;
+			if(in_array($method, array('add','index','reset_order')))
+				$contextual = 0;
+			$has_form = 0;
+			if(in_array($method, array('add','edit')))
+				$has_form = 1;
+			$has_view = 0;
+			if(in_array($method, array('add','index','edit','view')))
+				$has_view = 1;
+			$bulk = 0;
+			if(in_array($method, array('delete')))
+				$bulk = 1;
+			
+			switch($method) {
+				case 'index': $label = $labelPrefix.$tableLabel.' List'; break;
+				case 'add': case 'edit': case 'view': case 'delete':
+					$label = $labelPrefix.Inflector::humanize($method).' '.Inflector::singularize($tableLabel);
+					break;
+				default: $label = $labelPrefix.Inflector::humanize($method);
+			}
+			
+			$action = array(
+				//'id',
+				//'cc_config_table_id',
+				'url' => '/'.$tableName.'/'.$method,
+				'name' => $method,
+				'label' => $label,
+				'contextual' => $contextul,
+				'has_form' => $has_form,
+				'has_view' => $has_view,
+				'bulk_processing' => $bulk,
+				'position' => $i+1
+			);
+			
+			// filter out some actions for special purposes
+			if(!empty($viewName)) switch($viewName) {
+			case 'menu':	if(!in_array($method, array('add','index'))) continue;
+			case 'add':		if(!in_array($method, array('index'))) continue;
+			case 'view':	if(!in_array($method, array('add','index','edit','delete'))) continue;
+			case 'edit':	if(!in_array($method, array('add','index','view','delete'))) continue;
+			}
+			
+			$actions[] = $action;
+		}
+		
+		return $actions;
+	}
+	
+	
+	function getMethods($tableName = null, $methods = array()) {
+		$methods = array();
+		$controllerName = Inflector::camelize($tableName) . 'Controller';
+		App::uses($controllerName, 'Controller');
 		
 		if(class_exists($controllerName, true)) {
 			$parent = get_parent_class($controllerName);	// AppController
 			$pParent = get_parent_class($parent);			// CakeCore Controller
 			// we don't want the methods defined in Cake's core controller
 			$pParentMethods = get_class_methods($pParent);
-			$methods = get_class_methods($controllerName);
-			foreach($methods as $i => $method) {
-				if(strpos($method, '_') === 0) 			unset($methods[$i]);
-				if(strpos($method, 'reset_order') === 0)	unset($methods[$i]);
-				if(in_array($method, $pParentMethods)) 	unset($methods[$i]);
+			$controllerMethods = get_class_methods($controllerName);
+			foreach($controllerMethods as $i => $method) {
+				if(strpos($method, '_') === 0) 			unset($controllerMethods[$i]);
+				if(strpos($method, 'reset_order') === 0)	unset($controllerMethods[$i]);
+				if(in_array($method, $pParentMethods)) 	unset($controllerMethods[$i]);
+				if(in_array($method, $methods)) 	unset($controllerMethods[$i]);
 			}
-		}
-		
-		// access the model's behaviors, if it uses Sortable, add the method "reset_order"
-		if($$modelName->Behaviors->loaded('Sortable')) {
-			$methods[] = 'reset_order';
 		}
 		
 		return $methods;
 	}
 	
 	
-	function store($table_name = null) {
-		if(empty($table_name)) return false;
-		$table_id = $this->CcConfigTable->getTable($table_name);
+	function store($tableName = null, $prefix = null) {
+		if(empty($tableName)) return false;
+		
+		$table_id = $this->CcConfigTable->getTable($tableName);
+		
 		if(!empty($table_id)) {
-			// $table_name needs to be string now
-			$methods = $this->getMethods($table_name);
+			// $tableName needs to be string now
+			$methods = $this->getDefaultActions($tableName, null, $prefix);
 			if(!empty($methods)) {
 				$stored = $this->find('all', array(
 					'conditions' => array(
@@ -93,46 +164,19 @@ class CcConfigAction extends CakeclientAppModel {
 					),
 					'recursive' => -1
 				));
-				$count = count($stored) + 1;
 				
 				foreach($methods as $i => $method) {
 					$existant = false;
 					foreach($stored as $k => $record) {
-						if($record['CcConfigAction']['name'] == $method) {
+						if($record['CcConfigAction']['name'] == $method['name']) {
 							$existant = true;
 							break;
 						}
 					}
 					if(!$existant) {
-						// store a new record
-						$context = 1;
-						if(in_array($method, array('add','index'))) {
-							$context = 0;
-						}
-						$has_form = 0;
-						if(in_array($method, array('add','edit'))) {
-							$has_form = 1;
-						}
-						$has_view = 0;
-						if(in_array($method, array('add','index','edit','view'))) {
-							$has_view = 1;
-						}
-						$bulk = 0;
-						if(in_array($method, array('delete'))) {
-							$bulk = 1;
-						}
+						$method['cc_config_table_id'] = $table_id;
 						$this->create();
-						$this->save(array(
-							'cc_config_table_id' => $table_id,
-							'name' => $method,
-							'label' => Inflector::humanize($method),
-							'contextual' => $context,
-							'has_form' => $has_form,
-							'has_view' => $has_view,
-							'bulk_processing' => $bulk,
-							'position' => $count
-						), false);
-						$count ++;
+						$this->save($method, false);
 					}
 				}
 			}
@@ -140,11 +184,14 @@ class CcConfigAction extends CakeclientAppModel {
 	}
 	
 	
-	function tidy($for_table = null) {
-		if(empty($for_table)) return false;
-		$table_id = $this->CcConfigTable->getTable($for_table);
+	/*
+	* Remove actions that have disappeared from the controller.
+	*/
+	function tidy($tableName = null) {
+		if(empty($tableName)) return false;
+		$table_id = $this->CcConfigTable->getTable($tableName);
 		if(!empty($table_id)) {
-			$methods = $this->getMethods($for_table);
+			$methods = $this->getMethods($tableName);
 			if(!empty($methods)) {
 				$stored = $this->find('all', array(
 					'conditions' => array(
