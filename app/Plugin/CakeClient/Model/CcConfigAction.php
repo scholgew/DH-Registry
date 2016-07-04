@@ -112,14 +112,14 @@ class CcConfigAction extends CakeclientAppModel {
 			);
 			
 			// filter out some actions for special purposes
+			$add = true;
 			if(!empty($viewName)) switch($viewName) {
-			case 'menu':	if(!in_array($method, array('add','index'))) continue;
-			case 'add':		if(!in_array($method, array('index'))) continue;
-			case 'view':	if(!in_array($method, array('add','index','edit','delete'))) continue;
-			case 'edit':	if(!in_array($method, array('add','index','view','delete'))) continue;
+			case 'menu':	if(!in_array($method, array('add','index'))) $add = false; break;
+			case 'add':		if(!in_array($method, array('index'))) $add = false; break;
+			case 'view':	if(!in_array($method, array('add','index','edit','delete'))) $add = false; break;
+			case 'edit':	if(!in_array($method, array('add','index','view','delete'))) $add = false; break;
 			}
-			
-			$actions[] = $action;
+			if($add) $actions[] = $action;
 		}
 		
 		return $actions;
