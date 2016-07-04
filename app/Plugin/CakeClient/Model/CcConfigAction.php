@@ -91,7 +91,7 @@ class CcConfigAction extends CakeclientAppModel {
 				$bulk = 1;
 			
 			switch($method) {
-				case 'index': $label = $labelPrefix.$tableLabel.' List'; break;
+				case 'index': $label = $labelPrefix.'List '.$tableLabel; break;
 				case 'add': case 'edit': case 'view': case 'delete':
 					$label = $labelPrefix.Inflector::humanize($method).' '.Inflector::singularize($tableLabel);
 					break;
