@@ -104,7 +104,7 @@ class CcConfigAction extends CakeclientAppModel {
 				'url' => '/'.$tableName.'/'.$method,
 				'name' => $method,
 				'label' => $label,
-				'contextual' => $contextul,
+				'contextual' => $contextual,
 				'has_form' => $has_form,
 				'has_view' => $has_view,
 				'bulk_processing' => $bulk,
@@ -140,7 +140,7 @@ class CcConfigAction extends CakeclientAppModel {
 			foreach($controllerMethods as $i => $method) {
 				if(strpos($method, '_') === 0) 			unset($controllerMethods[$i]);
 				if(strpos($method, 'reset_order') === 0)	unset($controllerMethods[$i]);
-				if(in_array($method, $pParentMethods)) 	unset($controllerMethods[$i]);
+				if(!empty($pParentMethods) AND in_array($method, $pParentMethods)) 	unset($controllerMethods[$i]);
 				if(in_array($method, $methods)) 	unset($controllerMethods[$i]);
 			}
 		}

@@ -50,18 +50,15 @@ class CcConfigMenu extends CakeclientAppModel {
 	}
 	
 	
-	public function createDefaultMenuTree($dataSource = null, $menuGroups = array()) {
+	public function getDefaultMenuTree($dataSource = null, $menuGroups = array()) {
 		$menu = array();
 		$prefixes = Hash::extract($menuGroups, '{n}.prefix');
 		
 		if(!empty($menuGroups)) foreach($menuGroups as $k => $group) {
-			
 			$menu[$k]['CcConfigMenu'] = $this->getDefaultMenu($group, $k);
 			
 			$source = (!empty($group['dataSource'])) ? $group['dataSource'] : $dataSource;
-			
-			//$menu[$k]['CcConfigTable'] = $this->CcConfigTable->getDefaultTables($source, $group, $prefixes);
-			$menu[$k]['CcConfigTable'] = $this->CcConfigTable->createDefaultTableTree($source, $group, $prefixes);
+			$menu[$k]['CcConfigTable'] = $this->CcConfigTable->getDefaultTableTree($source, $group, $prefixes);
 		}
 		
 		return $menu;

@@ -51,7 +51,7 @@ class CcConfigTable extends CakeclientAppModel {
 	}
 	
 	
-	public function getDefaultTable($tablename, $i = 0, $prefix = null) {
+	public function getDefaultTable($tableName, $i = 0, $prefix = null) {
 		$tableLabel = $this->makeTableLabel($tableName, $prefix);
 		return array(
 			//'id' => '1',
@@ -89,7 +89,7 @@ class CcConfigTable extends CakeclientAppModel {
 				if(strpos($tableName, $prefix) === false) continue;
 			}
 			
-			$tables[] = $this->CcConfigTable->getDefaultTable($tableName, $i, $prefix);
+			$tables[] = $this->getDefaultTable($tableName, $i, $prefix);
 		}
 		
 		return $tables;
@@ -112,6 +112,8 @@ class CcConfigTable extends CakeclientAppModel {
 				);
 			}
 		}
+		
+		return $tables;
 	}
 	
 	

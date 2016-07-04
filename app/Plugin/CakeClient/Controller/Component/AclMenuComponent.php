@@ -210,6 +210,7 @@ class AclMenuComponent extends Component {
 			debug($menu);
 			
 			// basically do some cleaning...
+			/*
 			$_menu = array();
 			foreach($menu as $k => &$item) {
 				if(empty($item[$this->menuModelName]['label'])) 
@@ -252,13 +253,14 @@ class AclMenuComponent extends Component {
 					);
 					*/
 					
-					
+					/*
 					// build the output list
 					if(!isset($menuEntry['url']) AND empty($actions)) {
 						unset($item[$this->tableModelName][$i]);
 					}
 				}
 			}
+			*/
 			Cache::write($menuName, $menu, 'cakeclient');
 		}
 		
@@ -281,12 +283,11 @@ class AclMenuComponent extends Component {
 	
 	
 	public function getDefaultMenu($dataSource = null, $groups = array()) {
-		$menuModel = $this->loadModel($menuModelName);
+		$menuModel = $this->loadModel($this->menuModelName);
 		$menuModel->acf_value = $this->acf_adminValue;
 		$menuModel->aro_model = $this->aro_model;
-		$menuGroups = $this->defaultMenus;
-		if(!empty($groups)) $menuGroups = $groups;
-		$menu = $menuModel->createDefaultMenuTree($dataSource, $groups);
+		if(empty($groups)) $groups = $this->defaultMenus;
+		$menu = $menuModel->getDefaultMenuTree($dataSource, $groups);
 		
 		
 		/*
@@ -424,8 +425,8 @@ class AclMenuComponent extends Component {
 			'contain' => array(
 				$this->actionModelName => array(
 					'conditions' => array($this->actionModelName.'.name' => $action),
-					'CcConfigActionsViewsAction' => array(
-						'order' => 'CcConfigActionsViewsAction.position'
+					'CcConfigActionsView' => array(
+						'order' => 'CcConfigActionsView.position'
 					)
 				)
 			),
@@ -448,8 +449,7 @@ class AclMenuComponent extends Component {
 			$actions = $this->controller->{$this->tableModelName}->find('first', array(
 				'contain' => array(
 					$this->actionModelName => array(
-						'conditions' => array($this->actionModelName.'.name !=' => $action),
-						'order' => 'position'
+						'conditions' => array($this->actionModelName.'.name !=' => $action)
 					)
 				),
 				'conditions' => array($this->tableModelName.'.name' => $table)

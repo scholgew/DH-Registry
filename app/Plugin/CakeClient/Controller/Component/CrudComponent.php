@@ -53,7 +53,8 @@ class CrudComponent extends Component {
 			
 			// check if there's an override
 			if($tableConfig = $this->getTableConfig($table))
-				$this->modelName = $tableConfig[$this->tableModel]['model'];
+				if(!empty($tableConfig[$this->tableModelName]['model']))
+					$this->modelName = $tableConfig[$this->tableModelName]['model'];
 			
 			$this->controller->uses = array($this->modelName);
 			$this->controller->modelClass = $this->modelName;	// this does the trick!
@@ -90,13 +91,13 @@ class CrudComponent extends Component {
 	
 	
 	public function getTableConfig($table = null) {
-		if(!isset($controller->{$this->tableModelName}))
-			$controller->loadModel($this->tableModelName);
+		if(!isset($this->controller->{$this->tableModelName}))
+			$this->controller->loadModel($this->tableModelName);
 		
 		// #ToDo: get the right table entry that belongs to the action that was being called!
 		// acf_value, Model to get the right menu...
 		
-		return $tableConfig = $controller->{$this->tableModelName}->find('first', array(
+		return $tableConfig = $this->controller->{$this->tableModelName}->find('first', array(
 			'contain' => array(),
 			'conditions' => array($this->tableModelName.'.name' => $table)
 		));
