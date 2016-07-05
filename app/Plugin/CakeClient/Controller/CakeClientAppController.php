@@ -27,7 +27,7 @@ class CakeclientAppController extends AppController {
 	
 	
 	
-	function beforeFilter() {
+	public function beforeFilter() {
 		// check with main application AppController, if we got permission to proceed
 		parent::beforeFilter();
 		
@@ -50,10 +50,6 @@ class CakeclientAppController extends AppController {
 			}
 		}
 		
-		// we're on a CRUD route - set all the CRUD relevant variables (actions, menu, view, fieldlist, relations)
-		if(!in_array(strtolower($this->request->params['action']), array('delete','reset_order')))
-			$this->Crud->setCRUDviewVars();
-		
 		// maintain pagination settings
 		if($paginate = $this->Session->read('Paginate')) $this->paginate = $paginate;
 		if(!empty($this->request->data['Pager'])) {
@@ -67,7 +63,12 @@ class CakeclientAppController extends AppController {
 	
 	
 	
-	
+	public function beforeRender() {
+		parent::beforeRender();
+		// we're on a CRUD route - set all the CRUD relevant variables (actions, menu, view, fieldlist, relations)
+		if(!in_array(strtolower($this->request->params['action']), array('delete','reset_order')))
+			$this->Crud->setCRUDviewVars();
+	}
 	
 	
 	
@@ -80,7 +81,7 @@ class CakeclientAppController extends AppController {
 	* As this is only a generic plugin, that makes sense. 
 	* CakeclientAppController is only in effect, if we're on a CRUD route, however. 
 	*/
-	function _appControllerOverride($method = null, &$return) {
+	protected function _appControllerOverride($method = null, &$return) {
 		if(!empty($method) AND is_string($method)) {
 			// Do not use $this as the current object's reference - $this' parent class is already extended by $this!
 			// Naming $this by it's string classname checks the parent statically. 
@@ -104,7 +105,7 @@ class CakeclientAppController extends AppController {
 	* If more advanced logic is required, this method may be 
 	* overridden in the application's AppController. 
 	*/
-	function _normalizePath($action = array()) {
+	public function _normalizePath($action = array()) {
 		$return = array();
 		if($this->_appControllerOverride('normalizePath', $return, $action)) return $return;
 		
@@ -139,27 +140,27 @@ class CakeclientAppController extends AppController {
 	
 	
 	
-	function index() {
+	public function index() {
 		$this->Crud->index();
 	}
 	
-	function add() {
+	public function add() {
 		$this->Crud->add();
 	}
 	
-	function edit($id = null) {
+	public function edit($id = null) {
 		$this->Crud->edit($id);
 	}
 	
-	function view($id = null) {
+	public function view($id = null) {
 		$this->Crud->view($id);
 	}
 	
-	function delete($id = null) {
+	public function delete($id = null) {
 		$this->Crud->delete($id);
 	}
 	
-	function reset_order() {
+	public function reset_order() {
 		$this->Crud->reset_order();
 	}
 }

@@ -152,6 +152,7 @@
 			$cc_config_actions_edit
 		);
 		
+		
 		// finally the "real" CRUD routes :)
 		// short index URLs
 		Router::connect(
@@ -166,15 +167,14 @@
 				'crud' => 'add|view|index|edit|delete|reset_order'
 			)
 		);
-		
 		if(!$prefix_empty) {
 			// Route everything that's not CRUD to controllers outside the plugin - but stay within the prefix route to have a unified backend. 
 			// Do not make a prefix routing like "prefix_action()", to have the same method available in several routes. Allow access based on prefix and user accesslevel. 
-			$authPlugin = Configure::read('Cakeclient.auth_plugin');
+			//$authPlugin = Configure::read('Cakeclient.auth_plugin');
 			Router::connect('/' . $prefix . '/users/login', array(
 				'controller' => 'users',
 				'action' => 'login',
-				'plugin' => $authPlugin,
+				//'plugin' => $authPlugin,
 				'cakeclient.route' => $prefix
 			));
 			Router::connect('/' . $prefix . '/:controller/:action/*', array(

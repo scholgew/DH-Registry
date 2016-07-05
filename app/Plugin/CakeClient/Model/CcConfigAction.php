@@ -74,12 +74,16 @@ class CcConfigAction extends CakeclientAppModel {
 		}
 		
 		// get the existant controller functions
-		$methods = array_merge($methods, $this->getMethods($tableName, $methods));
+		$union = $this->getMethods($tableName, $methods);
+		// we have an array-format conversion here...
 		
-		foreach($methods as $i => $method) {
+		foreach($union as $method => $method_data) {
 			$contextual = 1;
 			if(in_array($method, array('add','index','reset_order')))
 				$contextual = 0;
+			if(	!in_array($method, array('add','index','reset_order'))
+			AND isset($method_data['contextual']))
+				$contextual = $method_data['contextual'];
 			$has_form = 0;
 			if(in_array($method, array('add','edit')))
 				$has_form = 1;
@@ -90,6 +94,7 @@ class CcConfigAction extends CakeclientAppModel {
 			if(in_array($method, array('delete')))
 				$bulk = 1;
 			
+			// labeling
 			switch($method) {
 				case 'index': $label = $labelPrefix.'List '.$tableLabel; break;
 				case 'add': case 'edit': case 'view': case 'delete':
@@ -107,15 +112,17 @@ class CcConfigAction extends CakeclientAppModel {
 				'contextual' => $contextual,
 				'has_form' => $has_form,
 				'has_view' => $has_view,
-				'bulk_processing' => $bulk,
-				'position' => $i+1
+				'bulk_processing' => $bulk
 			);
+			// metadata section
+			unset($method_data['contextual']);
+			foreach($method_data as $key => $value) $action[$key] = $value;
 			
 			// filter out some actions for special purposes
 			$add = true;
 			if(!empty($viewName)) switch($viewName) {
-			case 'menu':	if(!in_array($method, array('add','index'))) $add = false; break;
-			case 'add':		if(!in_array($method, array('index'))) $add = false; break;
+			case 'menu':	if(!in_array($method, array('add','index'))) 				 $add = false; break;
+			case 'add':		if(!in_array($method, array('index'))) 						 $add = false; break;
 			case 'view':	if(!in_array($method, array('add','index','edit','delete'))) $add = false; break;
 			case 'edit':	if(!in_array($method, array('add','index','view','delete'))) $add = false; break;
 			}
@@ -126,7 +133,7 @@ class CcConfigAction extends CakeclientAppModel {
 	}
 	
 	
-	function getMethods($tableName = null, $methods = array()) {
+	function getMethods($tableName = null, $defaultMethods = array()) {
 		$plugin = $pluginAppOverride = false;
 		$controllerMethods = array();
 		$controllerName = Inflector::camelize($tableName).'Controller';
@@ -135,25 +142,29 @@ class CcConfigAction extends CakeclientAppModel {
 		App::uses($controllerName, 'Controller');
 		
 		// determine wether it's a plugin controller
-		$reflector = new ReflectionClass($controllerName);
-        $dir = dirname($reflector->getFileName());
-		if(strpos($dir, 'Plugin')) {
-			$plugin = true;
-			// test for an app-level override
-			$_controllerName = Inflector::camelize('app_'.$tableName).'Controller';
-			App::uses($_controllerName, 'Controller');
-			if(class_exists($_controllerName, true)) {
-				$pluginAppOverride = true;
-				$controllerName = $_controllerName;
-			}
-		}
-		
-		$excludes = array('reset_order',);
-		if($appExcludes = Configure::read('AclMenu.excludes'))
-			$excludes = array_unique(array_merge($excludes, $appExcludes));
-		Configure::write('AclMenu.excludes', $excludes);
-		
 		if(class_exists($controllerName, true)) {
+			$reflector = new ReflectionClass($controllerName);
+			$dir = dirname($reflector->getFileName());
+			$pluginName = null;
+			unset($reflector);
+			if(strpos($dir, 'Plugin')) {
+				$plugin = true;
+				$expl = explode(DS, $dir);
+				foreach($expl as $k => $d) if($d == 'Plugin') $pluginName = $expl[$k+1];
+				// test for an app-level override
+				$_controllerName = Inflector::camelize('app_'.$tableName).'Controller';
+				App::uses($_controllerName, 'Controller');
+				if(class_exists($_controllerName, true)) {
+					$pluginAppOverride = true;
+					$controllerName = $_controllerName;
+				}
+			}
+			
+			$excludes = array('reset_order',);
+			if($appExcludes = Configure::read('AclMenu.excludes'))
+				$excludes = array_unique(array_merge($excludes, $appExcludes));
+			Configure::write('AclMenu.excludes', $excludes);
+			
 			if($plugin) {
 				if($pluginAppOverride) {
 					$pluginController = get_parent_class($controllerName);
@@ -162,6 +173,8 @@ class CcConfigAction extends CakeclientAppModel {
 					$pluginAppController = get_parent_class($controllerName);
 				}
 				$appController = get_parent_class($pluginAppController);
+			}else{
+				$appController = get_parent_class($controllerName);
 			}
 			$coreController = get_parent_class($appController);
 			
@@ -169,15 +182,56 @@ class CcConfigAction extends CakeclientAppModel {
 			$coreControllerMethods = get_class_methods($coreController);
 			$controllerMethods = get_class_methods($controllerName);
 			foreach($controllerMethods as $i => $method) {
-				if(strpos($method, '_') === 0) 		unset($controllerMethods[$i]);
-				if(in_array($method, $excludes))	unset($controllerMethods[$i]);
-				if(!empty($coreControllerMethods) AND in_array($method, $coreControllerMethods)) 
-													unset($controllerMethods[$i]);
-				if(in_array($method, $methods)) 	unset($controllerMethods[$i]);
+				if(	strpos($method, '_') === 0
+				||	in_array($method, $excludes)
+				||	in_array($method, $defaultMethods)		// cleaning against the default list
+				||	(!empty($coreControllerMethods) AND in_array($method, $coreControllerMethods)) 
+				) {
+					unset($controllerMethods[$i]);
+				}else{
+					$reflector = new ReflectionMethod($controllerName, $method);
+					if(!$reflector->isPublic()) unset($controllerMethods[$i]);
+					unset($reflector);
+				}
 			}
 		}
 		
-		return $controllerMethods;
+		// format conversion!!!
+		$union = $defaultMethods + $controllerMethods;
+		$out = array();
+		foreach($union as $i => $method) {
+			$position = $i+1;
+			if(!method_exists($controllerName, $method)) {
+				$out[$method] = array(
+					'position' => $position,
+					'controller_name' => null,
+					'plugin_name' => 'Cakeclient',
+					'plugin_app_override' => null
+				);
+			}else{
+				$reflector = new ReflectionMethod($controllerName, $method);
+				$params = $reflector->getParameters();
+				$contextual = 0;
+				foreach($params as $param) {
+					$name = $param->getName();
+					if(preg_match('/^id$|.+_id$/i', $name))
+						$contextual = 1;
+					break;	// most likely we're only interested into the first parameter
+				}
+				unset($reflector);
+				$override = ($pluginAppOverride) ? 'yes' : 'no'; 
+				if(!$plugin) $override = null;
+				$out[$method] = array(
+					'position' => $position,
+					'controller_name' => $controllerName,
+					'plugin_name' => $pluginName,
+					'plugin_app_override' => $override,
+					'contextual' => $contextual
+				);
+			}
+		}
+		
+		return $out;
 	}
 	
 	

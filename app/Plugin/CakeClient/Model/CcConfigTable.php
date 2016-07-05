@@ -21,24 +21,25 @@ class CcConfigTable extends CakeclientAppModel {
 		'CcConfigMenu' => array(
 			'className' => 'CcConfigMenu',
 			'foreignKey' => 'cc_config_menu_id',
+		),
+		'CcConfigAco' => array(
+			'className' => 'CcConfigAco',
+			'foreignKey' => 'cc_config_aco_id',
 		)
 	);
 	
 	var $hasMany = array(
 		'CcConfigAction' => array(
 			'className' => 'CcConfigAction',
-			'foreignKey' => 'cc_config_table_id',
-			'dependent' => true
+			'foreignKey' => 'cc_config_table_id'
 		),
 		'CcConfigFielddefinition' => array(
 			'className' => 'CcConfigFielddefinition',
-			'foreignKey' => 'cc_config_table_id',
-			'dependent' => true
+			'foreignKey' => 'cc_config_table_id'
 		),
 		'CcConfigDisplayedrelation' => array(
 			'className' => 'CcConfigDisplayedrelation',
-			'foreignKey' => 'cc_config_table_id',
-			'dependent' => true
+			'foreignKey' => 'cc_config_table_id'
 		)
 	);
 	
@@ -71,7 +72,6 @@ class CcConfigTable extends CakeclientAppModel {
 	
 	public function getGroupTables($source = null, $group = array(), $prefixes = array()) {
 		$prefix = (!empty($group['prefix'])) ? $group['prefix'] : null;
-		
 		$_tables = $this->getTables($source);
 		$tables = array();
 		if(!empty($_tables)) foreach($_tables as $i => $tableName) {
@@ -88,22 +88,31 @@ class CcConfigTable extends CakeclientAppModel {
 			}else{
 				if(strpos($tableName, $prefix) === false) continue;
 			}
-			
 			$tables[] = $this->getDefaultTable($tableName, $i, $prefix);
 		}
-		
 		return $tables;
 	}
 	
 	
-	public function getDefaultTableTree($source = null, $group = array(), $prefixes = array()) {
+	public function getDefaultAcoTableTree($sources = array()) {
+		$tables = array();
+		foreach($sources as $source)
+			$tables = array_merge($tables, $this->getGroupTables($source));
+		if(!empty($tables)) foreach($tables as $i => &$table) {
+			$table['CcConfigAction'] = $this->CcConfigAction->getDefaultActions($table['name'], null);
+		}
+		return $tables;
+	}
+	
+	
+	public function getDefaultMenuTableTree($source = null, $group = array(), $prefixes = array()) {
 		$tables = $this->getGroupTables($source, $group, $prefixes);
 		$prefix = (!empty($group['prefix'])) ? $group['prefix'] : null;
 		if(!empty($tables)) foreach($tables as $i => &$table) {
-			$table['CcConfigActionsCcConfigTable'] = array();
+			$table['CcConfigMenuEntry'] = array();
 			$actions = $this->CcConfigAction->getDefaultActions($table['name'], 'menu', $prefix);
 			if(!empty($actions)) foreach($actions as $k => $action) {
-				$table['CcConfigActionsCcConfigTable'][] = array(
+				$table['CcConfigMenuEntry'][] = array(
 					//'id',
 					//'cc_config_table_id',
 					//'cc_config_action_id'
@@ -112,7 +121,6 @@ class CcConfigTable extends CakeclientAppModel {
 				);
 			}
 		}
-		
 		return $tables;
 	}
 	
@@ -165,7 +173,7 @@ class CcConfigTable extends CakeclientAppModel {
 	* Create table definitions in configuration from all db-tables 
 	* that cannot be found in configuration.
 	*/
-	function store($config_id = null) {
+	function store($menu_id = null) {
 		if(empty($config_id)) {
 			// use the current config id
 			$config_id = Configure::read('Cakeclient.config_id');

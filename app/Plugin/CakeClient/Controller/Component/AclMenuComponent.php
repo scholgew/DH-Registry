@@ -50,6 +50,8 @@ class AclMenuComponent extends Component {
 					'dataSource' => 'default',
 					// #ToDo: implement this (default false):
 					'classPrefix' => false
+					// what about class prefixes for different sources?
+					// what about prefixing during ACO generation?
 				),
 				array(
 					'name' => 'Tables',
@@ -245,8 +247,8 @@ class AclMenuComponent extends Component {
 		$menuModel->aro_model = $this->aro_model;
 		if(empty($groups)) $groups = $this->defaultMenus;
 		
-		debug($this->menuModel->CcConfigTable->CcConfigAction->getDefaultActions('users'));
-		exit;
+		//debug($this->menuModel->CcConfigTable->CcConfigAction->getDefaultActions('cc_config_tables'));
+		//exit;
 		return $menuModel->getDefaultMenuTree($dataSource, $groups);
 	}
 	
@@ -265,7 +267,7 @@ class AclMenuComponent extends Component {
 			'displayfield' => null,
 			'displayfield_label' => null,
 			'show_associations' => true,
-			'CcConfigActionsCcConfigTable' => array(
+			'CcConfigMenuEntry' => array(
 				
 				// get this from getActionDefaults:
 				

@@ -1,15 +1,13 @@
 <?php
 class CcConfigTablesController extends CakeclientAppController {
 	
-	
-	
-	function store_actions($for_table = null) {
-		$this->CcConfigTable->CcConfigAction->store($for_table);
+	function store_actions($tableName = null) {
+		$this->CcConfigTable->CcConfigAction->store($tableName);
 		$this->redirect('index');
 	}
 	
-	function tidy_actions($for_table = null) {
-		$this->CcConfigTable->CcConfigAction->tidy($for_table);
+	function tidy_actions($tableName = null) {
+		$this->CcConfigTable->CcConfigAction->tidy($tableName);
 		$this->redirect('index');
 	}
 	
