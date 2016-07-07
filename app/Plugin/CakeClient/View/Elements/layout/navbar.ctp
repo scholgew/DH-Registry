@@ -1,4 +1,12 @@
-<div id="cakeclient_navbar">
+
+
+<nav id="cakeclient_navbar" class="navbar navbar-default navbar-fixed-top navbar-inverse">
+	<div class="container-fluid">
+    
+	</div>
+</nav>
+	
+	
 	<?php
 	foreach($menus as $menuName) {
 		if(!empty($$menuName)) {
@@ -8,4 +16,3 @@
 		}
 	}
 	?>
-</div>

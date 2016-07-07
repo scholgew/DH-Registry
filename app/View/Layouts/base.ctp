@@ -18,7 +18,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+	<meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 	<?php echo $this->Html->charset(); ?>
 	<title>
 		<?php
@@ -39,14 +41,18 @@
 	}
 	echo $this->Html->meta('keywords', 'digital humanities, research, programs, courses');
 	echo $this->Html->meta('description', 'European platform for digital humanity related research, courses and programs.');
+	echo $this->fetch('meta');
+	
 	echo $this->Html->meta('icon');
 	
-	echo $this->Html->css('styles.css');
-	if(Configure::read('debug') > 0) {
-		echo $this->Html->css('cake_debugging.css');
-	}
+	if(Configure::read('debug') > 0) echo $this->Html->css('cake_debugging.css');
 	
-	echo $this->fetch('meta');
+	echo $this->Html->css('https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css', array(
+		'integrity' => 'sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7',
+		'crossorigin' => 'anonymous'));
+	
+	// custom CSS
+	echo $this->Html->css('styles.css');
 	echo $this->fetch('css');
 	?>
 	
@@ -111,6 +117,7 @@
 	<script type="text/javascript"><?php echo $this->fetch('script_bottom'); ?></script>
 	<script type="text/javascript">
 		window.onload = function() {
+			// some features don't make use of jQuery
 			<?php echo $this->fetch('onload'); ?>
 		}
 	</script>

@@ -9,7 +9,9 @@
 		header('Pragma: no-cache');
 	}
 	?>
-	<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+	<meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 	<?php echo $this->Html->charset(); ?>
 	<title>
 		<?php
@@ -31,6 +33,7 @@
 	if($meta_description) {
 		echo $this->Html->meta('description', $meta_description);
 	}
+	echo $this->fetch('meta');
 	
 	echo $this->Html->meta('icon');
 	
@@ -39,11 +42,12 @@
 		echo $this->Html->css('Cakeclient.cake_debugging.css');
 	}
 	
-	echo $this->fetch('meta');
-	echo $this->fetch('css');
-	echo $this->fetch('script');
+	echo $this->Html->css('https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css', array(
+		'integrity' => 'sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7',
+		'crossorigin' => 'anonymous'));
 	
-	echo $this->element('layout/onload', array(), array('plugin' => 'Cakeclient'));
+	// custom CSS
+	echo $this->fetch('css');
 	?>
 	
 </head>
@@ -84,5 +88,29 @@
 			?>
 		</div>
 	</div>
+	
+	<script src="https://code.jquery.com/jquery-1.12.4.min.js"
+		integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="
+		crossorigin="anonymous">
+	</script>
+	<script type="text/javascript">
+		window.jQuery || document.write('<script type="text/javascript" src="<?php echo $this->Html->url('/js/jquery-1.12.4.min.js', true); ?>"><\/script>')
+	</script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" 
+		integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" 
+		crossorigin="anonymous">
+	</script>
+	<script type="text/javascript">
+		(typeof $().modal == 'function') || document.write('<script type="text/javascript" src="<?php echo $this->Html->url('/js/bootstrap.min.js', true); ?>"><\/script>')
+	</script>
+	
+	<?php echo $this->fetch('script'); ?>
+	<script type="text/javascript"><?php echo $this->fetch('script_bottom'); ?></script>
+	<?php echo $this->element('layout/onload', array(), array('plugin' => 'Cakeclient')); ?>
+	
 </body>
 </html>
+
+
+
+
