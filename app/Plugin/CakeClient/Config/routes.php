@@ -40,7 +40,7 @@
 		'/cakeclient/:table',
 		array(
 			'plugin' => 'cakeclient',
-			'controller' => 'models',
+			'controller' => 'virtual',
 			'action' => 'index',
 			'cakeclient.route' => 'cakeclient',
 			'crud' => 'index'
@@ -51,7 +51,7 @@
 		'/cakeclient/:table/:crud/*',
 		array(
 			'plugin' => 'cakeclient',
-			'controller' => 'models',
+			'controller' => 'virtual',
 			'cakeclient.route' => 'cakeclient'
 			// one would expect the parameter 'crud' here as well, but this is set by the router itself!
 		),
@@ -90,7 +90,7 @@
 		$prefix_empty = false;
 		$short_url_array = array(
 			'plugin' => 'cakeclient',
-			'controller' => 'models',
+			'controller' => 'virtual',
 			'action' => 'index',
 			$prefix => 1,
 			'cakeclient.route' => $prefix,
@@ -98,7 +98,7 @@
 		);
 		$long_url_array = array(
 			'plugin' => 'cakeclient',
-			'controller' => 'models',
+			'controller' => 'virtual',
 			$prefix => 1,
 			'cakeclient.route' => $prefix
 			// one would expect the parameter 'crud' here as well, but this is set by the router itself!

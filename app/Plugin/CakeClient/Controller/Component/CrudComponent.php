@@ -753,7 +753,7 @@ class CrudComponent extends Component {
 				if(!empty($action['CcConfigAction'])) $method = $action['CcConfigAction']['name'];
 			}
 			/** Check if method exists in custom controller
-			*	Check for an unique property in ModelsController to make sure we're not on a CRUD path, 
+			*	Check for an unique property in VirtualController to make sure we're not on a CRUD path, 
 			*	thus not invoking the 'delete' method on the CakeclientAppController again!
 			*/
 			if(empty($this->controller->crudController) AND method_exists($this->controller, $method)) {
