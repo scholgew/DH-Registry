@@ -51,80 +51,91 @@ class CcConfigAction extends CakeclientAppModel {
 	
 	
 	
-	public function getDefaultActions($tableName = null, $viewName = null, $tablePrefix = null) {
-		$actions = array();
-		$tableLabel = $this->makeTableLabel($tableName, $tablePrefix);
-		$urlPrefix = Configure::read('Cakeclient.prefix');
+	public function getDefaultAction($method = null, $tableName = null, $tablePrefix = null, $urlPrefix = null, $i = 0) {
+		if(empty($method) OR empty($tableName)) return array();
+		
+		if(empty($urlPrefix) AND $urlPrefix !== false)
+			$urlPrefix = Configure::read('Cakeclient.prefix');
 		$labelPrefix = null;
 		if(!empty($urlPrefix)) {
 			$urlPrefix = '/'.$urlPrefix;
-			$labelPrefix = Inflector::classify($urlPrefix).' ';
+			$labelPrefix = Inflector::classify($urlPrefix).'-';
 		}else{
 			$urlPrefix = null;
 		}
 		
+		$tableLabel = $this->makeTableLabel($tableName, $tablePrefix);
+		
+		$contextual = 1;
+		if(in_array($method, array('add','index','reset_order')))
+			$contextual = 0;
+		$has_form = 0;
+		if(in_array($method, array('add','edit')))
+			$has_form = 1;
+		$has_view = 0;
+		if(in_array($method, array('add','index','edit','view')))
+			$has_view = 1;
+		$bulk = 0;
+		if(in_array($method, array('delete')))
+			$bulk = 1;
+		
+		switch($method) {
+		case 'index': $label = $labelPrefix.'List '.$tableLabel; break;
+		case 'add': case 'edit': case 'view': case 'delete':
+			$label = $labelPrefix.Inflector::humanize($method).' '.Inflector::singularize($tableLabel);
+			break;
+		default: $label = $labelPrefix.Inflector::humanize($method);
+		}
+		
+		return array(
+			//'id',
+			//'cc_config_table_id',
+			'url' => $urlPrefix.'/'.$tableName.'/'.$method,
+			'name' => $method,
+			'label' => $label,
+			'contextual' => $contextual,
+			'has_form' => $has_form,
+			'has_view' => $has_view,
+			'bulk_processing' => $bulk,
+			'position' => $i+1,	// default positioning
+			'controller_name' => null,
+			'plugin_name' => null,
+			'plugin_app_override' => null
+		);
+	}
+	
+	
+	public function getDefaultActions($tableName = null, $viewName = null, $tablePrefix = null, $urlPrefix = null) {
+		$actions = array();
 		// default CRUD actions
 		$methods = array('add','index','view','edit','delete');
-		
 		// access the model's behaviors, if it uses Sortable, add the method "reset_order"
 		$modelName = Inflector::classify($tableName);
 		$$modelName = ClassRegistry::init($modelName);
 		if($$modelName->Behaviors->loaded('Sortable')) {
 			$methods[] = 'reset_order';
 		}
-		
 		// get the existant controller functions
 		$union = $this->getMethods($tableName, $methods);
 		// we have an array-format conversion here...
 		
 		foreach($union as $method => $method_data) {
-			$contextual = 1;
-			if(in_array($method, array('add','index','reset_order')))
-				$contextual = 0;
+			$action = $this->getDefaultAction($method, $tableName, $tablePrefix, $urlPrefix);
+			// special handling for the contextual property
 			if(	!in_array($method, array('add','index','reset_order'))
 			AND isset($method_data['contextual']))
-				$contextual = $method_data['contextual'];
-			$has_form = 0;
-			if(in_array($method, array('add','edit')))
-				$has_form = 1;
-			$has_view = 0;
-			if(in_array($method, array('add','index','edit','view')))
-				$has_view = 1;
-			$bulk = 0;
-			if(in_array($method, array('delete')))
-				$bulk = 1;
-			
-			// labeling
-			switch($method) {
-				case 'index': $label = $labelPrefix.'List '.$tableLabel; break;
-				case 'add': case 'edit': case 'view': case 'delete':
-					$label = $labelPrefix.Inflector::humanize($method).' '.Inflector::singularize($tableLabel);
-					break;
-				default: $label = $labelPrefix.Inflector::humanize($method);
-			}
-			
-			$action = array(
-				//'id',
-				//'cc_config_table_id',
-				'url' => '/'.$tableName.'/'.$method,
-				'name' => $method,
-				'label' => $label,
-				'contextual' => $contextual,
-				'has_form' => $has_form,
-				'has_view' => $has_view,
-				'bulk_processing' => $bulk
-			);
-			// metadata section
+				$action['contextual'] = $method_data['contextual'];
 			unset($method_data['contextual']);
+			// apply all method metadata from getMethods
 			foreach($method_data as $key => $value) $action[$key] = $value;
 			
 			// filter out some actions for special purposes
 			$add = true;
 			if(!empty($viewName)) switch($viewName) {
-			case 'menu':	if(!in_array($method, array('add','index'))) 				 $add = false; break;
-			case 'add':		if(!in_array($method, array('index'))) 						 $add = false; break;
-			case 'view':	if(!in_array($method, array('add','index','edit','delete'))) $add = false; break;
-			case 'edit':	if(!in_array($method, array('add','index','view','delete'))) $add = false; break;
+			case 'menu':	if($action['contextual']) 						$add = false; break;
+			case 'add':		if($action['contextual'] OR $method == 'add') 	$add = false; break;
+			case 'view':	if($method == 'reset_order') 					$add = false; break;
+			case 'edit':	if($method == 'reset_order') 					$add = false; break;
 			}
 			if($add) $actions[] = $action;
 		}
