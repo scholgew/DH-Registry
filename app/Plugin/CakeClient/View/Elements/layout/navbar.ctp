@@ -1,7 +1,4 @@
-<?php
-$menus = Configure::read('Cakeclient.topNav');
-?>
-<div id="cakeclient_top_nav">
+<div id="cakeclient_navbar">
 	<?php
 	foreach($menus as $menuName) {
 		if(!empty($$menuName)) {

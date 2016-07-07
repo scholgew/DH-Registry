@@ -230,7 +230,7 @@ class AclMenuComponent extends Component {
 	public function setMenu() {
 		$cakeclientMenu = $this->getMenu($this->_aro_id);
 		
-		if(!$this->request->is('requested') AND Configure::read('Cakeclient.topNav')) {
+		if(!$this->request->is('requested') AND Configure::read('Cakeclient.navbar')) {
 			// load the AssetHelper which appends the top_nav Menu to whichever layout
 			if(	!in_array('Cakeclient.Asset', $this->controller->helpers)
 			AND	!isset($this->controller->helpers['Cakeclient.Asset']))
