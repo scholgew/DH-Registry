@@ -1,14 +1,6 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<?php
-	if(Configure::read('debug') > 0) {
-		header('Expires: Sun, 01 Jan 2014 00:00:00 GMT');
-		header('Cache-Control: no-store, no-cache, must-revalidate');
-		header('Cache-Control: post-check=0, pre-check=0', FALSE);
-		header('Pragma: no-cache');
-	}
-	?>
 	<meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -42,9 +34,10 @@
 		echo $this->Html->css('Cakeclient.cake_debugging.css');
 	}
 	
-	echo $this->Html->css('https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css', array(
+	// #ToDo: streamline the styles with bootstrap
+	/*echo $this->Html->css('https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css', array(
 		'integrity' => 'sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7',
-		'crossorigin' => 'anonymous'));
+		'crossorigin' => 'anonymous'));*/
 	
 	// custom CSS
 	echo $this->fetch('css');

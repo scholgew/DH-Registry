@@ -14,7 +14,7 @@ table {
 	border: 1px solid $table_header_border_color;
 	border-spacing: 0px;	/* aka "cellspacing" */
 	border-collapse: collapse;	/* cellspacing for IE <= 7 */
-	margin-bottom: 1.5em;
+	margin-bottom: 0;	// because h-scrollbars will be pushed down
 	
 	th {
 		border:0;

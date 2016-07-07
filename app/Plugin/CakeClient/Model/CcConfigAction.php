@@ -51,7 +51,7 @@ class CcConfigAction extends CakeclientAppModel {
 	
 	
 	
-	public function getDefaultAction($method = null, $tableName = null, $tablePrefix = null, $urlPrefix = null, $i = 0) {
+	public function getDefaultAction($method = null, $tableName = null, $viewName = null, $tablePrefix = null, $urlPrefix = null, $i = 0) {
 		if(empty($method) OR empty($tableName)) return array();
 		
 		if(empty($urlPrefix) AND $urlPrefix !== false)
@@ -79,12 +79,15 @@ class CcConfigAction extends CakeclientAppModel {
 		if(in_array($method, array('delete')))
 			$bulk = 1;
 		
-		switch($method) {
-		case 'index': $label = $labelPrefix.'List '.$tableLabel; break;
-		case 'add': case 'edit': case 'view': case 'delete':
-			$label = $labelPrefix.Inflector::humanize($method).' '.Inflector::singularize($tableLabel);
-			break;
-		default: $label = $labelPrefix.Inflector::humanize($method);
+		$label = $labelPrefix.Inflector::humanize($method);
+		if($method == 'index') $label = 'List';
+		if(empty($viewName) OR !in_array($viewName, array('index','menu'))) {
+			switch($method) {
+			case 'index': $label = $labelPrefix.'List '.$tableLabel; break;
+			case 'add': case 'edit': case 'view': case 'delete':
+				$label = $labelPrefix.Inflector::humanize($method).' '.Inflector::singularize($tableLabel);
+				break;
+			}
 		}
 		
 		return array(
@@ -120,7 +123,7 @@ class CcConfigAction extends CakeclientAppModel {
 		// we have an array-format conversion here...
 		
 		foreach($union as $method => $method_data) {
-			$action = $this->getDefaultAction($method, $tableName, $tablePrefix, $urlPrefix);
+			$action = $this->getDefaultAction($method, $tableName, $viewName, $tablePrefix, $urlPrefix);
 			// special handling for the contextual property
 			if(	!in_array($method, array('add','index','reset_order'))
 			AND isset($method_data['contextual']))

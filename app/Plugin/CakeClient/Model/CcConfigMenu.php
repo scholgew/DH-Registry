@@ -42,7 +42,7 @@ class CcConfigMenu extends CakeclientAppModel {
 			//'id',
 			'label' => $name,
 			'position' => $k+1,
-			'block' => 'cakeclient_nav',
+			'block' => 'cakeclient_navbar',
 			'foreign_key' => $this->aro_value,
 			'model' => $this->aro_model
 		);

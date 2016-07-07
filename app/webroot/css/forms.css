@@ -1,34 +1,22 @@
 /*
-Syntax error: Undefined variable: "$font_color".
-        on line 68 of css/scss/forms.scss
+Syntax error: Undefined mixin 'inline-form'.
+        on line 4 of css/scss/forms.scss, in `inline-form'
+        from line 4 of css/scss/forms.scss
 
-63: 	}
-64: 	select {
-65: 		margin: 0 0 5px;
-66: 		padding: 1px;
-67: 		background-color:#eee;
-68: 		color:$font_color;
-69: 		vertical-align: middle;
-70: 		width: 287px;
-71: 		border:1px solid #999;
-72: 		display: block;
-73: 	}
+1: /** Forms **\/
+2: 
+3: form.inline_form {
+4: 	@include inline-form;
+5: }
+6: 
+7: 
+8: form.position_form {
+9: 	@include inline-form;
 
 Backtrace:
-css/scss/forms.scss:68
-C:/Ruby193/lib/ruby/gems/1.9.1/gems/sass-3.2.13/lib/sass/script/variable.rb:49:in `_perform'
-C:/Ruby193/lib/ruby/gems/1.9.1/gems/sass-3.2.13/lib/sass/script/node.rb:40:in `perform'
-C:/Ruby193/lib/ruby/gems/1.9.1/gems/sass-3.2.13/lib/sass/tree/visitors/perform.rb:298:in `visit_prop'
-C:/Ruby193/lib/ruby/gems/1.9.1/gems/sass-3.2.13/lib/sass/tree/visitors/base.rb:37:in `visit'
-C:/Ruby193/lib/ruby/gems/1.9.1/gems/sass-3.2.13/lib/sass/tree/visitors/perform.rb:100:in `visit'
-C:/Ruby193/lib/ruby/gems/1.9.1/gems/sass-3.2.13/lib/sass/tree/visitors/base.rb:53:in `block in visit_children'
-C:/Ruby193/lib/ruby/gems/1.9.1/gems/sass-3.2.13/lib/sass/tree/visitors/base.rb:53:in `map'
-C:/Ruby193/lib/ruby/gems/1.9.1/gems/sass-3.2.13/lib/sass/tree/visitors/base.rb:53:in `visit_children'
-C:/Ruby193/lib/ruby/gems/1.9.1/gems/sass-3.2.13/lib/sass/tree/visitors/perform.rb:109:in `block in visit_children'
-C:/Ruby193/lib/ruby/gems/1.9.1/gems/sass-3.2.13/lib/sass/tree/visitors/perform.rb:121:in `with_environment'
-C:/Ruby193/lib/ruby/gems/1.9.1/gems/sass-3.2.13/lib/sass/tree/visitors/perform.rb:108:in `visit_children'
-C:/Ruby193/lib/ruby/gems/1.9.1/gems/sass-3.2.13/lib/sass/tree/visitors/base.rb:37:in `block in visit'
-C:/Ruby193/lib/ruby/gems/1.9.1/gems/sass-3.2.13/lib/sass/tree/visitors/perform.rb:320:in `visit_rule'
+css/scss/forms.scss:4:in `inline-form'
+css/scss/forms.scss:4
+C:/Ruby193/lib/ruby/gems/1.9.1/gems/sass-3.2.13/lib/sass/tree/visitors/perform.rb:253:in `visit_mixin'
 C:/Ruby193/lib/ruby/gems/1.9.1/gems/sass-3.2.13/lib/sass/tree/visitors/base.rb:37:in `visit'
 C:/Ruby193/lib/ruby/gems/1.9.1/gems/sass-3.2.13/lib/sass/tree/visitors/perform.rb:100:in `visit'
 C:/Ruby193/lib/ruby/gems/1.9.1/gems/sass-3.2.13/lib/sass/tree/visitors/base.rb:53:in `block in visit_children'
@@ -70,4 +58,4 @@ C:/Ruby193/lib/ruby/gems/1.9.1/gems/sass-3.2.13/vendor/listen/lib/listen/adapter
 body:before {
   white-space: pre;
   font-family: monospace;
-  content: "Syntax error: Undefined variable: \"$font_color\".\A         on line 68 of css/scss/forms.scss\A \A 63: 	}\A 64: 	select {\A 65: 		margin: 0 0 5px;\A 66: 		padding: 1px;\A 67: 		background-color:#eee;\A 68: 		color:$font_color;\A 69: 		vertical-align: middle;\A 70: 		width: 287px;\A 71: 		border:1px solid #999;\A 72: 		display: block;\A 73: 	}"; }
+  content: "Syntax error: Undefined mixin 'inline-form'.\A         on line 4 of css/scss/forms.scss, in `inline-form'\A         from line 4 of css/scss/forms.scss\A \A 1: /** Forms **/\A 2: \A 3: form.inline_form {\A 4: 	@include inline-form;\A 5: }\A 6: \A 7: \A 8: form.position_form {\A 9: 	@include inline-form;"; }

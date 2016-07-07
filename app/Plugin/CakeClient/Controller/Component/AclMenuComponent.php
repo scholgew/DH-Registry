@@ -193,7 +193,7 @@ class AclMenuComponent extends Component {
 			if($default OR (empty($menu) AND $this->isAdmin())) {
 				$menu = $this->getDefaultMenu($dataSource);
 			}	
-			debug($menu);
+			//debug($menu);
 			
 			// basically do some cleaning...
 			/*
@@ -399,7 +399,7 @@ class AclMenuComponent extends Component {
 			foreach($actions as $k => $action) {
 				$action_id = null;
 				if(is_array($action)) {
-					if(!$action['show']) continue;
+					if(isset($action['show']) AND !$action['show']) continue;
 					if(!empty($action['label'])) {
 						$label = $action['label'];
 					}else{

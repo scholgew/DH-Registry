@@ -47,9 +47,10 @@
 	
 	if(Configure::read('debug') > 0) echo $this->Html->css('cake_debugging.css');
 	
-	echo $this->Html->css('https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css', array(
+	// #ToDo: streamline the styles with bootstrap
+	/*echo $this->Html->css('https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css', array(
 		'integrity' => 'sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7',
-		'crossorigin' => 'anonymous'));
+		'crossorigin' => 'anonymous'));*/
 	
 	// custom CSS
 	echo $this->Html->css('styles.css');

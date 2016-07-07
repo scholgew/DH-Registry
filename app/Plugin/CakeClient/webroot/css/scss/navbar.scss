@@ -1,31 +1,31 @@
+
+
+
 body {
-	margin-top: 50px;
+	padding-top: 50px;
 }
 
-#cakeclient_top_nav {
-	position: fixed;
-	height: 30px;
-	width: 100%;
-	top: 0;
-	z-index: 100;
-	background-color: black;
-	opacity: 0.8;
-	color: #fff;
-	padding: 10px;
+#cakeclient_navbar {
+	// importing a customized bootstrap collection
+	@import 'bootstrap_selection';
 	
-	ul {
-		list-style: none;
-		display: none;
-	}
 	
-	> ul {
-		> li {
-			display: block;
-			float: left;
-			> ul {
-				> li {
-					
+	.dropdown-menu {
+		padding: 10px;
+		padding-right: 25px;
+		max-height: 90vh;
+		overflow-y: auto;
+		overflow-x: hidden;
+		li {
+			&.group_label {
+				clear: left;
+				float: none;
+				+ .group {
+					clear: left;
 				}
+			}
+			&.group {
+				float: left;
 			}
 		}
 	}
