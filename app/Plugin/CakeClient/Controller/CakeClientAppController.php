@@ -18,7 +18,8 @@ class CakeclientAppController extends AppController {
 	// paging defaults
 	public $paginate = array(
 		'limit' => 10,
-		'maxLimit' => 200
+		'maxLimit' => 200,
+		'recursive' => 0	// get at least the parent Model data
 	);
 	
 	

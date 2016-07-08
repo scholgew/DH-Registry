@@ -102,10 +102,11 @@ class CrudComponent extends Component {
 		// #ToDo: get the right table entry that belongs to the action that was being called!
 		// acf_value, Model to get the right menu...
 		
-		return $tableConfig = $this->controller->{$this->tableModelName}->find('first', array(
+		$tableConfig = $this->controller->{$this->tableModelName}->find('first', array(
 			'contain' => array(),
 			'conditions' => array($this->tableModelName.'.name' => $table)
 		));
+		return $tableConfig['CcConfigTable'];
 	}
 	
 	
@@ -381,12 +382,10 @@ class CrudComponent extends Component {
 		if(!$relations = Cache::read($cacheName, 'cakeclient')) {
 			if(!isset($this->controller->CcConfigTable)) $this->controller->loadModel('CcConfigTable');
 			if($table_id = $this->controller->CcConfigTable->getTable($table)) {
-				$tables = Configure::read('Cakeclient.tables');
-				$tableDef = false;
+				$tableDef = $this->getTableConfig($table);
 				$modelClass = Inflector::classify($table);
-				if(!empty($tables[$table])) {
-					$tableDef = $tables[$table];
-					$modelClass = $tableDef['modelclass'];
+				if($tableDef) {
+					$modelClass = $tableDef['model'];
 				}
 				if((!empty($tableDef['show_associations']) AND $tableDef['show_associations'] !== '0') OR $from_model) {
 					if(!$from_model) {
@@ -425,7 +424,7 @@ class CrudComponent extends Component {
 										'visible' => true,
 										'primary_key' => $primaryKey,
 										// add the ID of the related table in Cakeclient table config table, for easy subsequent lookups
-										'cc_config_table_id' => $tables[$tablename]['id']
+										'cc_config_table_id' => $tableDef['id']
 									);
 								}
 							}

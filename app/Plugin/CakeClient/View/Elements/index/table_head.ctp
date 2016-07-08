@@ -16,7 +16,7 @@ echo '<tr>';
 	if(	isset($crudRelations)
 	AND	(!empty($crudRelations['hasMany']) OR !empty($crudRelations['hasAndBelongsToMany']))
 	) {
-		echo '<th class="relations">Relations</th>';
+		//echo '<th class="relations">Relations</th>';
 	}
 	foreach($crudFieldlist as $key => $fieldDef) {
 		$fieldname = $key;

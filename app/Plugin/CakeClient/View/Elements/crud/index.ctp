@@ -29,13 +29,12 @@
 								echo '</td>';
 							}
 							if(	isset($crudRelations)
-							AND	(!empty($crudRelations['belongsTo']) OR !empty($crudRelations['hasMany']) OR !empty($crudRelations['hasAndBelongsToMany']))
+							AND	(!empty($crudRelations['hasMany']) OR !empty($crudRelations['hasAndBelongsToMany']))
 							) {
-								echo '<td class="children">';
-									echo $this->element('index/parent_models', array('record' => $record));
+								/*/echo '<td class="children">';
 									echo $this->element('index/child_models', array('record' => $record));
 									echo $this->element('index/habtm_models', array('record' => $record));
-								echo '</td>';
+								echo '</td>';*/
 							}
 							foreach($crudFieldlist as $key => $fieldDef) {
 								$fieldname = $key;
