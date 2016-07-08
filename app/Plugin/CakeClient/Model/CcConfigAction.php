@@ -148,16 +148,16 @@ class CcConfigAction extends CakeclientAppModel {
 	
 	
 	function getMethods($tableName = null, $defaultMethods = array()) {
-		$plugin = $pluginAppOverride = false;
+		$plugin = $pluginAppOverride = $virtual = false;
 		$controllerMethods = array();
 		$controllerName = Inflector::camelize($tableName).'Controller';
 		
 		// plugins need to extend the App::paths() array in order to be detected
 		// App::build(array('Controller' => App::path('Controller', 'Plugin')));
 		// if a plugin controller, get the app-level override, if any
-		$controllerName = $this->getAppClass($controllerName, 'Controller', $plugin, $pluginAppOverride);
+		$controllerName = $this->getAppClass($controllerName, 'Controller', $virtual, $plugin, $pluginAppOverride);
 		
-		if($controllerName) {
+		if($controllerName AND !$virtual) {
 			$reflector = new ReflectionClass($controllerName);
 			$dir = dirname($reflector->getFileName());
 			$pluginName = null;

@@ -173,16 +173,18 @@ class CrudComponent extends Component {
 	
 	// set an option list for hasMany relations. list depends on model's displayField
 	function setOptionList($modelName, $relatedModelName, $getFunction = 'getOptions') {
+		if(empty($modelName))
+			$modelName = $this->modelName;
 		$relatedModelListName = Inflector::variable(Inflector::pluralize($relatedModelName));
-		if(method_exists($this->controller->$modelName->$relatedModelName, $getFunction)) {
+		if(method_exists($this->controller->{$modelName}->{$relatedModelName}, $getFunction)) {
 			// Pass the current model id. If none is set, use pass[0] instead.
-			$id = $this->controller->$modelName->id;
+			$id = $this->controller->{$modelName}->id;
 			if(empty($id) AND !empty($this->controller->request->params['pass'][0])) {
 				$id = $this->controller->request->params['pass'][0];
 			}
-			$list = $this->controller->$modelName->$relatedModelName->{$getFunction}($modelName, $id);
+			$list = $this->controller->{$modelName}->{$relatedModelName}->{$getFunction}($modelName, $id);
 		}else{
-			$list = $this->controller->$modelName->$relatedModelName->find('list');
+			$list = $this->controller->{$modelName}->{$relatedModelName}->find('list');
 		}
 		$this->controller->set($relatedModelListName, $list);
 		return $list;
@@ -369,7 +371,7 @@ class CrudComponent extends Component {
 	
 	
 	
-	function getRelations($table = null, $from_model = false) {
+	public function getRelations($table = null, $from_model = false) {
 		// params-controller will contain the virtual controller name - which in turn is the table we are looking at!
 		if(empty($table)) {
 			$table = $this->controller->request->params['controller'];
@@ -436,13 +438,13 @@ class CrudComponent extends Component {
 		}
 		return $relations;
 	}
-	function setRelations($table = null, $from_model = false) {
+	public function setRelations($table = null, $from_model = false) {
 		$relations = $this->getRelations($table, $from_model);
 		$this->controller->set('crudRelations', $relations);
 		return $relations;
 	}
 	
-	function getFieldlist($modelName = null, $action = null) {
+	public function getFieldlist($modelName = null, $action = null) {
 		if(empty($modelName)) {
 			$modelName = $this->controller->modelClass;
 		}
@@ -477,11 +479,11 @@ class CrudComponent extends Component {
 				
 			}else{
 				// no fieldlist was specified - create one from the table description
-				$columns = $this->controller->$modelName->schema();
+				$columns = $this->controller->{$modelName}->schema();
 				
 				$sortable = false;
-				if($this->controller->$modelName->Behaviors->loaded('Sortable')) {
-					$sortable = $this->controller->$modelName->Behaviors->Sortable->settings[$modelName];
+				if($this->controller->{$modelName}->Behaviors->loaded('Sortable')) {
+					$sortable = $this->controller->{$modelName}->Behaviors->Sortable->settings[$modelName];
 				}
 				
 				$fieldlist = array();
@@ -578,17 +580,18 @@ class CrudComponent extends Component {
 		}
 		return $fieldlist;
 	}
-	function setFieldlist($modelName = null, $action = null) {
+	public function setFieldlist($modelName = null, $action = null) {
 		$fieldlist = $this->getFieldlist($modelName, $action);
 		$this->controller->set('crudFieldlist', $fieldlist);
 		return $fieldlist;
 	}
 	
-	function __checkForeignKeys($modelName, &$fieldlist, $is_configList, $currentAction_contains_form, $tableConfig) {
+	protected function __checkForeignKeys($modelName, &$fieldlist, $is_configList, $currentAction_contains_form, $tableConfig) {
 		// examine related models and add fields / change definitions
+		//debug($this->controller->{$modelName}->belongsTo);
 		$foreignKeys = array();
-		if(!empty($this->controller->$modelName->belongsTo)) {
-			foreach($this->controller->$modelName->belongsTo as $modelAlias => $modelRelation) {
+		if(!empty($this->controller->{$modelName}->belongsTo)) {
+			foreach($this->controller->{$modelName}->belongsTo as $modelAlias => $modelRelation) {
 				if(!$is_configList) {
 					// override the displayField naming in fieldlist
 					$relatedTable = $this->controller->$modelName->$modelAlias->useTable;
@@ -782,17 +785,17 @@ class CrudComponent extends Component {
 		if(!empty($named = $this->controller->request->params['named'])) {
 			// do some sanitization, prevent SQL injection on the filter keys - Cake takes care of escaping the filter values
 			$namedKeys = preg_replace('/[^a-zA-Z0-9_-]/', '', array_keys($named));
-			$columns = $this->controller->$modelName->schema();
+			$columns = $this->controller->{$modelName}->schema();
 			foreach($namedKeys as $namedField) {
-				if(!isset($named[$namedKeys])) continue;
+				if(!isset($named[$namedField])) continue;
 				// don't pull in the pagination sort keys
 				if(in_array(strtolower($namedField), array('sort','direction'))) continue;
 				// if a named parameter is present, check if it is a valid fieldname
 				if(isset($columns[$namedField]))
-					$conditions[$modelName . '.' . $namedField] = $named[$namedKeys];
+					$conditions[$modelName . '.' . $namedField] = $named[$namedField];
 			}
 			if(!empty($this->controller->request->params['named']['sort'])) {
-				$this->controller->$modelName->Behaviors->disable('Sortable');
+				$this->controller->{$modelName}->Behaviors->disable('Sortable');
 			}
 		}
 		// tell the model which CRUD method is working

@@ -50,7 +50,6 @@ class CakeclientAppController extends AppController {
 				}
 			}
 		}
-		
 		// maintain pagination settings
 		if($paginate = $this->Session->read('Paginate'))
 			$this->paginate = array_merge($this->paginate, $paginate);

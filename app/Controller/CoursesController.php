@@ -274,12 +274,12 @@ class CoursesController extends AppController {
 			$namedKeys = preg_replace('/[^a-zA-Z0-9_-]/', '', array_keys($named));
 			$columns = $this->Course->schema();
 			foreach($namedKeys as $namedField) {
-				if(!isset($named[$namedKeys])) continue;
+				if(!isset($named[$namedField])) continue;
 				// don't pull in the pagination sort keys
 				if(in_array(strtolower($namedField), array('sort','direction'))) continue;
 				// if a named parameter is present, check if it is a valid fieldname
 				if(isset($columns[$namedField]))
-					$this->filter['Course.' . $namedField] = $named[$namedKeys];
+					$this->filter['Course.' . $namedField] = $named[$namedField];
 			}
 			
 			if(isset($named['country'])) {

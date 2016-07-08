@@ -17,6 +17,7 @@ class CakeclientAppModel extends AppModel {
 		Cache::clear($check_expiry = false, 'cakeclient');
 	}
 	
+	
 	public function makeTableLabel($tablename = null, $prefix = null) {
 		$label = $tablename;
 		if($prefix) $label = str_replace($prefix, '', $label);
@@ -27,12 +28,14 @@ class CakeclientAppModel extends AppModel {
 	/*
 	* If we are examining a plugin class, get the according App-class - if any
 	*/
-	public function getAppClass($className = null, $classType = null, &$plugin = false, &$pluginAppOverride = false) {
+	public function getAppClass($className = null, $classType = null, &$virtual = false, &$plugin = false, &$pluginAppOverride = false) {
 		if(empty($className) OR empty($classType)) return null;
 		
 		App::uses($className, $classType);
-		if(!class_exists($className, true)) return null;
-		
+		if(!class_exists($className, true)) {
+			$virtual = true;
+			return $className;
+		}
 		$reflector = new ReflectionClass($className);
 		$dir = dirname($reflector->getFileName());
 		$pluginName = null;

@@ -37,6 +37,7 @@
 								echo '</td>';*/
 							}
 							foreach($crudFieldlist as $key => $fieldDef) {
+								$foreignKeyValue = null;
 								$fieldname = $key;
 								$fieldModelName = $modelName;
 								fieldnameSplit($key, $fieldname, $fieldModelName);
@@ -50,12 +51,16 @@
 										$key = $fieldname = $fieldDef['displayField'];
 										$fieldModelName = $modelName;
 										fieldnameSplit($key, $fieldname, $fieldModelName);
-										$foreignKeyValue = $record[$fieldModelName][$fieldname];
+										if(isset($record[$fieldModelName]) AND isset($record[$fieldModelName][$fieldname]))
+											$foreignKeyValue = $record[$fieldModelName][$fieldname];
 									}
 									if(!empty($fieldDef['display'])) {
 										if(!is_array($fieldDef['display'])) $fieldDef['display'] = array('method' => $fieldDef['display']);
 										if(!empty($foreignKeyValue)) {
-											$fieldDef['display']['label'] = $foreignKeyValue;
+											$pre = null;
+											if(!empty($record[$fieldModelName]['id']))
+												$pre = $record[$fieldModelName]['id'].': ';
+											$fieldDef['display']['label'] = $pre.$foreignKeyValue;
 										}else{
 											// if the foreignKey field has no value (NULL), make no links or other fancy stuff
 											$fieldDef['display'] = array('method' => 'display');

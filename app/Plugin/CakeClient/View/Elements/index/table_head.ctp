@@ -18,11 +18,10 @@ echo '<tr>';
 	) {
 		//echo '<th class="relations">Relations</th>';
 	}
-	foreach($crudFieldlist as $key => $fieldDef) {
+	if(!empty($crudFieldlist)) foreach($crudFieldlist as $key => $fieldDef) {
 		$fieldname = $key;
 		$fieldModelName = $modelName;
 		fieldnameSplit($key, $fieldname, $fieldModelName);
-		
 		if(!is_array($fieldDef)) $fieldDef = array('label' => $fieldDef);
 		if(empty($fieldDef['label'])) $fieldDef['label'] = Inflector::camelize($fieldname);
 		
