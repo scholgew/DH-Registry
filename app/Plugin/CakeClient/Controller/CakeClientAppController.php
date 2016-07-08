@@ -15,6 +15,8 @@ class CakeclientAppController extends AppController {
 	
 	public $overrideController = null;
 	
+	public $uses = array('Dummy');
+	
 	// paging defaults
 	public $paginate = array(
 		'limit' => 10,
@@ -23,8 +25,28 @@ class CakeclientAppController extends AppController {
 	);
 	
 	
-	
-	
+	// override the CoreController method to load models outside the Plugin!
+	function loadModel($modelClass = null, $id = null) {
+		if ($modelClass === null) {
+			$modelClass = $this->modelClass;
+		}
+		$this->uses = ($this->uses) ? (array)$this->uses : array();
+		if (!in_array($modelClass, $this->uses, true)) {
+			$this->uses[] = $modelClass;
+		}
+		list($plugin, $modelClass) = pluginSplit($modelClass, true);
+		
+		// THE OVERRIDE!!!
+		if($plugin == 'App.') $plugin = null;
+
+		$this->{$modelClass} = ClassRegistry::init(array(
+			'class' => $plugin . $modelClass, 'alias' => $modelClass, 'id' => $id
+		));
+		if (!$this->{$modelClass}) {
+			throw new MissingModelException($modelClass);
+		}
+		return true;
+	}
 	
 	
 	

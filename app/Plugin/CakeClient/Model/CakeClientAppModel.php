@@ -32,7 +32,7 @@ class CakeclientAppModel extends AppModel {
 		if(empty($className) OR empty($classType)) return null;
 		
 		App::uses($className, $classType);
-		if(!class_exists($className, true)) {
+		if(!class_exists($className, $autoLoad = true)) {
 			$virtual = true;
 			return $className;
 		}

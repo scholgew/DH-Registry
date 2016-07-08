@@ -14,11 +14,13 @@ class CrudComponent extends Component {
 	public $referer = null;
 	
 	
-	protected $onCrud = false;	// indicate wether the special behavior is active or not
+	protected $table = null;				// ! the table name retrieved from request params
 	
-	protected $modelName = null;	// the model used by the virtual controller
+	protected $onCrud = false;				// indicate wether the special behavior is active or not
 	
-	protected $virtualController = null;	// the controller name indicated by params['table']
+	protected $virtualController = null;	// the controller name derived from table name - for variable & path names
+	
+	protected $modelName = null;			// the derived model - overridable by config
 	
 	
 	
@@ -40,32 +42,52 @@ class CrudComponent extends Component {
 	}
 	
 	
+	public function getModel($modelName = null) {
+		if(empty($modelName)) return null;
+		if(!isset($this->controller->{$modelName}))
+			$this->controller->loadModel($modelName);
+		return $this->controller->{$modelName};
+	}
+	
+	
 	function initialize(Controller $controller) {
 		$this->controller = $controller;
+		$this->table = $this->controller->request->params['controller'];
 		$this->virtualController = $controller->name;
 		
 		// we're on a special route (#ToDo: could that be checked against cakeclient.route?)
 		if(!empty($this->controller->request->params['table'])) {
 			// set the table name, as it is passed via the router array
-			$table = $this->controller->request->params['table'];
-			$this->virtualController = Inflector::camelize($table);
+			$this->table = $this->controller->request->params['table'];
+			$this->virtualController = Inflector::camelize($this->table);
 			$this->modelName = Inflector::singularize($this->virtualController);
 			
 			// if we're using a plugin model and the model has an app-level override, use it
 			$this->controller->modelClass = $this->modelName;
-			if(method_exists($this->controller->{$this->modelName}, 'getAppClass'))
-				$this->modelName = $this->controller->{$this->modelName}->getAppClass($this->modelName, 'Model');
+			// avoi loading the modelClass, as it could be located outside the plugin, thus we need a dummy model
+			$virtual = $plugin = false;
+			if(method_exists($this->controller->Dummy, 'getAppClass'))
+				$this->modelName = $this->controller->Dummy->getAppClass($this->modelName, 'Model', $virtual, $plugin);
 			
 			// check if there's an override
-			if($tableConfig = $this->getTableConfig($table))
+			if($tableConfig = $this->getTableConfig($this->table))
 				if(!empty($tableConfig[$this->tableModelName]['model']))
 					$this->modelName = $tableConfig[$this->tableModelName]['model'];
+			/*
+			* Overridden the way Cake loads models in CakeclientAppController:
+			* if the requested model is existant and resides inside App, put a prefix on it to explicitly
+			* suppress plugin prefixing.
+			* Otherwise the original loadModel() method would put a 'Cakeclient' in front of it. 
+			*/
+			$loadModel = $this->modelName;
+			if(!$plugin AND !$virtual) $loadModel = 'App.'.$this->modelName;
+			$this->controller->loadModel($loadModel);	// see override in CakeclientAppController!
 			
 			$this->controller->uses = array($this->modelName);
-			$this->controller->modelClass = $this->modelName;	// this does the trick!
+			$this->controller->modelClass = $this->modelName;
 			
 			// map the special crud parameters to their respective keys - requests without those won't arrive in here!
-			$this->controller->request->params['controller'] = $this->controller->request->params['table'];
+			$this->controller->request->params['controller'] = $this->table;
 			if(!empty($this->controller->request->params['crud'])) {
 				$this->controller->request->params['action'] = $this->controller->request->params['crud'];
 			}
@@ -102,11 +124,11 @@ class CrudComponent extends Component {
 		// #ToDo: get the right table entry that belongs to the action that was being called!
 		// acf_value, Model to get the right menu...
 		
-		$tableConfig = $this->controller->{$this->tableModelName}->find('first', array(
+		if($tableConfig = $this->controller->{$this->tableModelName}->find('first', array(
 			'contain' => array(),
 			'conditions' => array($this->tableModelName.'.name' => $table)
-		));
-		return $tableConfig['CcConfigTable'];
+		))) return $tableConfig['CcConfigTable'];
+		return array();
 	}
 	
 	
@@ -191,186 +213,6 @@ class CrudComponent extends Component {
 	}
 	
 	
-	
-	// get list of actions to display
-	/*
-	function getActions($action = null, $table = null, $controlled = true) {
-		if(empty($action)) {
-			$action = $this->controller->request->params['action'];
-		}
-		$table = $this->getTable($table);
-		$prefix = !empty($this->controller->request->params['cakeclient.route'])
-			? $this->controller->request->params['cakeclient.route']
-			: false;
-		$modelName = $this->controller->modelClass;
-		
-		$this->controller->loadModel('CcConfigTable');
-		$currentAction = $this->controller->CcConfigTable->find('first', array(
-			'contain' => array(
-				'CcConfigAction' => array(
-					'conditions' => array('CcConfigAction.name' => $action),
-					'CcConfigActionsViewsAction' => array(
-						'order' => 'CcConfigActionsViewsAction.position'
-					)
-				)
-			),
-			'conditions' => array('CcConfigTable.name' => $table)
-		));
-		/** The menu / context-menu templates filter for the "contextual" property.
-		*	"index" views display many records and thus must check if an action belongs into a records context. 
-		*	Actions that are contextual (edit, view) don't have to check for the menu-action's context, 
-		*	as the context is already set by the record's ID.
-		*
-		$current_action_must_check_context = true;
-		if($action != 'index') $current_action_must_check_context = false;
-		if(isset($currentAction['CcConfigAction'][0]['contextual']))
-			$current_action_must_check_context = !$currentAction['CcConfigAction'][0]['contextual'];
-		
-		// check for the actions linked to the current view first, then all actions except the current one, then default list
-		if(!empty($currentAction['CcConfigAction'][0]['CcConfigActionsViewsAction'])) {
-			$actions = $currentAction['CcConfigAction'][0]['CcConfigActionsViewsAction'];
-		}else{
-			$actions = $this->controller->CcConfigTable->find('first', array(
-				'contain' => array(
-					'CcConfigAction' => array(
-						'conditions' => array('CcConfigAction.name !=' => $action),
-						'order' => 'position'
-					)
-				),
-				'conditions' => array('CcConfigTable.name' => $table)
-			));
-			if(!empty($actions['CcConfigAction'])) {
-				$actions = $actions['CcConfigAction'];
-			}else{
-				$actions = array();
-				// get the default list
-				$actionsName = $action . 'Actions';
-				if(isset($this->$actionsName)) {
-					$actions = $this->$actionsName;
-				}
-				if(strtolower($action) == 'index') { 
-					$tableModel = Inflector::classify($table);
-					$$tableModel = ClassRegistry::init($tableModel);
-					// access the model's behaviors and add a special method if Sortable is loaded
-					if($$tableModel->Behaviors->loaded('Sortable')) {
-						$actions[] = 'reset_order';
-					}
-				}
-			}
-		}
-		
-		$returnActions = array();
-		if(!empty($actions)) {
-			foreach($actions as $k => $action) {
-				$action_id = null;
-				if(is_array($action)) {
-					if(!$action['show']) continue;
-					if(!empty($action['label'])) {
-						$title = $action['label'];
-					}else{
-						$title = Inflector::humanize(Inflector::underscore($action['name']));
-					}
-					$actionName = $action['name'];
-					if(!empty($action['id'])) $action_id = $action['id'];
-				}else{
-					// mangling the default lists
-					$title = Inflector::humanize(Inflector::underscore($action));
-					switch($action) {
-						case 'add': $title .= ' '.$this->modelName; break;
-						case 'index': $title = 'List '.$this->virtualController; break;
-					}
-					$actionName = $action;
-				}
-				// set the route prefix to be the plugin element of the url, as this will appear in front of it all, and not named "plugin"
-				$_action = array(
-					'title' => $title,
-					'action_id' => $action_id,
-					'url' => array(
-						'action' => $actionName,
-						'plugin' => Configure::read('Cakeclient.prefix')
-					)
-				);
-				if(is_array($action) AND !empty($action['controller'])) {
-					$_action['url']['controller'] = $action['controller'];
-				}else{
-					$_action['url']['controller'] = $table;
-				}
-				
-				// handle appending record id's or appearance in index tables
-				$_action['contextual'] = $_action['append_id'] = false;
-				if(!in_array($actionName, array('add', 'index', 'reset_order'))) {
-					$_action['contextual'] = $_action['append_id'] = true;
-				}
-				if(is_array($action)) {
-					$_action['contextual'] = $_action['append_id'] = (bool)$action['contextual'];
-					$_action['bulk_processing'] = (bool)$action['bulk_processing'];
-				}
-				// if currently not in an index view, put all actions in the top menu - set contextual to false.
-				if(!$current_action_must_check_context) {
-					$_action['contextual'] = false;
-					// note: we're still appending the id, if the action previously was contextual
-				}
-				
-				// check wether we're on a prefix route (consider it as some kind of access control)
-				$routes = Configure::read('Routing.prefixes');
-				$add = true;
-				$prefixed = false;
-				if(!empty($routes) AND is_array($routes)) {
-					foreach($routes as $route) {
-						$add = true;
-						$prefixed = false;
-						if(strpos($actionName, $route . '_') === 0) {
-							if($route !== $prefix) {
-								// we're not on the route of the prefix the action has
-								$add = false;
-							}else{
-								// remove the prefix, as this will be added via the URL prefix again
-								$_action['url']['action'] = substr($actionName, strlen($route) + 1);
-								$prefixed = true;
-							}
-						}
-					}
-				}
-				
-				// we do not read the table's controller - for simplicity, go for the AppController only
-				// best would be, to set a list of accessible actions dynamically per user/group from AppController or AuthComponent as some kind of ACL
-				// this is what AclMenuComponent in plugin UtilClasses does!
-				$allowed = array();
-				if($controlled AND !empty($this->controller->allowedActions)) {
-					$allowed = $this->controller->allowedActions;
-				}
-				if(!empty($allowed)) {
-					// get the action's cake-path - like it is done in AclMenuComponent
-					$normalizedPath = $this->controller->_normalizePath($_action['url']);
-					if(!isset($allowed[$normalizedPath])) {
-						$add = false;
-					}else{
-						unset($_action['url']['base']);
-					}
-				}
-				
-				if(!empty($routes) AND !$prefixed AND !in_array($actionName, array('index', 'view', 'edit', 'add', 'delete'))) {
-					// we're leaving a prefix route here, otherwise cake would not find a non-prefixed method outside the plugin - the downside of prefix routing!
-					$_action['url']['plugin'] = null;
-				}
-				
-				if($add) {
-					$returnActions[$k] = $_action;
-				}
-			}
-		}
-		
-		return $returnActions;
-	}
-	function setActions($action = null, $table = null, $controlled = true) {
-		$actions = $this->getActions($action, $table, $controlled);
-		$this->controller->set('crudActions', $actions);
-		return $actions;
-	}*/
-	
-	
-	
-	
 	public function getRelations($table = null, $from_model = false) {
 		// params-controller will contain the virtual controller name - which in turn is the table we are looking at!
 		if(empty($table)) {
@@ -444,60 +286,59 @@ class CrudComponent extends Component {
 		return $relations;
 	}
 	
-	public function getFieldlist($modelName = null, $action = null) {
-		if(empty($modelName)) {
-			$modelName = $this->controller->modelClass;
-		}
+	public function getFieldlist($modelName = null, $action = null, $table = null) {
+		if(empty($modelName)) 	$modelName = $this->controller->modelClass;
+		if(empty($table)) 		$tableName = $this->table;
+		if(empty($action)) 		$action = $this->controller->request->params['action'];
 		
-		$tableName = Inflector::tableize($modelName);
-		if(empty($action)) {
-			$action = $this->controller->request->params['action'];
-		}
 		$role = 'admin';	// add the role level to the fieldlist configuration...
 		$cacheName = $role . '_fieldlist_' . $modelName . '_' . $action;
-		
 		if(!$fieldlist = Cache::read($cacheName, 'cakeclient')) {
-			$currentAction_contains_form = false;
-			if(in_array($action, array('add', 'edit'))) $currentAction_contains_form = true;
 			
-			$this->controller->loadModel('CcConfigTable');
+			$has_form = false;
+			if(in_array($action, array('add', 'edit'))) $has_form = true;
+			
+			if(!isset($this->controller->{$this->tableModelName}))
+				$this->controller->loadModel($this->tableModelName);
+			
+			// #ToDo: get ACO!
 			$currentAction = $this->controller->CcConfigTable->find('first', array(
 				'contain' => array('CcConfigAction' => array('conditions' => array('CcConfigAction.name' => $action))),
 				'conditions' => array('CcConfigTable.name' => $tableName)
 			));
 			if(isset($currentAction['CcConfigAction'][0]['has_form'])) {
-				$currentAction_contains_form = $currentAction['CcConfigAction'][0]['has_form'];
+				$has_form = $currentAction['CcConfigAction'][0]['has_form'];
 			}
 			
-			$tableConfig = Configure::read('Cakeclient.tables');
 			$configList = false;
-			
-			if(!empty($tableConfig[$tableName]['fieldlists'][$action])) {
-				$fieldlist = $tableConfig[$tableName]['fieldlists'][$action];
+			//$tableConfig = Configure::read('Cakeclient.tables');
+			$tableConfig = $this->getTableConfig($tableName);
+			// #ToDo
+			if(0) {	
+			//if(!empty($tableConfig['fieldlists'][$action])) {
+				$fieldlist = $tableConfig['fieldlists'][$action];
 				// do not alter a manually edited fieldlist...
 				$configList = true;
 				
 			}else{
 				// no fieldlist was specified - create one from the table description
-				$columns = $this->controller->{$modelName}->schema();
-				
 				$sortable = false;
 				if($this->controller->{$modelName}->Behaviors->loaded('Sortable')) {
 					$sortable = $this->controller->{$modelName}->Behaviors->Sortable->settings[$modelName];
 				}
 				
+				$columns = $this->controller->{$modelName}->schema();
 				$fieldlist = array();
-				
 				foreach($columns as $fieldName => $schema) {
 					// don't add the timestamp fields to forms
-					if(in_array($fieldName, array('updated','modified','created')) AND $currentAction_contains_form) continue;
+					if(in_array($fieldName, array('updated','modified','created')) AND $has_form) continue;
 					
 					$fielddef = array(
 						'fieldname' => $modelName . '.' . $fieldName,
 						'label' => Inflector::camelize($fieldName)
 					);
 					// by default, do not display an editable id field in forms...
-					if(isset($schema['key']) AND $schema['key'] == 'primary' AND $currentAction_contains_form) {
+					if(isset($schema['key']) AND $schema['key'] == 'primary' AND $has_form) {
 						$fielddef['formoptions']['readonly'] = 'readonly';
 					}
 					if(isset($schema['comment'])) {
@@ -520,7 +361,7 @@ class CrudComponent extends Component {
 				}
 			}
 			
-			$this->__checkForeignKeys($modelName, $fieldlist, $configList, $currentAction_contains_form, $tableConfig);
+			$this->__checkForeignKeys($modelName, $fieldlist, $configList, $has_form, $tableConfig);
 			
 			// normalize the fieldlist
 			foreach($fieldlist as $k => $value) {
@@ -586,10 +427,13 @@ class CrudComponent extends Component {
 		return $fieldlist;
 	}
 	
-	protected function __checkForeignKeys($modelName, &$fieldlist, $is_configList, $currentAction_contains_form, $tableConfig) {
+	
+	// destroys the column label
+	protected function __checkForeignKeys($modelName, &$fieldlist, $is_configList, $has_form, $tableConfig) {
 		// examine related models and add fields / change definitions
 		//debug($this->controller->{$modelName}->belongsTo);
 		$foreignKeys = array();
+		debug($this->controller->{$modelName}->belongsTo);
 		if(!empty($this->controller->{$modelName}->belongsTo)) {
 			foreach($this->controller->{$modelName}->belongsTo as $modelAlias => $modelRelation) {
 				if(!$is_configList) {
@@ -623,13 +467,13 @@ class CrudComponent extends Component {
 					);
 				}
 				// set the option list
-				if($currentAction_contains_form) {
+				if($has_form) {
 					$this->setOptionList($modelName, $modelAlias, 'getOptions');
 				}
 			}
 		}
 		if(!empty($this->controller->$modelName->hasAndBelongsToMany)) {
-			if($currentAction_contains_form) {
+			if($has_form) {
 				foreach($this->controller->$modelName->hasAndBelongsToMany as $modelAlias => $modelRelation) {
 					$this->setOptionList($modelName, $modelAlias, 'getHabtmOptions');
 				}
@@ -799,7 +643,7 @@ class CrudComponent extends Component {
 			}
 		}
 		// tell the model which CRUD method is working
-		$this->controller->{$modelName}->crud = 'index';
+		//$this->controller->{$modelName}->crud = 'index';
 		
 		$this->controller->Paginator->settings = $this->controller->paginate;
 		try{
