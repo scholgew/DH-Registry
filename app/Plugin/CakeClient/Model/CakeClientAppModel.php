@@ -23,5 +23,38 @@ class CakeclientAppModel extends AppModel {
 		return $label = Inflector::camelize($label);
 	}
 	
+	
+	/*
+	* If we are examining a plugin class, get the according App-class - if any
+	*/
+	public function getAppClass($className = null, $classType = null, &$plugin = false, &$pluginAppOverride = false) {
+		if(empty($className) OR empty($classType)) return null;
+		
+		App::uses($className, $classType);
+		if(!class_exists($className, true)) return null;
+		
+		$reflector = new ReflectionClass($className);
+		$dir = dirname($reflector->getFileName());
+		$pluginName = null;
+		unset($reflector);
+		if(strpos($dir, 'Plugin')) {
+			$plugin = true;
+			$expl = explode(DS, $dir);
+			foreach($expl as $k => $d) if($d == 'Plugin') $pluginName = $expl[$k+1];
+			// test for an app-level override
+			$_className = 'App'.$className;
+			App::uses($_className, $classType);
+			if(class_exists($_className, true)) {
+				$pluginAppOverride = true;
+				$className = $_className;
+			}
+		}
+		
+		return $className;
+	}
+	
+	
+	
+	
 }
 ?>

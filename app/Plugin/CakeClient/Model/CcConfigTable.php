@@ -54,6 +54,7 @@ class CcConfigTable extends CakeclientAppModel {
 	
 	public function getDefaultTable($tableName, $i = 0, $prefix = null) {
 		$tableLabel = $this->makeTableLabel($tableName, $prefix);
+		$modelName = $this->getAppClass(Inflector::classify($tableName), 'Model');
 		return array(
 			//'id' => '1',
 			//'cc_config_menu_id' => 1,
@@ -61,7 +62,7 @@ class CcConfigTable extends CakeclientAppModel {
 			'name' => $tableName,
 			'allow_all' => false,	// admin is allowed anyway
 			'label' => $tableLabel,
-			'model' => Inflector::classify($tableName),
+			'model' => $modelName,
 			'controller' => $tableName,
 			'displayfield' => null,
 			'displayfield_label' => null,

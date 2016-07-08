@@ -73,15 +73,6 @@ jQuery(document).ready(function ($) {
 		</div>
 		<div>
 			<?php
-			echo $this->Html->image('dhpr_slideshow/00002.jpg', array(
-				'u' => 'image',
-				'width' => 565,
-				'height' => 400
-			));
-			?>
-		</div>
-		<div>
-			<?php
 			echo $this->Html->image('dhpr_slideshow/first slide DODH.jpg', array(
 				'u' => 'image',
 				'width' => 467,
@@ -91,18 +82,27 @@ jQuery(document).ready(function ($) {
 		</div>
 		<div>
 			<?php
-			echo $this->Html->image('dhpr_slideshow/treemap.jpg', array(
+			echo $this->Html->image('dhpr_slideshow/00002.jpg', array(
 				'u' => 'image',
-				'width' => 646,
+				'width' => 565,
 				'height' => 400
 			));
 			?>
 		</div>
 		<div>
 			<?php
-			echo $this->Html->image('dhpr_slideshow/_disciplines.png', array(
+			echo $this->Html->image('dhpr_slideshow/_timelineprojectsDisciplinesNumbInstitutionsDODHJul3.png', array(
 				'u' => 'image',
-				'width' => 618,
+				'width' => 679,
+				'height' => 400
+			));
+			?>
+		</div>
+		<div>
+			<?php
+			echo $this->Html->image('dhpr_slideshow/_TreemapDisciplineDODHJul3large.png', array(
+				'u' => 'image',
+				'width' => 851,
 				'height' => 400
 			));
 			?>

@@ -51,6 +51,11 @@ class CrudComponent extends Component {
 			$this->virtualController = Inflector::camelize($table);
 			$this->modelName = Inflector::singularize($this->virtualController);
 			
+			// if we're using a plugin model and the model has an app-level override, use it
+			$this->controller->modelClass = $this->modelName;
+			if(method_exists($this->controller->{$this->modelName}, 'getAppClass'))
+				$this->modelName = $this->controller->{$this->modelName}->getAppClass($this->modelName, 'Model');
+			
 			// check if there's an override
 			if($tableConfig = $this->getTableConfig($table))
 				if(!empty($tableConfig[$this->tableModelName]['model']))
@@ -166,15 +171,15 @@ class CrudComponent extends Component {
 	
 	
 	// set an option list for hasMany relations. list depends on model's displayField
-	function setOptionList($modelName, $relatedModelName, $getRelationTypeOptions = 'getHasManyOptions') {
+	function setOptionList($modelName, $relatedModelName, $getFunction = 'getOptions') {
 		$relatedModelListName = Inflector::variable(Inflector::pluralize($relatedModelName));
-		if(method_exists($this->controller->$modelName->$relatedModelName, $getRelationTypeOptions)) {
+		if(method_exists($this->controller->$modelName->$relatedModelName, $getFunction)) {
 			// Pass the current model id. If none is set, use pass[0] instead.
 			$id = $this->controller->$modelName->id;
 			if(empty($id) AND !empty($this->controller->request->params['pass'][0])) {
 				$id = $this->controller->request->params['pass'][0];
 			}
-			$list = $this->controller->$modelName->$relatedModelName->{$getRelationTypeOptions}($modelName, $id);
+			$list = $this->controller->$modelName->$relatedModelName->{$getFunction}($modelName, $id);
 		}else{
 			$list = $this->controller->$modelName->$relatedModelName->find('list');
 		}
@@ -442,6 +447,7 @@ class CrudComponent extends Component {
 		if(empty($modelName)) {
 			$modelName = $this->controller->modelClass;
 		}
+		
 		$tableName = Inflector::tableize($modelName);
 		if(empty($action)) {
 			$action = $this->controller->request->params['action'];
@@ -616,14 +622,14 @@ class CrudComponent extends Component {
 				}
 				// set the option list
 				if($currentAction_contains_form) {
-					$this->setOptionList($modelName, $modelAlias, 'getHasManyOptions');
+					$this->setOptionList($modelName, $modelAlias, 'getOptions');
 				}
 			}
 		}
 		if(!empty($this->controller->$modelName->hasAndBelongsToMany)) {
 			if($currentAction_contains_form) {
 				foreach($this->controller->$modelName->hasAndBelongsToMany as $modelAlias => $modelRelation) {
-					$this->setOptionList($modelName, $modelAlias, 'gethasAndBelongsToManyOptions');
+					$this->setOptionList($modelName, $modelAlias, 'getHabtmOptions');
 				}
 			}
 		}

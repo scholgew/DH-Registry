@@ -73,7 +73,9 @@ class AppUser extends User {
 		'Institution' => array(
 			'className' => 'Institution',
 			'foreignKey' => 'institution_id'
-		)
+		),
+		'UserRole',
+		'Country'
 	);
 	
 	public $hasMany = array(
