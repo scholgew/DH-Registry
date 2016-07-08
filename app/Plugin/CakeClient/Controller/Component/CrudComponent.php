@@ -778,12 +778,18 @@ class CrudComponent extends Component {
 		
 		if(!empty($this->controller->request->data['BulkProcessor'])) $this->bulkProcessor($redirect = false);
 		
-		if(!empty($this->controller->request->params['named'])) {
+		// result filter
+		if(!empty($named = $this->controller->request->params['named'])) {
+			// do some sanitization, prevent SQL injection on the filter keys - Cake takes care of escaping the filter values
+			$namedKeys = preg_replace('/[^a-zA-Z0-9_-]/', '', array_keys($named));
 			$columns = $this->controller->$modelName->schema();
-			foreach($this->controller->request->params['named'] as $namedField => $namedValue) {
+			foreach($namedKeys as $namedField) {
+				if(!isset($named[$namedKeys])) continue;
+				// don't pull in the pagination sort keys
 				if(in_array(strtolower($namedField), array('sort','direction'))) continue;
 				// if a named parameter is present, check if it is a valid fieldname
-				if(isset($columns[$namedField])) $conditions[$modelName . '.' . $namedField] = $namedValue;
+				if(isset($columns[$namedField]))
+					$conditions[$modelName . '.' . $namedField] = $named[$namedKeys];
 			}
 			if(!empty($this->controller->request->params['named']['sort'])) {
 				$this->controller->$modelName->Behaviors->disable('Sortable');

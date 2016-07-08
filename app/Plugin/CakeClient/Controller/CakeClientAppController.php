@@ -52,7 +52,8 @@ class CakeclientAppController extends AppController {
 		}
 		
 		// maintain pagination settings
-		if($paginate = $this->Session->read('Paginate')) $this->paginate = $paginate;
+		if($paginate = $this->Session->read('Paginate'))
+			$this->paginate = array_merge($this->paginate, $paginate);
 		if(!empty($this->request->data['Pager'])) {
 			$form = $this->request->data['Pager'];
 			if(!empty($form['limit']) AND ctype_digit($form['limit'])) {

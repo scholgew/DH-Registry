@@ -269,31 +269,24 @@ class CoursesController extends AppController {
 	
 	protected function _namedFilters() {
 		// get filters from named URL parameters
-		if(!empty($this->request->named)) {
-			foreach($this->request->named as $key => $value) {
-				switch($key) {
-					case 'sort':
-					case 'direction':
-						continue;
-					case 'geolocation':
-						$expl = explode(',', $value);
-						if(!empty($expl[0]) AND !empty($expl[1])) {
-							$this->filter['Course.lat'] = $expl[0];
-							$this->filter['Course.lon'] = $expl[1];
-						}
-						break;
-					case 'id':
-						$this->filter['Course.id'] = $value;
-						break;
-					case 'country':
-						if(!ctype_digit($value)) {
-							$value = $this->Course->Country->field('id', array('Country.name' => $value));
-						}
-						$this->filter['Course.country_id'] = $value;
-						break;
-					default:
-						continue;
+		if(!empty($named = $this->request->named)) {
+			// do some sanitization, prevent SQL injection on the filter keys - Cake takes care of escaping the filter values
+			$namedKeys = preg_replace('/[^a-zA-Z0-9_-]/', '', array_keys($named));
+			$columns = $this->Course->schema();
+			foreach($namedKeys as $namedField) {
+				if(!isset($named[$namedKeys])) continue;
+				// don't pull in the pagination sort keys
+				if(in_array(strtolower($namedField), array('sort','direction'))) continue;
+				// if a named parameter is present, check if it is a valid fieldname
+				if(isset($columns[$namedField]))
+					$this->filter['Course.' . $namedField] = $named[$namedKeys];
+			}
+			
+			if(isset($named['country'])) {
+				if(!ctype_digit($named['country'])) {
+					$value = $this->Course->Country->field('id', array('Country.name' => $named['country']));
 				}
+				$this->filter['Course.country_id'] = $named['country'];
 			}
 		}
 	}
