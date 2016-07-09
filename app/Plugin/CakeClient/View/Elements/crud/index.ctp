@@ -55,7 +55,6 @@
 											$foreignKeyValue = $record[$fieldModelName][$fieldname];
 									}
 									if(!empty($fieldDef['display'])) {
-										if(!is_array($fieldDef['display'])) $fieldDef['display'] = array('method' => $fieldDef['display']);
 										if(!empty($foreignKeyValue)) {
 											$pre = null;
 											if(!empty($record[$fieldModelName]['id']))

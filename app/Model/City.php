@@ -72,13 +72,7 @@ class City extends AppModel {
  * @var array
  */
 	public $belongsTo = array(
-		'Country' => array(
-			'className' => 'Country',
-			'foreignKey' => 'country_id',
-			'conditions' => '',
-			'fields' => '',
-			'order' => ''
-		)
+		'Country'
 	);
 
 /**
