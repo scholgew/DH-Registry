@@ -67,7 +67,7 @@ class AppUsersController extends UsersController {
 		$institutions = $this->AppUser->Institution->find('list', array(
 			'contain' => array('Country'),
 			'fields' => array('Institution.id', 'Institution.name', 'Country.name'),
-			'conditions' => array('Institution.is_university' => 1)
+			'conditions' => array('Institution.can_have_course' => 1)
 		));
 		ksort($institutions);
 		$this->set('institutions', $institutions);

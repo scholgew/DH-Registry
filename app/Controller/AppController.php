@@ -75,8 +75,8 @@ class AppController extends Controller {
 		
 		// for debugging purposes
 		if(!$this->Auth->user() AND strpos(APP, 'xampp') !== false AND Configure::read('debug') > 0) {
-			$this->Auth->allow();
-			$this->DefaultAuth->is_admin = true;
+			//$this->Auth->allow();
+			//$this->DefaultAuth->is_admin = true;
 			//debug('allowed by debug settings');
 		}
 		

@@ -13,12 +13,10 @@
 			</li>
 			<?php
 			if(is_null(Configure::read('Users.allowRegistration')) OR Configure::read('Users.allowRegistration')) {
-				$label = 'Register';
-				if(Configure::read('Users.adminConfirmRegistration')) $label = 'Apply';
 				?>
 				<li>
 					<?php
-					echo $this->Html->link($label, array(
+					echo $this->Html->link('Register', array(
 						'controller' => 'users',
 						'action' => 'register'
 					));
@@ -52,7 +50,8 @@
 				<?php
 				echo $this->Html->link('Dashboard', array(
 					'controller' => 'users',
-					'action' => 'dashboard'
+					'action' => 'dashboard',
+					'plugin' => false
 				));
 				?>
 			</li>
@@ -60,7 +59,8 @@
 				<?php
 				echo $this->Html->link('Profile', array(
 					'controller' => 'users',
-					'action' => 'profile'
+					'action' => 'profile',
+					'plugin' => false
 				));
 				?>
 			</li>
@@ -68,7 +68,8 @@
 				<?php
 				echo $this->Html->link('Log Out', array(
 					'controller' => 'users',
-					'action' => 'logout'
+					'action' => 'logout',
+					'plugin' => false
 				));
 				?>
 			</li>

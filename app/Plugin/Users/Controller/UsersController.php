@@ -32,6 +32,15 @@ class UsersController extends UsersAppController {
 			if(!is_null(Configure::read('Users.allowRegistration')) && !Configure::read('Users.allowRegistration')) {
 				$this->Auth->deny('register');
 			}
+			if($this->Auth->user()) {
+				$this->Auth->allow(array(
+					'dashboard',
+					'profile'
+				));
+				if(in_array($this->request->params['action'], array(
+					'register','login'
+				))) $this->redirect($this->Auth->loginRedirect);
+			}
 		}
 		
 		if(isset($this->Security)) {
@@ -56,8 +65,8 @@ class UsersController extends UsersAppController {
 			Configure::write('App.defaultEmail', 'noreply@' . $host);
 		}
 		
-		parent::beforeFilter();
 		$this->set('title_for_layout', 'User Management');
+		parent::beforeFilter();
 	}
 	
 	
@@ -100,7 +109,26 @@ class UsersController extends UsersAppController {
 					$this->redirect($this->Auth->redirect($returnTo));	// fallback
 				}
 			}else{
-				$this->Auth->flash('Invalid email-password combination. Please try again.');
+				$msg = 'Invalid email-password combination. Please try again.';
+				$data = $this->request->data;
+				if(	!empty($data[$this->modelClass][Configure::read('Users.loginName')])
+				OR	!empty($data[Configure::read('Users.loginName')])	
+				) {
+					if(!empty($data[$this->modelClass])) $data = $data[$this->modelClass];
+					$loginName = $data[Configure::read('Users.loginName')];
+					$user = $this->{$this->modelClass}->find('first', array(
+						'contain' => array(),
+						'conditions' => array(
+							$this->modelClass.'.'.Configure::read('Users.loginName') => $loginName,
+							$this->modelClass.'.active' => true
+						)
+					));
+					if($user AND !$user[$this->modelClass]['email_verified']) {
+						$msg = 'Your email address has not yet been verified. Please check your spamfilters or send the verification mail again.';
+						$this->set('usersVerification', true);
+					}
+				}
+				$this->Auth->flash($msg);
 			}
 		}
 	}

@@ -15,7 +15,7 @@
 	<ul>
 		<li>
 			<?php
-			if($this->Session->check('Users.verification')) {
+			if($this->Session->check('Users.verification') OR !empty($usersVerification)) {
 				echo $this->Html->link('Resend Email Verification', array(
 					'action' => 'request_email_verification',
 					'controller' => 'users'
@@ -33,9 +33,7 @@
 			?>
 			<li>
 				<?php
-				$label = 'Register';
-				if(Configure::read('Users.adminConfirmRegistration')) $label = 'Apply';
-				echo $this->Html->link($label, array(
+				echo $this->Html->link('Register', array(
 					'controller' => 'users',
 					'action' => 'register'
 				));
