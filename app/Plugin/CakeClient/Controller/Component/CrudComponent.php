@@ -86,6 +86,9 @@ class CrudComponent extends Component {
 			$this->controller->uses = array($this->modelName);
 			$this->controller->modelClass = $this->modelName;
 			
+			// try to detect and set some relations (belongsTo) on virtual models
+			$this->__setModelRelations($this->modelName, $reset = false);
+			
 			// map the special crud parameters to their respective keys - requests without those won't arrive in here!
 			$this->controller->request->params['controller'] = $this->table;
 			if(!empty($this->controller->request->params['crud'])) {
@@ -395,7 +398,7 @@ class CrudComponent extends Component {
 			}
 			
 			$this->__inspectAssociations($modelName, $fieldlist, $configList, $has_form, $tableConfig);
-			debug($fieldlist);
+			
 			Cache::write($cacheName, $fieldlist, 'cakeclient');
 		}
 		return $fieldlist;

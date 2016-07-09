@@ -100,15 +100,7 @@ class Institution extends AppModel {
 		'Course' => array(
 			'className' => 'Course',
 			'foreignKey' => 'institution_id',
-			'dependent' => false,
-			'conditions' => '',
-			'fields' => '',
-			'order' => '',
-			'limit' => '',
-			'offset' => '',
-			'exclusive' => '',
-			'finderQuery' => '',
-			'counterQuery' => ''
+			'dependent' => false
 		),
 		'User' => array(			// this is only an administrative thing
 			'className' => 'User',
