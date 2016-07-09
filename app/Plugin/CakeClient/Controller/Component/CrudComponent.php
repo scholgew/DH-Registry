@@ -118,13 +118,12 @@ class CrudComponent extends Component {
 	
 	
 	public function getTableConfig($table = null) {
-		if(!isset($this->controller->{$this->tableModelName}))
-			$this->controller->loadModel($this->tableModelName);
+		$model = $this->getModel($this->tableModelName);
 		
 		// #ToDo: get the right table entry that belongs to the action that was being called!
 		// acf_value, Model to get the right menu...
 		
-		if($tableConfig = $this->controller->{$this->tableModelName}->find('first', array(
+		if($tableConfig = $model->find('first', array(
 			'contain' => array(),
 			'conditions' => array($this->tableModelName.'.name' => $table)
 		))) return $tableConfig['CcConfigTable'];
@@ -213,24 +212,23 @@ class CrudComponent extends Component {
 	}
 	
 	
-	public function getRelations($table = null, $from_model = false) {
-		// params-controller will contain the virtual controller name - which in turn is the table we are looking at!
-		if(empty($table)) {
-			$table = $this->controller->request->params['controller'];
-		}
+	public function getRelations($tableName = null, $modelName = null, $from_model = false) {
+		if(empty($tableName)) $tableName = $this->table;
+		if(empty($modelName)) $modelName = $this->modelName;
 		
 		$role = 'admin'; // don't forget to enhance allowedActions checking!
-		$cacheName = $role . '_relations_' . $table;
+		$cacheName = $role . '_relations_' . $tableName;
 		if($from_model) $cacheName .= '_model';
-		
 		if(!$relations = Cache::read($cacheName, 'cakeclient')) {
-			if(!isset($this->controller->CcConfigTable)) $this->controller->loadModel('CcConfigTable');
-			if($table_id = $this->controller->CcConfigTable->getTable($table)) {
-				$tableDef = $this->getTableConfig($table);
-				$modelClass = Inflector::classify($table);
-				if($tableDef) {
-					$modelClass = $tableDef['model'];
-				}
+			
+			$tableDef = $this->getTableConfig($tableName);
+			// Yet we do not really need this
+			//if($tableDef = $this->getTableConfig($tableName)) {
+			if(0) {
+				//$table_id = $tableModel->getTable($tableName);
+				$table_id = $tableDef['id'];
+				$modelName = $tableDef['model'];
+				
 				if((!empty($tableDef['show_associations']) AND $tableDef['show_associations'] !== '0') OR $from_model) {
 					if(!$from_model) {
 						// check if there are stored relations on the db
@@ -249,45 +247,51 @@ class CrudComponent extends Component {
 							}
 						}
 					}
-					// if no stored relations were found, create a list of associations from the model
-					if(empty($relations) OR $from_model) {
-						if(!isset($this->controller->{$modelClass})) $this->controller->loadModel($modelClass);
-						foreach($this->controller->{$modelClass}->associations() as $assocType) {
-							$associated = $this->controller->{$modelClass}->{$assocType};
-							if(!empty($associated)) {
-								foreach($associated as $assoc => $association) {
-									$tablename = $this->controller->{$modelClass}->{$assoc}->useTable;
-									$primaryKey = $this->controller->{$modelClass}->{$assoc}->primaryKey;
-									$relations[$assocType][] = array(
-										'type' => $assocType,
-										'label' => $assoc,
-										'alias' => $assoc,
-										'classname' => $association['className'],
-										'foreign_key' => $association['foreignKey'],
-										'tablename' => $tablename,
-										'visible' => true,
-										'primary_key' => $primaryKey,
-										// add the ID of the related table in Cakeclient table config table, for easy subsequent lookups
-										'cc_config_table_id' => $tableDef['id']
-									);
-								}
-							}
+				}
+			}
+			
+			// if no stored relations were found, create a list of associations from the model
+			if(empty($relations) OR $from_model) {
+				$model = $this->getModel($modelName);
+				foreach($model->associations() as $assocType) {
+					$associated = $model->{$assocType};
+					if(!empty($associated)) {
+						$i = 0;
+						foreach($associated as $assoc => $association) {
+							$tablename = $model->{$assoc}->useTable;
+							$primaryKey = $model->{$assoc}->primaryKey;
+							$relations[$assocType][] = array(
+								'position' => $i+1,
+								'type' => $assocType,
+								'label' => $assoc,
+								'classname' => $assoc,
+								'classname' => $association['className'],
+								'foreign_key' => $association['foreignKey'],
+								'tablename' => $tablename,
+								'visible' => true,
+								'primary_key' => $primaryKey,
+								// add the ID of the related table in Cakeclient table config table, for easy subsequent lookups
+								'cc_config_table_id' => $tableDef['id']
+							);
+							$i++;
 						}
 					}
 				}
 			}
+			
+			
 			Cache::write($cacheName, $relations, 'cakeclient');
 		}
 		return $relations;
 	}
-	public function setRelations($table = null, $from_model = false) {
-		$relations = $this->getRelations($table, $from_model);
+	public function setRelations($tableName = null, $modelName = null, $from_model = false) {
+		$relations = $this->getRelations($tableName, $modelName, $from_model);
 		$this->controller->set('crudRelations', $relations);
 		return $relations;
 	}
 	
 	public function getFieldlist($modelName = null, $action = null, $table = null) {
-		if(empty($modelName)) 	$modelName = $this->controller->modelClass;
+		if(empty($modelName)) 	$modelName = $this->modelName;
 		if(empty($table)) 		$tableName = $this->table;
 		if(empty($action)) 		$action = $this->controller->request->params['action'];
 		
@@ -298,11 +302,10 @@ class CrudComponent extends Component {
 			$has_form = false;
 			if(in_array($action, array('add', 'edit'))) $has_form = true;
 			
-			if(!isset($this->controller->{$this->tableModelName}))
-				$this->controller->loadModel($this->tableModelName);
+			$tableModel = $this->getModel($this->tableModelName);
 			
 			// #ToDo: get ACO!
-			$currentAction = $this->controller->CcConfigTable->find('first', array(
+			$currentAction = $tableModel->find('first', array(
 				'contain' => array('CcConfigAction' => array('conditions' => array('CcConfigAction.name' => $action))),
 				'conditions' => array('CcConfigTable.name' => $tableName)
 			));
@@ -322,12 +325,14 @@ class CrudComponent extends Component {
 				
 			}else{
 				// no fieldlist was specified - create one from the table description
+				$model = $this->getModel($modelName);
+				
 				$sortable = false;
-				if($this->controller->{$modelName}->Behaviors->loaded('Sortable')) {
-					$sortable = $this->controller->{$modelName}->Behaviors->Sortable->settings[$modelName];
+				if($model->Behaviors->loaded('Sortable')) {
+					$sortable = $model->Behaviors->Sortable->settings[$modelName];
 				}
 				
-				$columns = $this->controller->{$modelName}->schema();
+				$columns = $model->schema();
 				$fieldlist = array();
 				foreach($columns as $fieldName => $schema) {
 					// don't add the timestamp fields to forms
@@ -361,7 +366,7 @@ class CrudComponent extends Component {
 				}
 			}
 			
-			$this->__checkForeignKeys($modelName, $fieldlist, $configList, $has_form, $tableConfig);
+			$this->__inspectForeignKeys($modelName, $fieldlist, $configList, $has_form, $tableConfig);
 			
 			// normalize the fieldlist
 			foreach($fieldlist as $k => $value) {
@@ -429,23 +434,23 @@ class CrudComponent extends Component {
 	
 	
 	// destroys the column label
-	protected function __checkForeignKeys($modelName, &$fieldlist, $is_configList, $has_form, $tableConfig) {
+	protected function __inspectForeignKeys($modelName, &$fieldlist, $is_configList, $has_form, $tableConfig) {
 		// examine related models and add fields / change definitions
-		//debug($this->controller->{$modelName}->belongsTo);
+		$model = $this->getModel($modelName);
 		$foreignKeys = array();
-		debug($this->controller->{$modelName}->belongsTo);
-		if(!empty($this->controller->{$modelName}->belongsTo)) {
-			foreach($this->controller->{$modelName}->belongsTo as $modelAlias => $modelRelation) {
+		if(!empty($model->belongsTo)) {
+			foreach($model->belongsTo as $modelAlias => $modelRelation) {
 				if(!$is_configList) {
 					// override the displayField naming in fieldlist
-					$relatedTable = $this->controller->$modelName->$modelAlias->useTable;
+					$relatedTable = $model->{$modelAlias}->useTable;
 					// relatedModelName.displayField would be even better - but is much too long!
 					$label = $foreignKey = $modelRelation['foreignKey'];
+					$label = Inflector::camelize($label);
 					if(!empty($tableConfig[$relatedTable]['displayfield_label'])) {
 						$label = $tableConfig[$relatedTable]['displayfield_label'];
 					}
 					// get the keys where the related values are stored
-					$displayField = $this->controller->$modelName->$modelAlias->displayField;
+					$displayField = $model->{$modelAlias}->displayField;
 					if(!empty($tableConfig[$relatedTable]['displayfield'])) {
 						$displayField = $tableConfig[$relatedTable]['displayfield'];
 					}

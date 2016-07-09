@@ -16,9 +16,11 @@ class UserRole extends CakeclientAppModel {
 		'User' => array(
 			'className' => 'User'
 		),
+		/* - virtually - yes.
 		'CcConfigMenu' => array(
 			'className' => 'CcConfigMenu'
 		)
+		*/
 	);
 	
 	
