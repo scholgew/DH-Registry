@@ -549,10 +549,11 @@ class CrudComponent extends Component {
 				break;
 		}
 		// don't set a view if non-CRUD
-		if(!empty($view) AND !empty($this->controller->request->params['controller'])) {
+		if(!empty($view)) {
 			// check for an override view
-			if(	is_file(APP . 'View' . DS . $this->virtualController . DS . $view . '.ctp')
-			OR	is_file(APP . 'View' . DS . $this->virtualController . DS . $action . '.ctp')
+			if(	Configure::read('Cakeclient.allowViewOverride')
+			AND (is_file(APP . 'View' . DS . $this->virtualController . DS . $view . '.ctp')
+				OR	is_file(APP . 'View' . DS . $this->virtualController . DS . $action . '.ctp'))
 			) {
 				$this->controller->view = APP . 'View' . DS . $this->virtualController . DS . $view . '.ctp';
 				// use the action-named view over a view called "form"

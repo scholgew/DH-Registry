@@ -58,8 +58,8 @@ class CcConfigAction extends CakeclientAppModel {
 			$urlPrefix = Configure::read('Cakeclient.prefix');
 		$labelPrefix = null;
 		if(!empty($urlPrefix)) {
-			$urlPrefix = '/'.$urlPrefix;
 			$labelPrefix = Inflector::classify($urlPrefix).'-';
+			$urlPrefix = '/'.$urlPrefix;
 		}else{
 			$urlPrefix = null;
 		}
@@ -80,7 +80,7 @@ class CcConfigAction extends CakeclientAppModel {
 			$bulk = 1;
 		
 		$label = $labelPrefix.Inflector::humanize($method);
-		if($method == 'index') $label = 'List';
+		if($method == 'index') $label = $labelPrefix.'List';
 		if(empty($viewName) OR !in_array($viewName, array('index','menu'))) {
 			switch($method) {
 			case 'index': $label = $labelPrefix.'List '.$tableLabel; break;

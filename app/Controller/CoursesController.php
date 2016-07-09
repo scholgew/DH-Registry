@@ -472,7 +472,7 @@ class CoursesController extends AppController {
 		
 		// child of country & city: university
 		$conditions = array(
-			'Institution.is_university' => true
+			'Institution.can_have_course' => true
 		);
 		if(!empty($this->filter['Course.country_id']))
 			$conditions['Institution.country_id'] = $this->filter['Course.country_id'];
