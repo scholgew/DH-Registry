@@ -73,6 +73,7 @@ class CcConfigTable extends CakeclientAppModel {
 	
 	public function getGroupTables($source = null, $group = array(), $prefixes = array()) {
 		$prefix = (!empty($group['prefix'])) ? $group['prefix'] : null;
+		$source = (!empty($group['dataSource'])) ? $group['dataSource'] : $source;
 		$_tables = $this->getTables($source);
 		$tables = array();
 		if(!empty($_tables)) foreach($_tables as $i => $tableName) {
@@ -106,12 +107,12 @@ class CcConfigTable extends CakeclientAppModel {
 	}
 	
 	
-	public function getDefaultMenuTableTree($source = null, $group = array(), $prefixes = array()) {
-		$tables = $this->getGroupTables($source, $group, $prefixes);
-		$prefix = (!empty($group['prefix'])) ? $group['prefix'] : null;
+	public function getDefaultMenuTableTree($prefix = null, $group = array(), $tablePrefixes = array(), $source = null) {
+		$tables = $this->getGroupTables($source, $group, $tablePrefixes);
+		$tablePrefix = (!empty($group['prefix'])) ? $group['prefix'] : null;
 		if(!empty($tables)) foreach($tables as $i => &$table) {
 			$table['CcConfigMenuEntry'] = array();
-			$actions = $this->CcConfigAction->getDefaultActions($table['name'], 'menu', $prefix);
+			$actions = $this->CcConfigAction->getDefaultActions($table['name'], 'menu', $tablePrefix, $prefix);
 			if(!empty($actions)) foreach($actions as $k => $action) {
 				$table['CcConfigMenuEntry'][] = array(
 					//'id',

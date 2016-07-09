@@ -80,8 +80,8 @@ class AppController extends Controller {
 			//debug('allowed by debug settings');
 		}
 		
-		if($this->Auth->user()) {
-			// dynamically load the AclMenu
+		if($this->Auth->user() AND $this->Auth->user('user_role_id') < 3) {
+			// dynamically load the AclMenu Component
 			$this->Crud->loadAclMenu();
 			$this->AclMenu->setMenu();
 		}

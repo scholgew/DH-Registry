@@ -9,7 +9,7 @@ class AclMenuComponent extends Component {
 	
 	public $settings, $defaultMenus = array();
 	
-	protected $_aro_id = null;
+	public $aro_id = null;
 	
 	
 	
@@ -38,11 +38,14 @@ class AclMenuComponent extends Component {
 	
 	private function _defaults() {
 		$defaults =  array(
+			'acoModelName' => 'CcConfigAco',
 			'menuModelName' => 'CcConfigMenu',
 			'tableModelName' => 'CcConfigTable',
 			'actionModelName' => 'CcConfigAction',
 			'acf' => 'user_role_id',
+			'acf_adminValue' => 1,
 			'aro_model' => 'UserRole',
+			'aro_id' => null,
 			'defaultMenus' => array(
 				array(
 					'name' => 'Config',
@@ -70,9 +73,6 @@ class AclMenuComponent extends Component {
 	
 	
 	public function isAdmin() {
-		
-		// #ToDo: check if a controller method exists
-		
 		if(	(isset($this->controller->DefaultAuth)
 			AND $this->controller->DefaultAuth->isAdmin())
 		OR	(isset($this->controller->Auth)
@@ -83,7 +83,8 @@ class AclMenuComponent extends Component {
 	
 	
 	public function getAcl($aro_id = null) {
-		return $this->menuModel->find('all', array(
+		$model = $this->getModel($this->acoModelName);
+		return $model->find('all', array(
 			'contain' => array(
 				$this->tableModelName => array(
 					'conditions' => array('name' => $this->request->params['controller']),
@@ -109,13 +110,12 @@ class AclMenuComponent extends Component {
 		foreach($this->settings as $key => $value)
 			$this->{$key} = $value;
 		
-		$this->menuModel = $this->getModel($this->menuModelName);
-		
 		$this->request = $controller->request;
 		
 		if(isset($this->controller->Auth))
-			if(!$this->_aro_id = $this->controller->Auth->user($this->acf))
-				$this->_aro_id = null;	// just to make sure the value is not (bool)false
+			if(!$this->aro_id = $this->controller->Auth->user($this->acf))
+			// just to make sure the value is not (bool)false, as NULL is a valid aro_id for the public user
+			$this->aro_id = null;	
 	}
 	
 	
@@ -178,57 +178,8 @@ class AclMenuComponent extends Component {
 	}
 	
 	
-	public function getMenu($acf_value = null, $dataSource = null, $default = false) {
-		$controlled = true;
-		
-		$menuName = $this->acf.'_'.$acf_value.'_menu';
-		$menu = Cache::read($menuName, 'cakeclient');
-		if(empty($menu)) {
-			
-			// try reading from the cc_config_tables tables
-			//$menu = $this->getAcl($acf_value);
-			//$menu = $this->getAcl(2);
-			
-			// only if demanded or admin: get defaults if no menu available
-			if($default OR (empty($menu) AND $this->isAdmin())) {
-				$menu = $this->getDefaultMenu($dataSource);
-			}	
-			//debug($menu);
-			
-			// basically do some cleaning...
-			/*
-			$_menu = array();
-			foreach($menu as $k => &$item) {
-				
-					// #ToDo: move this to view
-					
-					$menuEntry = array(
-						'label' => $label,
-						'url' => array(
-							'action' => 'index',
-							'controller' => $tableName,
-							'plugin' => Configure::read('Cakeclient.prefix')
-						),
-						'submenu' => $actions
-					);
-					
-					
-					// build the output list
-					if(!isset($menuEntry['url']) AND empty($actions)) {
-						unset($item[$this->tableModelName][$i]);
-					}
-				}
-			}
-			*/
-			Cache::write($menuName, $menu, 'cakeclient');
-		}
-		
-		return $menu;
-	}
-	
-	
 	public function setMenu() {
-		$cakeclientMenu = $this->getMenu($this->_aro_id);
+		$cakeclientMenu = $this->getMenu();
 		
 		if(!$this->request->is('requested') AND Configure::read('Cakeclient.navbar')) {
 			// load the AssetHelper which appends the top_nav Menu to whichever layout
@@ -241,14 +192,38 @@ class AclMenuComponent extends Component {
 	}
 	
 	
-	public function getDefaultMenu($dataSource = null, $groups = array()) {
+	public function getMenu($aro_id = null, $aro_model = null, $dataSource = null, $default = false) {
+		//$menuName = $this->acf.'_'.$aro_id.'_menu';
+		//$menu = Cache::read($menuName, 'cakeclient');
+		if(empty($menu)) {
+			
+			// try reading from the cc_config_tables tables
+			//$menu = $this->getAcl($aro_id);
+			//$menu = $this->getAcl(2);
+			
+			// only if demanded or admin: get defaults if no menu available
+			if($default OR (empty($menu) AND $this->isAdmin())) {
+				$menu = $this->getDefaultMenu($aro_id, $aro_model, $dataSource);
+			}	
+			
+			//Cache::write($menuName, $menu, 'cakeclient');
+		}
+		
+		return $menu;
+	}
+	
+	
+	public function getDefaultMenu($aro_id = null, $aro_model = null, $dataSource = null, $groups = array()) {
+		if(empty($aro_id)) 		$aro_id 	= $this->aro_id;
+		if(empty($aro_model)) 	$aro_model 	= $this->aro_model;
 		$menuModel = $this->getModel($this->menuModelName);
 		$menuModel->acf_value = $this->acf_adminValue;
 		$menuModel->aro_model = $this->aro_model;
 		if(empty($groups)) $groups = $this->defaultMenus;
 		
-		return $menuModel->getDefaultMenuTree($dataSource, $groups);
+		return $menuModel->getDefaultMenuTree($aro_id, $aro_model, $dataSource, $groups);
 	}
+	
 	
 	
 	public function getActions($action = null, $table = null, $controlled = true) {

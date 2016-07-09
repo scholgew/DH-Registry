@@ -58,7 +58,7 @@ class CcConfigAction extends CakeclientAppModel {
 			$urlPrefix = Configure::read('Cakeclient.prefix');
 		$labelPrefix = null;
 		if(!empty($urlPrefix)) {
-			$labelPrefix = Inflector::classify($urlPrefix).'-';
+			//$labelPrefix = Inflector::classify($urlPrefix).'-';
 			$urlPrefix = '/'.$urlPrefix;
 		}else{
 			$urlPrefix = null;

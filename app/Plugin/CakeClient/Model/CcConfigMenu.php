@@ -49,15 +49,34 @@ class CcConfigMenu extends CakeclientAppModel {
 	}
 	
 	
-	public function getDefaultMenuTree($dataSource = null, $menuGroups = array()) {
+	public function getDefaultMenuTree($aro_id = null, $aro_model = null, $dataSource = null, $menuGroups = array()) {
+		// determine the role prefix
+		$this->bindModel(array(
+			'belongsTo' => array(
+				$aro_model => array(
+					'className' => $aro_model,
+					'foreignKey' => 'foreign_key'
+				)
+			)
+		));
+		$role = $this->{$aro_model}->find('first', array(
+			'contain' => array(),
+			'conditions' => array(
+				$aro_model.'.id' => $aro_id
+			)
+		));
+		$prefix = null;
+		if(isset($role[$aro_model]['cakeclient_prefix']))
+			$prefix = $role[$aro_model]['cakeclient_prefix'];
+		
 		$menu = array();
 		if(!empty($menuGroups)) {
-			$prefixes = Hash::extract($menuGroups, '{n}.prefix');
+			$tablePrefixes = Hash::extract($menuGroups, '{n}.prefix');
 			foreach($menuGroups as $k => $group) {
 				$menu[$k]['CcConfigMenu'] = $this->getDefaultMenu($group, $k);
 				
 				$source = (!empty($group['dataSource'])) ? $group['dataSource'] : $dataSource;
-				$menu[$k]['CcConfigTable'] = $this->CcConfigTable->getDefaultMenuTableTree($source, $group, $prefixes);
+				$menu[$k]['CcConfigTable'] = $this->CcConfigTable->getDefaultMenuTableTree($prefix, $group, $tablePrefixes, $source);
 			}
 		}
 		return $menu;
