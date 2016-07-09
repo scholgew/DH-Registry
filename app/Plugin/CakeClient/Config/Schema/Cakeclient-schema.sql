@@ -170,8 +170,8 @@ CREATE TABLE IF NOT EXISTS `cc_config_tables` (
   PRIMARY KEY (`id`),
   KEY `FK_cc_config_tables_cc_config_menus` (`cc_config_menu_id`),
   KEY `FK_cc_config_tables_cc_config_acos` (`cc_config_aco_id`),
-  CONSTRAINT `FK_cc_config_tables_cc_config_acos` FOREIGN KEY (`cc_config_aco_id`) REFERENCES `cc_config_acos` (`id`) ON UPDATE CASCADE,
-  CONSTRAINT `FK_cc_config_tables_cc_config_menus` FOREIGN KEY (`cc_config_menu_id`) REFERENCES `cc_config_menus` (`id`) ON UPDATE CASCADE
+  CONSTRAINT `FK_cc_config_tables_cc_config_acos` FOREIGN KEY (`cc_config_aco_id`) REFERENCES `cc_config_acos` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `FK_cc_config_tables_cc_config_menus` FOREIGN KEY (`cc_config_menu_id`) REFERENCES `cc_config_menus` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 -- Daten Export vom Benutzer nicht ausgewählt
