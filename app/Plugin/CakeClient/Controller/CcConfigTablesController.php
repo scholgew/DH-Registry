@@ -1,6 +1,7 @@
 <?php
 class CcConfigTablesController extends CakeclientAppController {
 	
+	/*
 	function store_actions($tableName = null) {
 		$this->CcConfigTable->CcConfigAction->store($tableName);
 		$this->redirect('index');
@@ -10,13 +11,14 @@ class CcConfigTablesController extends CakeclientAppController {
 		$this->CcConfigTable->CcConfigAction->tidy($tableName);
 		$this->redirect('index');
 	}
-	
+	*/
 	
 	/**
 	* Var $table can either be a string table name (using current config_id),
 	* or the table identifier itself.
 	*/
-	function __format_relations(&$relations = array()) {
+	/*
+	private function __format_relations(&$relations = array()) {
 		$model_relations = array();
 		if(!empty($relations)) {
 			foreach($relations as $type => $assocs) {
@@ -27,7 +29,8 @@ class CcConfigTablesController extends CakeclientAppController {
 		}
 		return $relations = $model_relations;
 	}
-	
+	*/
+	/*
 	function store_relations($table = null) {
 		$relations = $this->Crud->getRelations($table, $from_model = true);
 		$this->__format_relations($relations);
@@ -41,5 +44,6 @@ class CcConfigTablesController extends CakeclientAppController {
 		$this->CcConfigTable->CcConfigDisplayedrelation->tidy($relations, $table);
 		$this->redirect('index');
 	}
+	*/
 }
 ?>

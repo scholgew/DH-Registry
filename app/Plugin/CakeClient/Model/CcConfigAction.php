@@ -249,7 +249,7 @@ class CcConfigAction extends CakeclientAppModel {
 		return $out;
 	}
 	
-	
+	/*
 	function store($tableName = null, $prefix = null) {
 		if(empty($tableName)) return false;
 		
@@ -283,11 +283,12 @@ class CcConfigAction extends CakeclientAppModel {
 			}
 		}
 	}
-	
+	*/
 	
 	/*
 	* Remove actions that have disappeared from the controller.
 	*/
+	/*
 	function tidy($tableName = null) {
 		if(empty($tableName)) return false;
 		$table_id = $this->CcConfigTable->getTable($tableName);
@@ -317,10 +318,11 @@ class CcConfigAction extends CakeclientAppModel {
 			}
 		}
 	}
-	
+	*/
 	/**
 	* Get the action to skip for generating drop-down options for linkable actions.
 	*/
+	/*
 	function getAction(&$action = null, $childModelName = null) {
 		$action_id = null;
 		if(!empty($childModelName) AND !in_array($childModelName, array($this->alias, $this->name)) AND ctype_digit($action)) {
@@ -369,12 +371,12 @@ class CcConfigAction extends CakeclientAppModel {
 		}
 		return $action_id;
 	}
-	
+	*/
 	/**
 	* Overriding Crud::setOptionList().
 	* Presumably called from the child model "ActionsView".
 	*/
-	function getHasManyOptions($childModelName = null, $action = null) {
+	function getOptions($childModelName = null, $action = null) {
 		$action_id = $this->getAction($action, $childModelName);
 		$list = array();
 		if(!empty($action_id)) {
@@ -408,7 +410,7 @@ class CcConfigAction extends CakeclientAppModel {
 	* linkable options for the action view that is being edited.
 	* Called from CrudComponent during /actions/edit (self join - so child model is the model itself).
 	*/
-	 function getHasAndBelongsToManyOptions($childModelName = null, $action = null) {
+	 function getHabtmOptions($childModelName = null, $action = null) {
 		$apConfigViewActions = array();
 		$action_id = $this->getAction($action);
 		if(!empty($action_id) AND $action AND is_array($action) AND $action[$this->alias]['has_view']) {

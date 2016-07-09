@@ -164,16 +164,17 @@ class CcConfigTable extends CakeclientAppModel {
 		return $table_id;
 	}
 	
-	
+	/*
 	function update($config_id = null) {
 		$this->tidy($config_id);
 		$this->store($config_id);
 	}
-	
+	*/
 	/**
 	* Create table definitions in configuration from all db-tables 
 	* that cannot be found in configuration.
 	*/
+	/*
 	function store($menu_id = null) {
 		if(empty($config_id)) {
 			// use the current config id
@@ -225,11 +226,12 @@ class CcConfigTable extends CakeclientAppModel {
 		$db = ConnectionManager::getDataSource($dataSource);
 		return $this->tables = $db->listSources();
 	}
-	
+	*/
 	/**
 	* Remove all table definitions from configuration
 	* that cannot be found in the db anymore.
 	*/
+	/*
 	function tidy($config_id = null) {
 		if(empty($config_id)) {
 			// use the current config id
@@ -269,6 +271,6 @@ class CcConfigTable extends CakeclientAppModel {
 			), false);
 		}
 	}
-	
+	*/
 }
 ?>

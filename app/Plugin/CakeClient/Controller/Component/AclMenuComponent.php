@@ -16,7 +16,7 @@ class AclMenuComponent extends Component {
 	
 	
 	
-	public function loadModel($modelName = null) {
+	public function getModel($modelName = null) {
 		if(!isset($this->controller->{$modelName}))
 			$this->controller->loadModel($modelName);
 		return $this->controller->{$modelName};
@@ -109,7 +109,7 @@ class AclMenuComponent extends Component {
 		foreach($this->settings as $key => $value)
 			$this->{$key} = $value;
 		
-		$this->menuModel = $this->loadModel($this->menuModelName);
+		$this->menuModel = $this->getModel($this->menuModelName);
 		
 		$this->request = $controller->request;
 		
@@ -242,90 +242,14 @@ class AclMenuComponent extends Component {
 	
 	
 	public function getDefaultMenu($dataSource = null, $groups = array()) {
-		$menuModel = $this->loadModel($this->menuModelName);
+		$menuModel = $this->getModel($this->menuModelName);
 		$menuModel->acf_value = $this->acf_adminValue;
 		$menuModel->aro_model = $this->aro_model;
 		if(empty($groups)) $groups = $this->defaultMenus;
 		
-		//debug($this->menuModel->CcConfigTable->CcConfigAction->getDefaultActions('cc_config_tables'));
-		//exit;
 		return $menuModel->getDefaultMenuTree($dataSource, $groups);
 	}
 	
-	/*
-	public function getTableDefaults($tablename, $i = 0, $prefix = null) {
-		$label = $this->makeTableLabel($tablename, $prefix);
-		return array(
-			//'id' => '1',
-			//'cc_config_menu_id' => 1,
-			'position' => $i+1,
-			'name' => $tablename,
-			'allow_all' => false,	// admin is allowed anyway
-			'label' => $label,
-			'model' => Inflector::classify($tablename),
-			'controller' => $tablename,
-			'displayfield' => null,
-			'displayfield_label' => null,
-			'show_associations' => true,
-			'CcConfigMenuEntry' => array(
-				
-				// get this from getActionDefaults:
-				
-				array(
-					//'id',
-					//'cc_config_table_id',
-					//'cc_config_action_id'
-					'position' => 1,
-					'CcConfigAction' => array(
-						array(
-							//'id' => '1',
-							//'cc_config_table_id' => '1',
-							'show' => true,
-							'url' => $urlPrefix.'/'.$tablename.'/add',
-							'name' => 'add',
-							'label' => $labelPrefix.'Add '.Inflector::singularize($label),
-							'comment' => null,
-							'contextual' => false,
-							'has_form' => true,
-							'bulk_processing' => false,
-							'has_view' => true
-						)
-					)
-				),
-				array(
-					//'id',
-					//'cc_config_table_id',
-					//'cc_config_action_id'
-					'position' => 2,
-					'CcConfigAction' => array(
-						array(
-							//'id' => '1',
-							//'cc_config_table_id' => '1',
-							'url' => $urlPrefix.'/'.$tablename.'/index',
-							'name' => 'index',
-							'label' => $labelPrefix.$label.' List',
-							'comment' => null,
-							'contextual' => false,
-							'has_form' => false,
-							'bulk_processing' => false,
-							'has_view' => true
-						)
-					)
-				)
-			)
-		);
-	}
-	*/
-	
-	
-	
-	/*
-	public function makeTableLabel($tablename = null, $prefix = null) {
-		$label = $tablename;
-		if($prefix) $label = str_replace($prefix, '', $label);
-		return $label = Inflector::camelize($label);
-	}
-	*/
 	
 	public function getActions($action = null, $table = null, $controlled = true) {
 		if(empty($action))
@@ -340,7 +264,7 @@ class AclMenuComponent extends Component {
 		
 		
 		
-		$model = $this->loadModel($this->tableModelName);
+		$model = $this->getModel($this->tableModelName);
 		$currentAction = $model->find('first', array(
 			'contain' => array(
 				$this->actionModelName => array(

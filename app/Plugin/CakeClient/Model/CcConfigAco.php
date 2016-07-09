@@ -30,7 +30,7 @@ class CcConfigAco extends CakeclientAppModel {
 	
 	
 	
-	public function createAcoTree($sources = array()) {
+	public function updateTree($sources = array()) {
 		if(empty($sources)) $sources = $this->sources;
 		
 		$data['CcConfigAco'] = $this->getDefaultAco();
