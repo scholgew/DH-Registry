@@ -212,13 +212,12 @@ class CrudComponent extends Component {
 	}
 	
 	
-	public function getRelations($tableName = null, $modelName = null, $from_model = false) {
+	public function getRelations($tableName = null, $modelName = null) {
 		if(empty($tableName)) $tableName = $this->table;
 		if(empty($modelName)) $modelName = $this->modelName;
 		
 		$role = 'admin'; // don't forget to enhance allowedActions checking!
 		$cacheName = $role . '_relations_' . $tableName;
-		if($from_model) $cacheName .= '_model';
 		if(!$relations = Cache::read($cacheName, 'cakeclient')) {
 			
 			$tableDef = $this->getTableConfig($tableName);
@@ -251,41 +250,67 @@ class CrudComponent extends Component {
 			}
 			
 			// if no stored relations were found, create a list of associations from the model
-			if(empty($relations) OR $from_model) {
+			if(empty($relations)) {
 				$model = $this->getModel($modelName);
-				foreach($model->associations() as $assocType) {
-					$associated = $model->{$assocType};
-					if(!empty($associated)) {
-						$i = 0;
-						foreach($associated as $assoc => $association) {
-							$tablename = $model->{$assoc}->useTable;
-							$primaryKey = $model->{$assoc}->primaryKey;
-							$relations[$assocType][] = array(
+				// check if the model is virtual and examine fieldlist
+				$virtual = $plugin = false;
+				$dummy = $this->getModel('Dummy');
+				if(method_exists($dummy, 'getAppClass'))
+					$dummy->getAppClass($this->modelName, 'Model', $virtual, $plugin);
+				if($virtual) {
+					// detect belongsTo relations
+					$columns = $model->schema();
+					$i = 0;
+					foreach($columns as $fieldName => $schema) {
+						if(preg_match('/.+_id$/', $fieldName)) {
+							$assoc = Inflector::classify(substr($fieldName, 0, -3));
+							$relations['belongsTo'][] = array(
 								'position' => $i+1,
-								'type' => $assocType,
+								'type' => 'belongsTo',
 								'label' => $assoc,
 								'classname' => $assoc,
-								'classname' => $association['className'],
-								'foreign_key' => $association['foreignKey'],
-								'tablename' => $tablename,
+								'foreign_key' => $fieldName,
+								'tablename' => Inflector::pluralize(substr($fieldName, 0, -3)),
 								'visible' => true,
-								'primary_key' => $primaryKey,
-								// add the ID of the related table in Cakeclient table config table, for easy subsequent lookups
-								'cc_config_table_id' => $tableDef['id']
+								'primary_key' => 'id'
 							);
 							$i++;
+						}
+					}
+				}else{
+					$associations = $model->associations();
+					foreach($associations as $assocType) {
+						$associated = $model->{$assocType};
+						if(!empty($associated)) {
+							$i = 0;
+							foreach($associated as $assoc => $association) {
+								$tablename = $model->{$assoc}->useTable;
+								$primaryKey = $model->{$assoc}->primaryKey;
+								$relations[$assocType][] = array(
+									'position' => $i+1,
+									'type' => $assocType,
+									'label' => $assoc,
+									'classname' => $association['className'],
+									'foreign_key' => $association['foreignKey'],
+									'tablename' => $tablename,
+									'visible' => true,
+									'primary_key' => $primaryKey,
+									// add the ID of the related table in Cakeclient table config table, for easy subsequent lookups
+									//'cc_config_table_id' => $tableDef['id']
+								);
+								$i++;
+							}
 						}
 					}
 				}
 			}
 			
-			
 			Cache::write($cacheName, $relations, 'cakeclient');
 		}
 		return $relations;
 	}
-	public function setRelations($tableName = null, $modelName = null, $from_model = false) {
-		$relations = $this->getRelations($tableName, $modelName, $from_model);
+	public function setRelations($tableName = null, $modelName = null) {
+		$relations = $this->getRelations($tableName, $modelName);
 		$this->controller->set('crudRelations', $relations);
 		return $relations;
 	}
@@ -316,7 +341,7 @@ class CrudComponent extends Component {
 			$configList = false;
 			//$tableConfig = Configure::read('Cakeclient.tables');
 			$tableConfig = $this->getTableConfig($tableName);
-			// #ToDo
+			// #ToDo: get the configuration of related tables
 			if(0) {	
 			//if(!empty($tableConfig['fieldlists'][$action])) {
 				$fieldlist = $tableConfig['fieldlists'][$action];
@@ -354,11 +379,14 @@ class CrudComponent extends Component {
 					}
 					if($sortable AND $sortable['orderBy'] == $fieldName) {
 						if($action == 'add') {
-							// Sortable::getOptions(). $parentKeys will be empty, which is bad if we want to add the new entry to a particular subtree. This calls for custom coding, or an AJAX app.
-							$sortableOptions = $this->controller->$modelName->getOptions($parentKeys = array());
+							$fielddef['form_options']['field'] = $fielddef['fieldname'];
+							$fielddef['form_options']['label'] = $fielddef['label'];
 							$fielddef['form_options']['type'] = 'select';
-							$fielddef['form_options']['options'] = $sortableOptions['addOptions'];
 							$fielddef['form_options']['empty'] = false;
+							// Sortable::getOptions(). $parentKeys will be empty, which is bad if we want to add 
+							// the new entry to a particular subtree. This calls for custom coding, or an AJAX app.
+							$sortableOptions = $this->controller->$modelName->getOptions($parentKeys = array());
+							$fielddef['form_options']['options'] = $sortableOptions['addOptions'];
 							if($sortableOptions['allowNull'] === true) $fielddef['form_options']['empty'] = 'null';
 						}
 					}
@@ -366,86 +394,64 @@ class CrudComponent extends Component {
 				}
 			}
 			
-			$this->__inspectForeignKeys($modelName, $fieldlist, $configList, $has_form, $tableConfig);
-			
-			// normalize the fieldlist
-			foreach($fieldlist as $k => $value) {
-				$label = $fieldname = $k;
-				$display = $displayField = null;
-				$form_options = array();
-				if(!empty($value['label'])) {
-					$label = $value['label'];
-				}
-				if(!empty($value['field'])) {
-					$fieldname = $value['field'];
-				}
-				if(!empty($value['displayField'])) {
-					$displayField = $value['displayField'];
-				}
-				if(!empty($value['display'])) {
-					$display = $value['display'];
-				}
-				$expl = explode('.', $fieldname);
-				if(!isset($expl[1])) {
-					$fieldname = $modelName . '.' . $fieldname;
-				}
-				if(!empty($displayField)) {
-					$expl = explode('.', $displayField);
-					if(!isset($expl[1])) {
-						$displayField = $modelName . '.' . $displayField;
-					}
-				}else{
-					$displayField = $fieldname;
-				}
-				// the fieldlist might be a one-dimensional list of "modelName.fieldname" entries, so this might have been assigned to the label 
-				$expl = explode('.', $label);
-				if(isset($expl[1])) {
-					$label = $expl[1];
-				}
-				$_fieldlist[$fieldname] = array_merge($value, array(
-					'field' => $fieldname,
-					'displayField' => $displayField,
-					'label' => $label,
-					'display' => $display
-				));
-				if(empty($value['form_options']) OR !is_array($value['form_options'])) {
-					$form_options['label'] = $_fieldlist[$fieldname]['label'];
-				}else{
-					$form_options = $value['form_options'];
-					if(empty($form_options['label'])) {
-						$form_options['label'] = $label;
-					}
-					if(empty($form_options['field'])) {
-						$form_options['field'] = $fieldname;
-					}
-				}
-				$_fieldlist[$fieldname]['form_options'] = $form_options;
-			}
-			$fieldlist = $_fieldlist;
+			$this->__inspectAssociations($modelName, $fieldlist, $configList, $has_form, $tableConfig);
+			debug($fieldlist);
 			Cache::write($cacheName, $fieldlist, 'cakeclient');
 		}
 		return $fieldlist;
 	}
-	public function setFieldlist($modelName = null, $action = null) {
-		$fieldlist = $this->getFieldlist($modelName, $action);
+	public function setFieldlist($modelName = null, $action = null, $tableName = null) {
+		$fieldlist = $this->getFieldlist($modelName, $action, $tableName);
 		$this->controller->set('crudFieldlist', $fieldlist);
 		return $fieldlist;
 	}
 	
 	
+	private function __setModelRelations($modelName = null, $reset = true) {
+		if(empty($modelName)) $modelName = $this->modelName;
+		$model = $this->getModel($modelName);
+		$belongsTo = $model->belongsTo;
+		if(empty($belongsTo)) {
+			// check if the model is virtual and examine fieldlist
+			$virtual = $plugin = false;
+			$dummy = $this->getModel('Dummy');
+			if(method_exists($dummy, 'getAppClass'))
+				$dummy->getAppClass($this->modelName, 'Model', $virtual, $plugin);
+			if($virtual) {
+				// detect belongsTo relations
+				$columns = $model->schema();
+				foreach($columns as $fieldName => $schema) {
+					if(preg_match('/.+_id$/', $fieldName)) {
+						$assoc = Inflector::classify(substr($fieldName, 0, -3));
+						$belongsTo[$assoc] = array(
+							'className' => $assoc,
+							'foreignKey' => $fieldName,
+							//'tablename' => Inflector::pluralize(substr($fieldName, 0, -3))
+						);
+					}
+				}
+				if(!empty($belongsTo))
+					$model->bindModel(array('belongsTo' => $belongsTo), $reset);
+			}
+		}
+		return $belongsTo;
+	}
+	
+	
 	// destroys the column label
-	protected function __inspectForeignKeys($modelName, &$fieldlist, $is_configList, $has_form, $tableConfig) {
+	private function __inspectAssociations($modelName, &$fieldlist, $is_configList, $has_form, $tableConfig) {
 		// examine related models and add fields / change definitions
 		$model = $this->getModel($modelName);
-		$foreignKeys = array();
-		if(!empty($model->belongsTo)) {
+		$belongsTo = $this->__setModelRelations($modelName, $reset = true);
+		
+		if(!empty($belongsTo)) {
 			foreach($model->belongsTo as $modelAlias => $modelRelation) {
 				if(!$is_configList) {
 					// override the displayField naming in fieldlist
 					$relatedTable = $model->{$modelAlias}->useTable;
 					// relatedModelName.displayField would be even better - but is much too long!
-					$label = $foreignKey = $modelRelation['foreignKey'];
-					$label = Inflector::camelize($label);
+					$foreignKey = $modelRelation['foreignKey'];
+					$label = Inflector::camelize($modelRelation['foreignKey']);
 					if(!empty($tableConfig[$relatedTable]['displayfield_label'])) {
 						$label = $tableConfig[$relatedTable]['displayfield_label'];
 					}
@@ -648,7 +654,7 @@ class CrudComponent extends Component {
 			}
 		}
 		// tell the model which CRUD method is working
-		//$this->controller->{$modelName}->crud = 'index';
+		$this->controller->{$modelName}->crud = 'index';
 		
 		$this->controller->Paginator->settings = $this->controller->paginate;
 		try{
