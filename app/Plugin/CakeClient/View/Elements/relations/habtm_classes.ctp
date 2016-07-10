@@ -1,7 +1,7 @@
 <?php
-if(isset($crudRelations) AND !empty($crudRelations['hasMany'])) {
+if(isset($crudRelations) AND !empty($crudRelations['hasAndBelongsToMany'])) {
 	echo '<div class="associations">';
-	echo '<p>Child Models</p>';
+	echo '<p title="An item of this class &quot;has and belongs to many&quot; items of the other class.">n:m Relations</p>';
 	echo '<ul>';
 	$parent_id = false;
 	if(empty($primaryKeyName)) {
@@ -10,14 +10,14 @@ if(isset($crudRelations) AND !empty($crudRelations['hasMany'])) {
 	if(isset($modelName) AND isset($record[$modelName]) AND isset($record[$modelName][$primaryKeyName])) {
 		$parent_id = $record[$modelName][$primaryKeyName];
 	}
-	foreach($crudRelations['hasMany'] as $assoc) {
+	foreach($crudRelations['hasAndBelongsToMany'] as $assoc) {
 		$link_url = array(
 			'action' => 'index',
 			'controller' => $assoc['tablename'],
 			'plugin' => Configure::read('Cakeclient.prefix'),
-			$assoc['foreign_key'] =>  $parent_id
+			$modelName . '.' . $assoc['primary_key'] => $parent_id
 		);
-		if(!$parent_id) unset($link_url[$assoc['foreign_key']]);
+		if(!$parent_id) unset($link_url[$assoc['primary_key']]);
 		echo '<li>';
 		echo $this->Html->link($assoc['label'], $link_url);
 		echo '</li>';

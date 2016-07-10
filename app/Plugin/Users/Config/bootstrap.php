@@ -10,6 +10,9 @@ Configure::write('Users.securitySettings', array(
 	'csrfCheck' => true
 ));
 Configure::write('Users.userModel', 'Users.User');
+// user roles are not actively being used by the plugin, 
+// but optionally can be displayd on login_info.ctp
+Configure::write('Users.roleModel', 'UserRole');
 
 
 

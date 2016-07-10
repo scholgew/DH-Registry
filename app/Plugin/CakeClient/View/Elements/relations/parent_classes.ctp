@@ -1,7 +1,7 @@
 <?php
 if(isset($crudRelations) AND !empty($crudRelations['belongsTo'])) {
 	echo '<div class="associations">';
-	echo '<p>Parent Models</p>';
+	echo '<p>Parent Classes</p>';
 	echo '<ul>';
 	
 	foreach($crudRelations['belongsTo'] as $assoc) {

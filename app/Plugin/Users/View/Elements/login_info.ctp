@@ -41,8 +41,9 @@
 		if(!empty($auth_user['is_admin'])) {
 			echo '<p>You are Admin.</p>';
 		}
-		if(isset($auth_user['role_id']) AND !empty($roles) AND !empty($roles[$auth_user['role_id']])) {
-			echo '<p>Role: ' . $roles[$auth_user['role_id']] . '.</p>';
+		if(	!empty($auth_user[Configure::read('Users.roleModel')])
+		AND !empty($auth_user[Configure::read('Users.roleModel')]['name'])) {
+			echo '<p>Role: ' . $auth_user[Configure::read('Users.roleModel')]['name'] . '.</p>';
 		}
 		?>
 		<ul>
