@@ -226,11 +226,11 @@ class AclMenuComponent extends Component {
 	
 	
 	
-	public function getActions($action = null, $table = null, $controlled = true) {
-		if(empty($action))
-			$action = $this->controller->request->params['action'];
+	public function getActions($table = null, $view = null) {
+		if(empty($view))
+			$view = $this->request->params['action'];
 		if(empty($table))
-			$table = $this->controller->request->params['controller'];
+			$table = $this->request->params['controller'];
 		
 		$prefix = Configure::read('Cakeclient.prefix');
 		if(!$prefix) $prefix = false;
@@ -243,7 +243,7 @@ class AclMenuComponent extends Component {
 		$currentAction = $model->find('first', array(
 			'contain' => array(
 				$this->actionModelName => array(
-					'conditions' => array($this->actionModelName.'.name' => $action),
+					'conditions' => array($this->actionModelName.'.name' => $view),
 					'CcConfigActionsView' => array(
 						'order' => 'CcConfigActionsView.position'
 					)
@@ -257,7 +257,7 @@ class AclMenuComponent extends Component {
 		*	as the context is already set by the record's ID.
 		*/
 		$current_action_must_check_context = true;
-		if($action != 'index') $current_action_must_check_context = false;
+		if($view != 'index') $current_action_must_check_context = false;
 		if(isset($currentAction[$this->actionModelName][0]['contextual']))
 			$current_action_must_check_context = !$currentAction[$this->actionModelName][0]['contextual'];
 		
@@ -268,7 +268,7 @@ class AclMenuComponent extends Component {
 			$actions = $this->controller->{$this->tableModelName}->find('first', array(
 				'contain' => array(
 					$this->actionModelName => array(
-						'conditions' => array($this->actionModelName.'.name !=' => $action)
+						'conditions' => array($this->actionModelName.'.name !=' => $view)
 					)
 				),
 				'conditions' => array($this->tableModelName.'.name' => $table)
@@ -278,11 +278,11 @@ class AclMenuComponent extends Component {
 			}else{
 				$actions = array();
 				// get the default list
-				$actionsName = $action . 'Actions';
+				$actionsName = $view . 'Actions';
 				if(isset($this->$actionsName)) {
 					$actions = $this->$actionsName;
 				}
-				if(strtolower($action) == 'index') { 
+				if(strtolower($view) == 'index') { 
 					$tableModel = Inflector::classify($table);
 					$$tableModel = ClassRegistry::init($tableModel);
 					// access the model's behaviors and add a special method if Sortable is loaded
@@ -381,8 +381,8 @@ class AclMenuComponent extends Component {
 	}
 	
 	
-	function setActions($action = null, $table = null, $controlled = true) {
-		$actions = $this->getActions($action, $table, $controlled);
+	function setActions($view = null, $table = null, $controlled = true) {
+		$actions = $this->getActions($view, $table, $controlled);
 		$this->controller->set('crudActions', $actions);
 		return $actions;
 	}
