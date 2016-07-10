@@ -111,7 +111,7 @@ class CcConfigAction extends CakeclientAppModel {
 	public function getDefaultActions($tableName = null, $viewName = null, $tablePrefix = null, $urlPrefix = null) {
 		$actions = array();
 		// default CRUD actions
-		$methods = array('add','index','view','edit','delete');
+		$methods = array('index','add','view','edit','delete');
 		// access the model's behaviors, if it uses Sortable, add the method "reset_order"
 		$modelName = Inflector::classify($tableName);
 		$$modelName = ClassRegistry::init($modelName);
@@ -135,7 +135,7 @@ class CcConfigAction extends CakeclientAppModel {
 			// filter out some actions for special purposes
 			$add = true;
 			if(!empty($viewName)) switch($viewName) {
-			case 'menu':	if($action['contextual']) 													$add = false; break;
+			case 'menu':	if($action['contextual'] OR in_array($method, array('reset_order'))) 		$add = false; break;
 			case 'index':	if($method == 'index')														$add = false; break;
 			case 'add':		if($action['contextual'] OR in_array($method, array('reset_order','add')))	$add = false; break;
 			case 'view':	if(in_array($method, array('reset_order','view')))							$add = false; break;
@@ -213,7 +213,7 @@ class CcConfigAction extends CakeclientAppModel {
 		}
 		
 		// format conversion!!!
-		$union = $defaultMethods + $controllerMethods;
+		$union = array_unique(array_merge($defaultMethods, $controllerMethods));
 		$out = array();
 		foreach($union as $i => $method) {
 			$position = $i+1;

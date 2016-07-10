@@ -1,5 +1,5 @@
 
-
+@import "variables";
 
 body {
 	padding-top: 50px;
@@ -11,6 +11,7 @@ body {
 	
 	
 	.dropdown-menu {
+		font-size: 0.8em;
 		padding: 10px;
 		padding-right: 25px;
 		max-height: 90vh;
@@ -20,12 +21,21 @@ body {
 			&.group_label {
 				clear: left;
 				float: none;
+				color: $menu_main_link_color;
+				font-weight: bold;
 				+ .group {
 					clear: left;
 				}
 			}
 			&.group {
 				float: left;
+				a {
+					padding: 3px 10px;
+					color: $actions_link_color;
+					&:hover {
+						color: $actions_link_hover_color;
+					}
+				}
 			}
 		}
 	}

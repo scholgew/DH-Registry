@@ -1,18 +1,4 @@
 <?php
-
-/** 
-* This constant is only used by the crontasks,
-* which are required to render links in the email bodies. 
-* As the cron is not being requested via the web, 
-* Cake's Router will resolve the base URL to 'localhost'.
-
-* We're not using Cake's 'App.FullBaseUrl', which would directly affect the Router::url('/', $full = true) output
-*/
-
-// cake internal base url - will be prepended to Router::url(/foo/bar, $full = true) => http://example.com/foo/bar
-// this URL must be declared as it cannot be retrieved otherwise when sending emails from cron/console
-Configure::write('App.fullBaseUrl', 'https://example.com');
-
 Configure::write('App.EmailSubjectPrefix', '[DH Registry]');
 Configure::write('App.defaultEmail', 'noreply@example.com');
 
@@ -29,6 +15,20 @@ Configure::write('App.CourseRed', Configure::read('App.CourseWarnPeriod') + 60*6
 Configure::write('App.CourseExpirationPeriod', (60*60*24*365*2));
 // courses not updated for this period will be hidden at all, for archival purposes
 Configure::write('App.CourseArchivalPeriod', (60*60*24*365*5));
+
+
+Configure::write('App.MapApiKey', 'foo');
+
+
+/** 
+* This constant is only used by the crontasks,
+* which are required to render links in the email bodies. 
+* As the cron is not being requested via the web, 
+* Cake's Router will resolve the base URL to 'localhost'.
+
+* We're not using Cake's 'App.FullBaseUrl', which would directly affect the Router::url('/', $full = true) output
+*/
+Configure::write('App.consoleBaseUrl', 'https://example.com');
 
 
 
