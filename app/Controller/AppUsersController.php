@@ -63,25 +63,27 @@ class AppUsersController extends UsersController {
 	}
 	
 	
-	protected function _setUniversities() {
+	protected function _setOptions() {
 		$institutions = $this->AppUser->Institution->find('list', array(
 			'contain' => array('Country'),
 			'fields' => array('Institution.id', 'Institution.name', 'Country.name'),
 			'conditions' => array('Institution.can_have_course' => 1)
 		));
 		ksort($institutions);
-		$this->set('institutions', $institutions);
+		$countries = $this->AppUser->Country->find('list', array('order' => 'Country.name ASC'));
+		$userRoles = $this->AppUser->UserRole->find('list');
+		$this->set(compact('institutions','countries','userRoles'));
 	}
 	
 	
 	public function register() {
-		$this->_setUniversities();
+		$this->_setOptions();
 		parent::register();
 	}
 	
 	
 	public function profile($id = null) {
-		$this->_setUniversities();
+		$this->_setOptions();
 		parent::profile($id);
 	}
 	
@@ -198,7 +200,7 @@ class AppUsersController extends UsersController {
 					$this->redirect('/users/dashboard');
 				}
 			}
-			$this->_setUniversities();
+			$this->_setOptions();
 		}
 	}
 	

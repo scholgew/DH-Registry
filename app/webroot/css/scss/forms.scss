@@ -47,28 +47,31 @@ form {
 	div {
 		margin-bottom: 14px;
 		vertical-align: text-top;
+		clear: left;
+		@include clearfix;
 	}
 	
 	.clearer, .spacer {
 		margin-bottom: 0;
 	}
 	
-	label, legend, a {
+	a {
+		float: none;
+		margin-bottom: 18px;
+		display: inline;
+	}
+	
+	label, legend, a.label {
 		display:block;
 		font-weight:bold;
 		margin: 0 0 2px;
 		float:left;
 		margin:2px 0 4px;
 		width:208px;
+		clear: left;
 	}
 	.required > label {
 		&:after {content: " *";}
-	}
-	
-	a {
-		width: auto;
-		float: none;
-		margin-bottom: 18px;
 	}
 	
 	/* inputs fixed width: match date-select with select(+multiple) & radio.fieldset */

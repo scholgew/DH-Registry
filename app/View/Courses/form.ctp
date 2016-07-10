@@ -56,12 +56,9 @@ if(!empty($errors)) {
 }
 
 if($this->action == 'edit') {
-	echo $this->Form->input('id');
+	echo $this->Form->input('id', array('disabled' => true, 'type' => 'text'));
 	?>
-	<div class="input text">
-		<label for="CourseId">Course ID</label>
-		<?php echo $this->request->data['Course']['id']; ?>
-	</div>
+	
 	<p>Courses are not displayed any more, if the "last-update" field's date is too old. </p>
 	<p>To mark this record as up-to-date, you have to submit this form, even if the information did not change.</p>
 	
