@@ -318,6 +318,7 @@ class CrudComponent extends Component {
 		return $relations;
 	}
 	
+	// #ToDo: move this to model CcConfigFielddefinitions!
 	public function getFieldlist($modelName = null, $action = null, $table = null) {
 		if(empty($modelName)) 	$modelName = $this->modelName;
 		if(empty($table)) 		$tableName = $this->table;

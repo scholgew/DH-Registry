@@ -51,7 +51,7 @@ class CcConfigAction extends CakeclientAppModel {
 	
 	
 	
-	public function getDefaultAction($method = null, $tableName = null, $viewName = null, $tablePrefix = null, $urlPrefix = null, $i = 0) {
+	public function getDefaultAction($method = null, $tableName = null, $viewName = null, $tablePrefix = null, $urlPrefix = null, $data = array()) {
 		if(empty($method) OR empty($tableName)) return array();
 		
 		if(empty($urlPrefix) AND $urlPrefix !== false)
@@ -63,10 +63,11 @@ class CcConfigAction extends CakeclientAppModel {
 		}else{
 			$urlPrefix = null;
 		}
+		$i = (isset($data['position'])) ? $data['position'] : 0;
+		$contextual = (isset($data['contextual'])) ? $data['contextual'] : 1;
 		
 		$tableLabel = $this->makeTableLabel($tableName, $tablePrefix);
 		
-		$contextual = 1;
 		if(in_array($method, array('add','index','reset_order')))
 			$contextual = 0;
 		$has_form = 0;
@@ -81,13 +82,12 @@ class CcConfigAction extends CakeclientAppModel {
 		
 		$label = $labelPrefix.Inflector::humanize($method);
 		if($method == 'index') $label = $labelPrefix.'List';
-		if(empty($viewName) OR !in_array($viewName, array('index','menu'))) {
-			switch($method) {
-			case 'index': $label = $labelPrefix.'List '.$tableLabel; break;
-			case 'add': case 'edit': case 'view': case 'delete':
+		if(empty($viewName) OR $viewName != 'menu') {
+			if($method == 'index') $label = $labelPrefix.'List '.$tableLabel;
+			if($viewName != 'index' AND in_array($method, array('add','edit','view','delete')))
 				$label = $labelPrefix.Inflector::humanize($method).' '.Inflector::singularize($tableLabel);
-				break;
-			}
+			if($viewName == 'index' AND !$contextual)
+				$label = $labelPrefix.Inflector::humanize($method).' '.Inflector::singularize($tableLabel);
 		}
 		
 		return array(
@@ -123,7 +123,7 @@ class CcConfigAction extends CakeclientAppModel {
 		// we have an array-format conversion here...
 		
 		foreach($union as $method => $method_data) {
-			$action = $this->getDefaultAction($method, $tableName, $viewName, $tablePrefix, $urlPrefix);
+			$action = $this->getDefaultAction($method, $tableName, $viewName, $tablePrefix, $urlPrefix, $method_data);
 			// special handling for the contextual property
 			if(	!in_array($method, array('add','index','reset_order'))
 			AND isset($method_data['contextual']))
@@ -135,10 +135,11 @@ class CcConfigAction extends CakeclientAppModel {
 			// filter out some actions for special purposes
 			$add = true;
 			if(!empty($viewName)) switch($viewName) {
-			case 'menu':	if($action['contextual']) 						$add = false; break;
-			case 'add':		if($action['contextual'] OR $method == 'add') 	$add = false; break;
-			case 'view':	if($method == 'reset_order') 					$add = false; break;
-			case 'edit':	if($method == 'reset_order') 					$add = false; break;
+			case 'menu':	if($action['contextual']) 													$add = false; break;
+			case 'index':	if($method == 'index')														$add = false; break;
+			case 'add':		if($action['contextual'] OR in_array($method, array('reset_order','add')))	$add = false; break;
+			case 'view':	if(in_array($method, array('reset_order','view')))							$add = false; break;
+			case 'edit':	if(in_array($method, array('reset_order','edit'))) 							$add = false; break;
 			}
 			if($add) $actions[] = $action;
 		}

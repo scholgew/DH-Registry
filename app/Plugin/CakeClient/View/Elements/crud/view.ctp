@@ -4,7 +4,7 @@
 			foreach($crudFieldlist as $key => $fieldDef) {
 				$fieldname = $key;
 				if(is_array($fieldDef)) {
-					$fieldname = $fieldDef['field'];
+					$fieldname = $fieldDef['fieldname'];
 				}
 				$fieldModelName = $modelName;
 				fieldnameSplit($key, $fieldname, $fieldModelName);

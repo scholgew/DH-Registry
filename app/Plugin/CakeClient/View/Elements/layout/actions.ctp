@@ -1,29 +1,31 @@
 <?php
 	if(!empty($crudActions)) {
 		$menu_actions = array();
-		// check wether a "add"  action is specified, as this one will be displayed outside the index table (no iteration)
-		foreach($crudActions as $k => $action) {
-			$contextual = false;
-			// action will be an array
-			if(isset($action['contextual'])) {
-				$contextual = (bool)$action['contextual'];
+		// #ToDo: check if we need to filter contextual actions for this view
+		if(1) {
+			// list views
+			foreach($crudActions as $k => $action) {
+				if(empty($action['contextual'])) {
+					$menu_actions[] = $action;
+					unset($crudActions[$k]);
+				}
 			}
-			unset($action['contextual']);
-			if(!$contextual) {
-				$menu_actions[] = $action;
-				unset($crudActions[$k]);
-			}
+			// set the contextual actions for further processing in the index table
+			$this->set('crudActions', $crudActions);
+		}else{
+			// contextual views
+			$menu_actions = $crudActions;
 		}
-		$this->set('crudActions', $crudActions);
 		
-		if(empty($primaryKeyName)) $primaryKeyName = 'id';
 		
 		if(!empty($menu_actions)) {
+			if(empty($primaryKeyName)) $primaryKeyName = 'id';
 			echo '<div class="actions">';
 				echo '<ul>';
 					foreach($menu_actions as $action) {
-						if((bool)$action['append_id']) {
+						if(!empty($action['contextual'])) {
 							if(!isset($record_id)) {
+								$record_id = null;
 								if(!empty($record[$modelName][$primaryKeyName])) {
 									$record_id = $record[$modelName][$primaryKeyName];
 								}elseif(!empty($this->data[$modelName][$primaryKeyName])) {
@@ -31,12 +33,12 @@
 								}
 							}
 							if(!empty($record_id)) {
-								$action['url'][] = $record_id;
+								$action['url'] .= '/'.$record_id;
 							}
 						}
 						$options = array('class' => strtolower($action['label']));
-						if(strtolower($action['label']) == 'delete') {
-							$options['confirm']  = 'Are you sure to delete ' . $modelName . ' with ID ' . $action['url'][0] . '?';
+						if(strtolower($action['name']) == 'delete') {
+							$options['confirm']  = 'Are you sure to delete ' . $modelName . ' with ID ' . $record_id . '?';
 						}
 						echo '<li>';
 							echo $this->Html->link($action['label'], $action['url'], $options);

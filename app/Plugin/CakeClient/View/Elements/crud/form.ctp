@@ -36,6 +36,8 @@
 						$options['options'] = $$options['options'];
 					}
 					if(!array_key_exists('empty', $options)) $options['empty'] = '-';
+				}else{
+					if(empty($fieldDef['default'])) $options['empty'] = ' - none - ';
 				}
 			}
 			echo $this->Form->input($fieldname, $options);
