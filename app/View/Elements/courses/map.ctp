@@ -15,9 +15,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+ 
+ 
+ 
+ 
+$this->Html->css('http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css', array('inline' => false));
+$this->Html->script('http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js', array('inline' => false));
+
+$this->Html->css('MarkerCluster.css', array('inline' => false));
+$this->Html->css('MarkerCluster.Default.css', array('inline' => false));
+$this->Html->script('leaflet.markercluster.js', array('inline' => false));
 ?>
 
-<div id="googleMap"></div>
+<div id="coursesMap"></div>
 
 
 <?php
@@ -37,13 +47,6 @@ $this->Html->scriptBlock(
 );
 
 
-
-
-// Please create new Google API key for JavaScript V3. Please Follow instructions under https://code.google.com/apis/console/?pli=1 and enter key in [ToDo]
-$this->Html->script('https://maps.googleapis.com/maps/api/js?key=AIzaSyBR4ndG2xpJKvCXdpHmvNG0w9lzAzkTFwM&sensor=false', array('inline' => false));
-// as the google marker clusterer provokes "mixed content errors" while on https, their code has been adapted (images loading via https)
-//$this->Html->script('https://google-maps-utility-library-v3.googlecode.com/svn/trunk/markerclusterer/src/markerclusterer.js', array('inline' => false));
-$this->Html->script('markerclusterer.js', array('inline' => false));
 
 $this->append('onload', 'var map = initializeMap();');
 ?>

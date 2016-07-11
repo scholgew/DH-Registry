@@ -79,41 +79,27 @@ if(!empty($locations) AND is_array($locations)) {
 ?>
 
 function initializeMap() {
-	var mapProp = {
-		mapTypeId:google.maps.MapTypeId.ROADMAP,
-		zoom:3,
-		center: new google.maps.LatLng(49.553915, 10.189551)
-	};
-	var map = new google.maps.Map(document.getElementById("googleMap"), mapProp);
-	var bounds = new google.maps.LatLngBounds();
+	var mymap = L.map('coursesMap').setView([50.9412784,6.9560874], 10);
+	L.tileLayer('https://api.mapbox.com/styles/v1/hashmich/ciqhed3uq001ae6niop4onov3/tiles/256/{z}/{x}/{y}?access_token=<?php echo Configure::read('App.mapApiKey'); ?>').addTo(mymap);
 	
+	var group = new L.MarkerClusterGroup({
+		spiderfyOnMaxZoom: true,
+		showCoverageOnHover: true,
+		zoomToBoundsOnClick: true,
+		maxClusterRadius: 30
+	});
 	var locations = JSON.parse('<?php echo json_encode($markers, JSON_HEX_APOS); ?>');
-	var markers = [];
-	var infowindows = [];
-	var i = 0;
+	
 	for(var loc in locations) {
-		var marker = new google.maps.Marker({
-			position: new google.maps.LatLng(locations[loc].coordinates.lat, locations[loc].coordinates.lon),
-			map: map,
-			title: locations[loc].title
-		});
-		var infowindow = new google.maps.InfoWindow({content: locations[loc].content});
-		markers[markers.length] = marker;
-		infowindows[infowindows.length] = infowindow;
-		google.maps.event.addListener(marker, "click", function(marker, i) {
-			return function() {
-				infowindows[i].open(map, marker);
-			}
-		}(marker, i));
-		bounds.extend(marker.getPosition());
-		i++;
+		var marker = L.marker([locations[loc].coordinates.lat, locations[loc].coordinates.lon]);
+		marker.bindPopup(locations[loc].content);
+		group.addLayer(marker);
 	}
-	var markerCluster = new MarkerClusterer(map, markers, {maxZoom: 5});
-	if(markers.length > 0) {
-		if (bounds.getNorthEast().equals(bounds.getSouthWest())) {
-			var extendPoint = new google.maps.LatLng(bounds.getNorthEast().lat() + 0.05, bounds.getNorthEast().lng() + 0.05);
-			bounds.extend(extendPoint);
-		}
-		map.fitBounds(bounds);
-	}
+	mymap.addLayer(group);
+	mymap.fitBounds(group.getBounds());
+	mymap.zoomIn();
 }
+
+
+
+
