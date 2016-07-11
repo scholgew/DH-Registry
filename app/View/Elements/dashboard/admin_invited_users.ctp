@@ -91,33 +91,34 @@ if(empty($invited)) {
 			}
 			?>
 		</table>
+	</div>
 		
-		<div class="actions">
-			<ul>
-				<li>
-					<?php
-					echo $this->Html->link('Invite a new course maintainer', array(
+	<div class="actions">
+		<ul>
+			<li>
+				<?php
+				echo $this->Html->link('Invite a new course maintainer', array(
+					'controller' => 'users',
+					'action' => 'invite',
+					'plugin' => null
+				));
+				?>
+			</li>
+			<li>
+				<?php
+				echo $this->Html->link('Re-Invite All!', array(
 						'controller' => 'users',
 						'action' => 'invite',
-						'plugin' => null
-					));
-					?>
-				</li>
-				<li>
-					<?php
-					echo $this->Html->link('Re-Invite All!', array(
-							'controller' => 'users',
-							'action' => 'invite',
-							'plugin' => null,
-							'all'
-						), array('confirm' => 'Confirm to send out an invitation reminder email to *ALL* users listed above.')
-					);
-					?>
-				</li>
-			</ul>
-		</div>
-		
+						'plugin' => null,
+						'all'
+					), array('confirm' => 'Confirm to send out an invitation reminder email to *ALL* users listed above.')
+				);
+				?>
+			</li>
+		</ul>
 	</div>
+		
+	
 	<?php
 }
 ?>

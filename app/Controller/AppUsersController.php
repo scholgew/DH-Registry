@@ -147,7 +147,16 @@ class AppUsersController extends UsersController {
 		$success = $proceed = false;
 		if( ($this->Auth->user() AND $this->Auth->user('user_role_id') < 3)
 		AND !empty($id) AND ctype_digit($id)) {
-			$proceed = true;
+			$user = $this->{$this->modelClass}->find('first', array(
+				'contain' => array(),
+				'conditions' => array(
+					$this->modelClass . '.id' => $id,
+					$this->modelClass . '.approved' => 0
+				)
+			));
+			if($user) {
+				$proceed = true;
+			}
 		}else{
 			// not authenticated!
 			// admins retrieve a link in their notification email to approve directly
@@ -159,7 +168,6 @@ class AppUsersController extends UsersController {
 				)
 			));
 			if($user) {
-				$id = $user[$this->modelClass]['id'];
 				$proceed = true;
 			}
 		}
@@ -167,10 +175,10 @@ class AppUsersController extends UsersController {
 		if($proceed) {
 			if(!empty($this->request->data[$this->modelClass])) {
 				// the admin submitted additional data
-				$this->{$this->modelClass}->save($this->request->data);
+				$user[$this->modelClass] = array_merge($user[$this->modelClass], $this->request->data[$this->modelClass]);
 			}
 			
-			if($user = $this->{$this->modelClass}->approve($id)) {
+			if($user = $this->{$this->modelClass}->approve($user)) {
 				$this->_sendUserManagementMail(array(
 					'template' => 'Users.account_approved',
 					'subject' => 'Account approved',
@@ -192,8 +200,8 @@ class AppUsersController extends UsersController {
 				));
 				$this->redirect('/');
 			}
-			$this->{$this->modelClass}->recursive = -1;
-			$user = $this->{$this->modelClass}->findById($id);
+			
+			$this->request->data = $user;
 			$this->_setOptions();
 		}else{
 			$this->redirect('/');

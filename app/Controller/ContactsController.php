@@ -19,7 +19,10 @@
 class ContactsController extends AppController {
 	
 	
-	public $filter = array();
+	public $uses = array(
+		'Country',
+		'AppUser'
+	);
 	
 	
 	
@@ -31,24 +34,72 @@ class ContactsController extends AppController {
 	}
 	
 	public function send() {
-			//$recipient = 'walter.scholger@uni-graz.at'; //Contact Address
-			//if(Configure::read('debug' > 0)) $recipient = 'walter.scholger@uni-graz.at';
-			$recipient = array('hendrik.schmeer@yahoo.de','b.safradin@gmail.com','scagliola@eshcc.eur.nl','andrea.scharnhorst@dans.knaw.nl');
-			if(!empty($this->request->data['Contact'])) {
-				// email logic
-				App::uses('CakeEmail', 'Network/Email');
-				$Email = new CakeEmail();
-				$Email->from($this->request->data['Contact']['email'])
-   				->to($recipient)
- 			    ->subject('[DH-Registry Contact-Form] New Question')
-  				->send($this->request->data['Contact']['message']);
-
-				$this->Session->setFlash('Your message has been sent!');
+		if(!empty($this->request->data['Contact'])) {
+			$data = $this->request->data['Contact'];
+			$admins = array();
+			// try fetching the moderator in charge of the user's country, 
+			if(!empty($data['country_id'])) {
+				$admins = $this->AppUser->find('all', array(
+					'contain' => array(),
+					'conditions' => array(
+						'AppUser.country_id' => $data['country_id'],
+						'AppUser.user_role_id' => 2,	// moderators
+						'AppUser.active' => 1
+					)
+				));
+			}
+			// then user_admin
+			if(empty($country_id)) {
+				$admins = $this->AppUser->find('all', array(
+					'contain' => array(),
+					'conditions' => array(
+						'AppUser.user_admin' => 1,
+						'AppUser.active' => 1
+					)
+				));
+			}
+			if($admins) {
+				foreach($admins as $admin) {
+					// email logic
+					App::uses('CakeEmail', 'Network/Email');
+					$Email = new CakeEmail();
+					$Email->from($this->request->data['Contact']['email'])
+					->to($admin['AppUser']['email'])
+					->subject('[DH-Registry Contact-Form] New Question')
+					->send($this->request->data['Contact']['message']);
+				}
+				$this->Session->setFlash('Your message has been sent.');
 				$this->redirect('/');
+			}else{
+				$this->Session->setFlash('Error: No Admin could be found!');
 			}
-			else{
-
-			}
+		}
+		
+		$mods = $this->AppUser->find('all', array(
+			'contain' => array(),
+			'conditions' => array('AppUser.user_role_id' => 2)
+		));
+		$country_ids = array();
+		if($mods) foreach($mods as $mod) {
+			if(!empty($mod['AppUser']['country_id']))
+				$country_ids[] = $mod['AppUser']['country_id'];
+		}
+		$countries = $this->Country->find('list', array(
+			'order' => 'Country.name ASC',
+			'conditions' => array('Country.id' => $country_ids)
+		));
+		$this->set('countries', $countries);
 	}
 }
 ?>
+
+
+
+
+
+
+
+
+
+
+

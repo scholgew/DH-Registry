@@ -1,4 +1,5 @@
 /** Forms **/
+@import "mixins";
 
 form.inline_form {
 	@include inline-form;

@@ -136,21 +136,19 @@ class AppUser extends User {
 	}
 	
 	
-	public function approve($id = null) {
-		if(empty($id)) return false;
-		$this->id = $id;
-		$this->read();
+	public function approve($data = array()) {
+		$this->data = $data;
 		$validator = $this->validator();
 		unset($validator['institution_id']['special']);
-		$validator['institution_id']['notEmpty'] => array(
+		$validator['institution_id']['notEmpty'] = array(
 			'rule' => 'notEmpty',
 			'message' => 'Institution may not be left blank.'
 		);
-		$validator['city_id']['notEmpty'] => array(
+		$validator['city_id']['notEmpty'] = array(
 			'rule' => 'notEmpty',
 			'message' => 'City may not be left blank.'
 		);
-		$validator['country_id']['notEmpty'] => array(
+		$validator['country_id']['notEmpty'] = array(
 			'rule' => 'notEmpty',
 			'message' => 'Country may not be left blank.'
 		);

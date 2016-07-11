@@ -26,7 +26,12 @@
 		'label' => 'E-mail',
 		'autocomplete' => 'off'
 	));
-		
+	
+	echo '<p>If available, please choose a country to assign your message to a national moderator.</p>';
+	echo $this->Form->input('country_id', array(
+		'empty' => '-- choose country --'
+	));
+	
 	echo $this->Form->input('first_name');
 	
 	echo $this->Form->input('last_name');
