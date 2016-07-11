@@ -3,9 +3,9 @@ Hello Admin,
 a new user has registered and is waiting for your approval of the new account!
 
 <?php
-if(!empty($user[$model])) {
+if(!empty($data[$model])) {
 	echo "Details: \n\n";
-	foreach($user[$model] as $fieldname => $value) {
+	foreach($data[$model] as $fieldname => $value) {
 		echo str_pad($fieldname . ':', 24, " ") . "			" . $value . "\n";
 	}
 	echo "\n\n";
@@ -16,7 +16,7 @@ if(!empty($user[$model])) {
 		'plugin' => 'users',
 		'controller' => 'users',
 		'action' => 'approve',
-		$user[$model]['approval_token']
+		$data[$model]['approval_token']
 	), $full = true);
 }
 ?>

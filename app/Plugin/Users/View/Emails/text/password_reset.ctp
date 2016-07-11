@@ -7,7 +7,7 @@ echo Router::url(array(
 	'plugin' => 'users',
 	'controller' => 'users',
 	'action' => 'reset_password',
-	$user[$model]['password_token']
-), $full = true);
+	$data[$model]['password_token']
+), true);
 echo "\n";
 ?>

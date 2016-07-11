@@ -7,3 +7,5 @@ ALTER TABLE `institutions`
 ALTER TABLE `user_roles` ADD COLUMN `cakeclient_prefix` VARCHAR(255) NULL DEFAULT NULL AFTER `name`;
 UPDATE `dh-registry`.`user_roles` SET `cakeclient_prefix`='admin' WHERE  `id`=1;
 UPDATE `dh-registry`.`user_roles` SET `cakeclient_prefix`='moderator' WHERE  `id`=2;
+
+ALTER TABLE `users` CHANGE COLUMN `authority` `about` TEXT NULL COLLATE 'utf8_unicode_ci' AFTER `telephone`;

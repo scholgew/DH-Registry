@@ -26,7 +26,7 @@ if(empty($invited)) {
 	$fieldlist = array(
 		'AppUser.name' => array('label' => 'Name'),
 		'Institution.name' => array('label' => 'Institution'),
-		'AppUser.authority' => array('label' => 'Proof'),
+		'AppUser.about' => array('label' => 'About'),
 		'AppUser.email' => array('label' => 'Email'),
 		'AppUser.telephone' => array('label' => 'Telephone')
 	);

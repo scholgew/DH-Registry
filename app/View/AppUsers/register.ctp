@@ -27,11 +27,6 @@
 	<?php
 	echo $this->Form->create($modelName, array('novalidate' => true));
 	
-	if(Configure::read('Users.username')) {
-		echo $this->Form->input('username', array(
-			'label' => 'Username'
-		));
-	}
 	echo $this->Form->input('email', array(
 		'label' => 'E-mail',
 		'autocomplete' => 'off'
@@ -54,6 +49,11 @@
 		'title' => 'Only fill in if you cannot find your institution in the dropdown list above.'
 	));
 	
+	echo $this->Form->input('country_id', array(
+		'empty' => '-- choose country --',
+		'title' => 'If available, your registration request will be assigned to your country\'s moderator.'
+	));
+	
 	echo $this->Form->input('academic_title');
 	
 	echo $this->Form->input('first_name');
@@ -64,9 +64,9 @@
 		'type' => 'text'
 	));
 	
-	echo $this->Form->input('authority', array(
+	echo $this->Form->input('about', array(
 		'type' => 'textarea',
-		'placeholder' => 'Please provide the name of the department or any other contact details that are suitable to prove your authority to add entries to the Digital Humanities Course Registry.',
+		'placeholder' => 'Please provide some details of your involvement into Digital Humanities. So our moderators have an idea, why you should be allowed to add entries to the Digital Humanities Course Registry.',
 	));
 	
 	echo $this->Form->end('Submit');

@@ -40,6 +40,10 @@ class AppUsersController extends UsersController {
 	
 	public function beforeFilter() {
 		parent::beforeFilter();
+		
+		if($this->Auth->user('user_role_id') < 3) $this->Auth->allow(array('invite'));
+		$this->Auth->allow(array('approve'));
+		
 		$this->set('title_for_layout', 'User Management');
 	}
 	
@@ -77,8 +81,124 @@ class AppUsersController extends UsersController {
 	
 	
 	public function register() {
-		$this->_setOptions();
 		parent::register();
+		$this->_setOptions();
+	}
+	
+	
+	protected function _newUserAdminNotification($user = array()) {
+		if(empty($user)) return false;
+		$result = true;
+		$admins = array();
+		$mailOpts = array(
+			'template' => 'Users.admin_new_user',
+			'subject' => 'New Account Request',
+			'data' => $user
+		);
+		
+		// try fetching the moderator in charge of the user's country, 
+		$country_id = (!empty($user[$this->modelClass]['country_id'])) 
+			? $user[$this->modelClass]['country_id'] : null;
+		if(empty($country_id) AND !empty($user[$this->modelClass]['institution_id'])) {
+			$institution = $this->{$this->modelClass}->find('first', array(
+				'contain' => array(),
+				'conditions' => array(
+					'Institution.id' => $user[$this->modelClass]['institution_id']
+				)
+			));
+			if($institution AND !empty($institution['Institution']['country_id']))
+				$country_id = $institution['Institution']['country_id'];
+		}
+		if(!empty($country_id)) {
+			$admins = $this->{$this->modelClass}->find('all', array(
+				'contain' => array(),
+				'conditions' => array(
+					$this->modelClass.'.country_id' => $country_id,
+					$this->modelClass.'.user_role_id' => 2,	// moderators
+					$this->modelClass . '.active' => 1
+				)
+			));
+		}
+		
+		// then user_admin
+		if(empty($country_id)) {
+			$admins = $this->{$this->modelClass}->find('all', array(
+				'contain' => array(),
+				'conditions' => array(
+					$this->modelClass . '.user_admin' => 1,
+					$this->modelClass . '.active' => 1
+				)
+			));
+		}
+		if($admins) {
+			foreach($admins as $admin) {
+				$mailOpts['email'] = $admin[$this->modelClass]['email']; 
+				if(!$this->_sendUserManagementMail($mailOpts)) {
+					$result = false;
+				}
+			}
+		}
+		
+		return $result;
+	}
+	
+	
+	public function approve($id = null) {
+		$success = $proceed = false;
+		if( ($this->Auth->user() AND $this->Auth->user('user_role_id') < 3)
+		AND !empty($id) AND ctype_digit($id)) {
+			$proceed = true;
+		}else{
+			// not authenticated!
+			// admins retrieve a link in their notification email to approve directly
+			$user = $this->{$this->modelClass}->find('first', array(
+				'contain' => array(),
+				'conditions' => array(
+					$this->modelClass . '.approval_token' => $id,
+					$this->modelClass . '.approved' => 0
+				)
+			));
+			if($user) {
+				$id = $user[$this->modelClass]['id'];
+				$proceed = true;
+			}
+		}
+		
+		if($proceed) {
+			if(!empty($this->request->data[$this->modelClass])) {
+				// the admin submitted additional data
+				$this->{$this->modelClass}->save($this->request->data);
+			}
+			
+			if($user = $this->{$this->modelClass}->approve($id)) {
+				$this->_sendUserManagementMail(array(
+					'template' => 'Users.account_approved',
+					'subject' => 'Account approved',
+					'email' => $user[$this->modelClass]['email'],
+					'data' => $user
+				));
+				$this->Session->setFlash('The account has been successfully approved.');
+				$success = true;
+			}else{
+				$this->Session->setFlash('Error: the user data did not pass validation. Please check the details.');
+			}
+			
+			
+			if($success) {
+				if($this->Auth->user()) $this->redirect(array(
+					'plugin' => null,
+					'controller' => 'users',
+					'action' => 'dashboard'
+				));
+				$this->redirect('/');
+			}
+			$this->{$this->modelClass}->recursive = -1;
+			$user = $this->{$this->modelClass}->findById($id);
+			$this->_setOptions();
+		}else{
+			$this->redirect('/');
+		}
+		// render the form...
 	}
 	
 	
@@ -141,11 +261,12 @@ class AppUsersController extends UsersController {
 	
 	// technically, this is a admin-triggered password reset - thus the email template reads somewhat different
 	public function invite($param = null) {
-		if(!$this->DefaultAuth->isAdmin()) $this->redirect('/users/dashboard');
-		
 		$mailOpts = array(
 			'template' => 'invite_user',
-			'subject' => 'Join the Digital Humanities Course Registry'
+			'subject' => 'Join the Digital Humanities Course Registry',
+			'bcc' => $this->Auth->user('email'),
+			'sender' => $this->Auth->user('email'),
+			'replyTo' => $this->Auth->user('email')
 		);
 		if(Configure::read('debug') > 0) $mailOpts['transport'] = 'Debug';
 		
@@ -163,7 +284,7 @@ class AppUsersController extends UsersController {
 					$mailOpts['email'] = $user[$this->modelClass]['email'];
 					$mailOpts['data'] = $user;
 					$this->_sendUserManagementMail($mailOpts);
-					$this->Session->setFlash('User will receive an email shortly.');
+					$this->Session->setFlash('User will receive a reminder email.');
 				}
 				
 			}elseif($param === 'all') {
@@ -182,7 +303,7 @@ class AppUsersController extends UsersController {
 							$this->_sendUserManagementMail($mailOpts);
 						}
 					}
-					$this->Session->setFlash('Users will receive an email shortly.');
+					$this->Session->setFlash('Users will receive a reminder email.');
 				}
 			}
 			$this->redirect('/users/dashboard');

@@ -22,7 +22,8 @@ echo "\n\n\n";
 echo "--\n\n";
 echo "The Digital Humanities Course Registry: \n";
 // because emails are being sent from commandline, Router::baseURL would be 'localhost'!
-echo Configure::read('App.BaseURL');
+if(Configure::read('App.fullBaseUrl')) echo Configure::read('App.fullBaseUrl');
+else echo Router::url('/', true);
 ?>
 
 

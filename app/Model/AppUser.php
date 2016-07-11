@@ -46,13 +46,13 @@ class AppUser extends User {
 		'telephone' => array(
 			'required' => array(
 				'rule' => 'notEmpty',
-				'message' => 'For verification of your authority, please enter your telephone number.'
+				'message' => 'For verification of your involvement, please enter your telephone number.'
 			)
 		),
-		'authority' => array(
+		'about' => array(
 			'required' => array(
 				'rule' => 'notEmpty',
-				'message' => 'For verification of your authority, please provide any further information.'
+				'message' => 'For verification of your involvement, please provide any further information.'
 			)
 		)
 	);
@@ -64,7 +64,7 @@ class AppUser extends User {
 	
 	
 	public $virtualFields = array(
-		'name' => 'CONCAT(AppUser.first_name, " ", AppUser.last_name)'
+		'name' => 'TRIM(CONCAT(AppUser.academic_title, " ", AppUser.first_name, " ", AppUser.last_name))'
 	);
 	
 	
@@ -133,6 +133,37 @@ class AppUser extends User {
 			$result[$this->alias]['name'] = $result[$this->alias]['first_name'] . ' ' . $result[$this->alias]['last_name'];
 		}
 		return $result;
+	}
+	
+	
+	public function approve($id = null) {
+		if(empty($id)) return false;
+		$this->id = $id;
+		$this->read();
+		$validator = $this->validator();
+		unset($validator['institution_id']['special']);
+		$validator['institution_id']['notEmpty'] => array(
+			'rule' => 'notEmpty',
+			'message' => 'Institution may not be left blank.'
+		);
+		$validator['city_id']['notEmpty'] => array(
+			'rule' => 'notEmpty',
+			'message' => 'City may not be left blank.'
+		);
+		$validator['country_id']['notEmpty'] => array(
+			'rule' => 'notEmpty',
+			'message' => 'Country may not be left blank.'
+		);
+		
+		$this->data[$this->alias]['active'] = 1;
+		$this->data[$this->alias]['approved'] = 1; // if approved is true, but active false, then the user is banned!
+		$this->data[$this->alias]['approval_token'] = null;
+		$this->data[$this->alias]['approval_token_expires'] = null;
+		if($this->save($data, array('validate' => true))) {
+			$this->recursive = -1;
+			return $this->read();
+		}
+		return false;
 	}
 	
 	

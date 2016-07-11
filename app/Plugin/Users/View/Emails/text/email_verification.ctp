@@ -6,11 +6,11 @@ echo Router::url(array(
 	'plugin' => 'users',
 	'controller' => 'users',
 	'action' => 'verify_email',
-	$user[$model]['email_token']
+	$data[$model]['email_token']
 ), $full = true);
 echo "\n";
 echo "\n";
-if(Configure::read('Users.adminConfirmRegistration') AND !$user[$model]['active']) {
+if(Configure::read('Users.adminConfirmRegistration') AND !$data[$model]['active']) {
 	echo "WAIT A MINUTE:\n";
 	echo "Login is only enabled once our administrators approved your account.\n";
 	echo "You will receive another email to notify you about that.\n";

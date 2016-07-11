@@ -15,12 +15,6 @@ Configure::write('Users.userModel', 'Users.User');
 Configure::write('Users.roleModel', 'UserRole');
 
 
-
-
-// make the plugin controllers & models available to the application
-//App::uses('UsersAppController', 'Controller');
-//App::uses('UsersAppModel', 'Model');
-
 // extend the App::paths() array in order to make the plugin controllers 
 // available to the AclMenuComponent method detection
 App::build(array('Controller' => App::path('Controller', 'Users')));
@@ -55,12 +49,12 @@ Configure::write('Users.loginName', 'email');	// alternatively: 'username'
 Configure::write('Users.adminConfirmRegistration', false);
 Configure::write('Users.newUserAdminNotification', false);
 //Configure::write('Users.adminEmailAddress', 'user.admin@example.com');
-
+Configure::write('Users.adminEmailAddress', false);
 
 /**
 * This Plugin also uses the following configuration constants:
 */
-//Configure::write('App.EmailSubjectPrefix', '[Your Site]');
+Configure::write('App.EmailSubjectPrefix', '[Your Site]');
 
 
 $filename = APP . 'Config' . DS . 'Users' . DS . 'bootstrap.php';

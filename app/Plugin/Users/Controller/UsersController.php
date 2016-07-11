@@ -245,13 +245,23 @@ class UsersController extends UsersAppController {
 			App::uses('CakeEmail', 'Network/Email');
 			$Email = $this->_getMailInstance();
 			$Email->to($options['email']);
-			if(!empty($options['from'])) $Email->from($options['from']);	// set in email config on app level
+			if(!empty($options['from'])) $Email->from($options['from']);	// set default in email config on app level
+			if(!empty($options['sender'])) {
+				$Email->sender($options['sender']);
+				$Email->returnPath($options['returnPath']);
+			}
+			if(!empty($options['replyTo'])) {
+				$Email->replyTo($options['replyTo']);
+				$Email->returnPath($options['returnPath']);
+			}
+			if(!empty($options['cc'])) $Email->cc($options['cc']);
+			if(!empty($options['bcc'])) $Email->bcc($options['bcc']);
 			$Email->emailFormat($options['emailFormat']);
 			$Email->subject($options['subject_prefix'] . $options['subject']);
 			$Email->template($options['template'], $options['layout']);
 			$Email->viewVars(array(
 				'model' => $this->modelClass,
-				'user' => $options['data'],
+				'data' => $options['data'],
 				'content' => $options['content']
 			));
 			if(!empty($options['message'])) $Email->message($options['message']);
@@ -498,6 +508,7 @@ class UsersController extends UsersAppController {
 		if($this->DefaultAuth->isAdmin() AND !empty($id) AND ctype_digit($id)) {
 			$proceed = true;
 		}else{
+			// admins retrieve a link in their notification email to approve directly
 			$user = $this->{$this->modelClass}->find('first', array(
 				'contain' => array(),
 				'conditions' => array(
@@ -512,14 +523,17 @@ class UsersController extends UsersAppController {
 		}
 		
 		if($proceed) {
-			$user = $this->{$this->modelClass}->approve($id);
-			$this->_sendUserManagementMail(array(
-				'template' => 'Users.account_approved',
-				'subject' => 'Account approved',
-				'email' => $user[$this->modelClass]['email'],
-				'data' => $user
-			));
-			$this->Session->setFlash('The account has been approved successfully.');
+			if($user = $this->{$this->modelClass}->approve($id)) {
+				$this->_sendUserManagementMail(array(
+					'template' => 'Users.account_approved',
+					'subject' => 'Account approved',
+					'email' => $user[$this->modelClass]['email'],
+					'data' => $user
+				));
+				$this->Session->setFlash('The account has been approved successfully.');
+			}else{
+				$this->Session->setFlash('ERROR! The user data did not pass validation. Please check the data manually.');
+			}
 		}
 		
 		if($this->DefaultAuth->isAdmin()) $this->redirect(array(
