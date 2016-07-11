@@ -26,7 +26,7 @@ if(empty($unapproved)) {
 	$fieldlist = array(
 		'AppUser.name' => array('label' => 'Name'),
 		'Institution.name' => array('label' => 'Institution'),
-		'AppUser.institution' => array('label' => 'New Institution?'),
+		'AppUser.university' => array('label' => 'New Institution?'),
 		'AppUser.about' => array('label' => 'About'),
 		'AppUser.email' => array('label' => 'Email'),
 		'AppUser.telephone' => array('label' => 'Telephone')
@@ -63,7 +63,7 @@ if(empty($unapproved)) {
 							'action' => 'approve',
 							'plugin' => null,
 							$record[$modelName]['id']
-						), array('confirm' => 'Please confirm to grant access to DH Course Registry for ' . $record[$modelName]['name'] . '.'));
+						));
 						echo $this->Html->link('delete', array(
 							'controller' => 'users',
 							'action' => 'delete',

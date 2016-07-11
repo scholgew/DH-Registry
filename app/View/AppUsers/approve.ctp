@@ -32,8 +32,6 @@
 	echo '<fieldset>';
 	$modSettingOptions = array('disabled' => true, 'type' => 'text');
 	if(!empty($auth_user['is_admin'])) {
-		echo '<p>If not active, the user is banned and cannot log in!</p>';
-		echo $this->Form->input('active');
 		echo $this->Form->input('is_admin');
 		echo '<p>As a moderator, the user must be assigned to a country from the list.</p>';
 		echo $this->Form->input('user_role_id');
@@ -45,23 +43,32 @@
 	echo '</fieldset>';
 	
 	echo '<fieldset>';
+	echo $this->Form->input('university', array(
+		'label' => 'New Institution',
+		'type' => 'text',
+		'disabled' => true,
+		'title' => 'The user could not find this institution on the list - you have to add it.'
+	));
 	echo '<p class="strong">The following categories possibly have to be extended in this order:</p>';
 	echo '<p>1. If the country doesn\'t exist, please go to "'
 			.$this->Html->link('Add Country', '/moderator/countries/add').'".</p>';
 	echo $this->Form->input('country_id', array(
 		'required' => 'required',
+		'empty' => '-- choose country --',
 		'div' => array('class' => 'input select required')
 	));
 	echo '<p>2. If the city doesn\'t exist, please go to "'
 			.$this->Html->link('Add City', '/moderator/cities/add').'".</p>';
 	echo $this->Form->input('city_id', array(
 		'required' => 'required',
+		'empty' => '-- choose city --',
 		'div' => array('class' => 'input select required')
 	));
 	echo '<p>3. If the institution doesn\'t exist, please go to "'
 			.$this->Html->link('Add Institution', '/moderator/institutions/add').'".</p>';
 	echo $this->Form->input('institution_id', array(
 		'required' => 'required',
+		'empty' => '-- choose institution --',
 		'div' => array('class' => 'input select required')
 	));
 	echo '</fieldset>';

@@ -140,17 +140,23 @@ class AppUser extends User {
 		$this->data = $data;
 		$validator = $this->validator();
 		unset($validator['institution_id']['special']);
-		$validator['institution_id']['notEmpty'] = array(
-			'rule' => 'notEmpty',
-			'message' => 'Institution may not be left blank.'
+		$validator['institution_id'] = array(
+			'notEmpty' => array(
+				'rule' => 'notEmpty',
+				'message' => 'Institution may not be left blank.'
+			)
 		);
-		$validator['city_id']['notEmpty'] = array(
-			'rule' => 'notEmpty',
-			'message' => 'City may not be left blank.'
+		$validator['city_id'] = array(
+			'notEmpty' => array(
+				'rule' => 'notEmpty',
+				'message' => 'City may not be left blank.'
+			)
 		);
-		$validator['country_id']['notEmpty'] = array(
-			'rule' => 'notEmpty',
-			'message' => 'Country may not be left blank.'
+		$validator['country_id'] = array(
+			'notEmpty' => array(
+				'rule' => 'notEmpty',
+				'message' => 'Country may not be left blank.'
+			)
 		);
 		
 		$this->data[$this->alias]['active'] = 1;

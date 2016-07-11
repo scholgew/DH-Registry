@@ -5,13 +5,12 @@ if(file_exists($filename)) {
 }
 
 // exclude the edit, view and index actions to have id available for the CRUD plugin
-Router::connect('/users/:action', array('plugin' => 'users', 'controller' => 'users'),
-	array('action' => '(?!edit)(?!view)(?!index).+'));
 Router::connect('/users/:action/*', array('plugin' => 'users', 'controller' => 'users'),
-	array('action' => '(?!edit)(?!view)(?!index).+'));
+	array('action' => '(?!edit)(?!view)(?!index)[^\/]+'));
+Router::connect('/users/:action', array('plugin' => 'users', 'controller' => 'users'),
+	array('action' => '(?!edit)(?!view)(?!index)[^\/]+'));
 Router::connect('/users/users/:action/*', array('plugin' => 'users', 'controller' => 'users'),
-	array('action' => '(?!edit)(?!view)(?!index).+'));
-
+	array('action' => '(?!edit)(?!view)(?!index)[^\/]+'));
 
 Router::connect('/login', array('plugin' => 'users', 'controller' => 'users', 'action' => 'login'));
 Router::connect('/logout', array('plugin' => 'users', 'controller' => 'users', 'action' => 'logout'));

@@ -30,6 +30,10 @@ class CoursesController extends AppController {
 		
 		if($this->request->is('requested') AND $this->request->params['action'] == 'map')
 			$this->Auth->allow(array('map'));
+		
+		if($this->Auth->user()) {
+			$this->Auth->allow(array('edit', 'add', 'delete'));
+		}
 	}
 	
 	
@@ -85,8 +89,8 @@ class CoursesController extends AppController {
 		
 		$admin = false;
 		$conditions = array('Course.id' => $id);
-		if(!$this->Auth->user('is_admin')) $conditions['Course.user_id'] = $this->Auth->user('id');
-		else $admin = true;
+		if($this->Auth->user('is_admin') OR $this->Auth->user('user_role_id') < 3) $admin = true;
+		else $conditions['Course.user_id'] = $this->Auth->user('id');
 		
 		// check autorisation beforehand
 		$course = $this->Course->find('first', array('conditions' => $conditions));
@@ -140,7 +144,7 @@ class CoursesController extends AppController {
 	
 	
 	public function add() {
-		$admin = ($this->Auth->user('is_admin')) ? true : false;
+		$admin = ($this->Auth->user('is_admin') OR $this->Auth->user('user_role_id') < 3);
 		if(!empty($this->request->data['Course'])) {
 			if(!$admin) {
 				$this->request->data['Course']['user_id'] = $this->Auth->user('id');
@@ -176,7 +180,10 @@ class CoursesController extends AppController {
 		));
 		
 		$conditions = array('Course.id' => $id);
-		if(!$this->Auth->user('is_admin')) $conditions['Course.user_id'] = $this->Auth->user('id');
+		if($this->Auth->user('is_admin') OR $this->Auth->user('user_role_id') < 3)
+			$admin = true;
+		else
+			$conditions['Course.user_id'] = $this->Auth->user('id');
 		
 		$this->Course->deleteAll($conditions, $cascade = true);
 		

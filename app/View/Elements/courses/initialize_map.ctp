@@ -79,7 +79,7 @@ if(!empty($locations) AND is_array($locations)) {
 ?>
 
 function initializeMap() {
-	var mymap = L.map('coursesMap').setView([50.9412784,6.9560874], 10);
+	var mymap = L.map('coursesMap').setView([50.000, 10.189551], 4);
 	L.tileLayer('https://api.mapbox.com/styles/v1/hashmich/ciqhed3uq001ae6niop4onov3/tiles/256/{z}/{x}/{y}?access_token=<?php echo Configure::read('App.mapApiKey'); ?>').addTo(mymap);
 	
 	var group = new L.MarkerClusterGroup({

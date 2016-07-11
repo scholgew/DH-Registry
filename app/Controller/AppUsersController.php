@@ -42,7 +42,6 @@ class AppUsersController extends UsersController {
 		parent::beforeFilter();
 		
 		if($this->Auth->user('user_role_id') < 3) $this->Auth->allow(array('invite'));
-		$this->Auth->allow(array('approve'));
 		
 		$this->set('title_for_layout', 'User Management');
 	}
@@ -178,7 +177,7 @@ class AppUsersController extends UsersController {
 				$user[$this->modelClass] = array_merge($user[$this->modelClass], $this->request->data[$this->modelClass]);
 			}
 			
-			if($user = $this->{$this->modelClass}->approve($user)) {
+			if($this->{$this->modelClass}->approve($user)) {
 				$this->_sendUserManagementMail(array(
 					'template' => 'Users.account_approved',
 					'subject' => 'Account approved',
