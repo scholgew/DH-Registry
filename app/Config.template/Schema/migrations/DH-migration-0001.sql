@@ -1,4 +1,5 @@
 drop table universities;
+ALTER TABLE `institutions` ADD COLUMN `course_count` int(11) DEFAULT 0 AFTER `is_university`;
 update institutions as i set i.course_count = (select count(*) from courses as c where i.id = c.institution_id);
 update nwo_disciplines set name = 'Computational Linguistics' where id = 7;
 ALTER TABLE `institutions`

@@ -19,12 +19,12 @@
  
  
  
-$this->Html->css('http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css', array('inline' => false));
-$this->Html->script('http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js', array('inline' => false));
+$this->Html->css('/leaflet/leaflet.css', array('inline' => false));
+$this->Html->script('/leaflet/leaflet.js', array('inline' => false));
 
-$this->Html->css('MarkerCluster.css', array('inline' => false));
-$this->Html->css('MarkerCluster.Default.css', array('inline' => false));
-$this->Html->script('leaflet.markercluster.js', array('inline' => false));
+$this->Html->css('/leaflet/MarkerCluster.css', array('inline' => false));
+$this->Html->css('/leaflet/MarkerCluster.Default.css', array('inline' => false));
+$this->Html->script('/leaflet/leaflet.markercluster.js', array('inline' => false));
 ?>
 
 <div id="coursesMap"></div>

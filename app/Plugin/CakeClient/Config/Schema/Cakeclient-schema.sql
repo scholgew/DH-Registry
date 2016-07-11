@@ -11,6 +11,7 @@
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 
 -- Exportiere Struktur von Tabelle dh-registry.cc_config_acos
+DROP TABLE IF EXISTS `cc_config_acos`;
 CREATE TABLE IF NOT EXISTS `cc_config_acos` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) COLLATE utf8_unicode_ci NOT NULL COMMENT 'Eg. the user name',
@@ -26,6 +27,7 @@ CREATE TABLE IF NOT EXISTS `cc_config_acos` (
 
 
 -- Exportiere Struktur von Tabelle dh-registry.cc_config_actions
+DROP TABLE IF EXISTS `cc_config_actions`;
 CREATE TABLE IF NOT EXISTS `cc_config_actions` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `cc_config_table_id` int(11) NOT NULL,
@@ -50,6 +52,7 @@ CREATE TABLE IF NOT EXISTS `cc_config_actions` (
 
 
 -- Exportiere Struktur von Tabelle dh-registry.cc_config_actions_views
+DROP TABLE IF EXISTS `cc_config_actions_views`;
 CREATE TABLE IF NOT EXISTS `cc_config_actions_views` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `position` int(3) NOT NULL,
@@ -67,6 +70,7 @@ CREATE TABLE IF NOT EXISTS `cc_config_actions_views` (
 
 
 -- Exportiere Struktur von Tabelle dh-registry.cc_config_configurations
+DROP TABLE IF EXISTS `cc_config_configurations`;
 CREATE TABLE IF NOT EXISTS `cc_config_configurations` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `key` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
@@ -78,6 +82,7 @@ CREATE TABLE IF NOT EXISTS `cc_config_configurations` (
 
 
 -- Exportiere Struktur von Tabelle dh-registry.cc_config_displayedrelations
+DROP TABLE IF EXISTS `cc_config_displayedrelations`;
 CREATE TABLE IF NOT EXISTS `cc_config_displayedrelations` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `cc_config_table_id` int(11) NOT NULL,
@@ -99,6 +104,7 @@ CREATE TABLE IF NOT EXISTS `cc_config_displayedrelations` (
 
 
 -- Exportiere Struktur von Tabelle dh-registry.cc_config_fielddefinitions
+DROP TABLE IF EXISTS `cc_config_fielddefinitions`;
 CREATE TABLE IF NOT EXISTS `cc_config_fielddefinitions` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `cc_config_table_id` int(11) DEFAULT NULL COMMENT 'Define a fieldlist belonging to the table directly as a default fieldlist, applying to any action. Leave empty action_id then.',
@@ -120,6 +126,7 @@ CREATE TABLE IF NOT EXISTS `cc_config_fielddefinitions` (
 
 
 -- Exportiere Struktur von Tabelle dh-registry.cc_config_menus
+DROP TABLE IF EXISTS `cc_config_menus`;
 CREATE TABLE IF NOT EXISTS `cc_config_menus` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `position` int(3) DEFAULT '0',
@@ -138,6 +145,7 @@ CREATE TABLE IF NOT EXISTS `cc_config_menus` (
 
 
 -- Exportiere Struktur von Tabelle dh-registry.cc_config_menu_items
+DROP TABLE IF EXISTS `cc_config_menu_items`;
 CREATE TABLE IF NOT EXISTS `cc_config_menu_items` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `position` int(3) DEFAULT NULL,
@@ -154,6 +162,7 @@ CREATE TABLE IF NOT EXISTS `cc_config_menu_items` (
 
 
 -- Exportiere Struktur von Tabelle dh-registry.cc_config_tables
+DROP TABLE IF EXISTS `cc_config_tables`;
 CREATE TABLE IF NOT EXISTS `cc_config_tables` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `cc_config_aco_id` int(11) NOT NULL,
@@ -178,9 +187,11 @@ CREATE TABLE IF NOT EXISTS `cc_config_tables` (
 
 
 -- Exportiere Struktur von Tabelle dh-registry.user_roles
+DROP TABLE IF EXISTS `user_roles`;
 CREATE TABLE IF NOT EXISTS `user_roles` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
+  `cakeclient_prefix` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
